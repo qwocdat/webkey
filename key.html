@@ -9,7 +9,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <style>
-body {
+body{
     margin:0;
     height:100vh;
     background:#000;
@@ -17,95 +17,88 @@ body {
     justify-content:center;
     align-items:center;
     font-family:-apple-system, BlinkMacSystemFont;
-}
-
-.overlay {
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,0.6);
-    display:flex;
-    justify-content:center;
-    align-items:center;
-}
-
-.popup {
-    width:90%;
-    max-width:320px;
-    background:#1c1c1e;
-    border-radius:18px;
     padding:20px;
-    text-align:center;
-    box-shadow:0 20px 40px rgba(0,0,0,0.5);
 }
 
-.popup h3 {
+.popup{
+    width:100%;
+    max-width:340px;
+    background:#1c1c1e;
+    border-radius:22px;
+    padding:24px 20px;
+    text-align:center;
+    box-shadow:0 25px 60px rgba(0,0,0,0.6);
+}
+
+h3{
     color:#fff;
     margin-bottom:10px;
+    font-weight:500;
 }
 
-.popup input {
+input{
     width:100%;
-    padding:12px;
-    border-radius:10px;
+    padding:14px;
+    border-radius:14px;
     border:none;
-    margin:10px 0;
+    margin:12px 0;
     background:#2c2c2e;
     color:#fff;
     text-align:center;
-    font-size:16px;
+    font-size:17px;
+    outline:none;
 }
 
-.btn {
+button{
     width:100%;
-    padding:12px;
+    padding:14px;
     border:none;
-    border-radius:12px;
+    border-radius:14px;
     background:#0a84ff;
     color:#fff;
-    font-size:16px;
-    margin-top:10px;
+    font-size:17px;
+    font-weight:500;
 }
 
-.progress {
-    margin-top:15px;
-    height:6px;
+.progress{
+    margin-top:12px;
+    height:5px;
     background:#2c2c2e;
     border-radius:10px;
     overflow:hidden;
     display:none;
 }
 
-.bar {
+.bar{
     height:100%;
     width:0%;
     background:#0a84ff;
-    transition:width 0.05s linear;
+    border-radius:10px;
 }
 
-.message {
-    margin-top:10px;
+.message{
+    margin-top:12px;
     font-size:14px;
     color:#aaa;
 }
-.success { color:#30d158; }
-.error { color:#ff453a; }
+
+.success{ color:#30d158; }
+.error{ color:#ff453a; }
 </style>
 </head>
 
 <body>
 
-<div class="overlay">
-    <div class="popup">
-        <h3>Nhập Key</h3>
-        <input id="keyInput" placeholder="Enter key">
-        <button class="btn" onclick="startVerify()">Xác minh</button>
+<div class="popup">
+    <h3>Nhập Key</h3>
+    <input id="keyInput" placeholder="Enter key">
+    <button onclick="startVerify()">Xác minh</button>
 
-        <div class="progress" id="progress">
-            <div class="bar" id="bar"></div>
-        </div>
-
-        <div class="message" id="msg">Chờ nhập key...</div>
+    <div class="progress" id="progress">
+        <div class="bar" id="bar"></div>
     </div>
+
+    <div class="message" id="msg">Chờ nhập key...</div>
 </div>
 
 <script>
@@ -118,7 +111,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database().ref("keys");
 
 function startVerify(){
-    const key = document.getElementById("keyInput").value.trim();
+    const key = document.getElementById("keyInput").value.trim().toUpperCase();
     const msg = document.getElementById("msg");
     const bar = document.getElementById("bar");
     const progress = document.getElementById("progress");
@@ -129,7 +122,9 @@ function startVerify(){
         return;
     }
 
+    bar.style.width = "0%";
     progress.style.display = "block";
+
     msg.textContent = "Đang xác minh...";
     msg.className = "message";
 
@@ -143,7 +138,7 @@ function startVerify(){
             clearInterval(interval);
             verifyKey(key);
         }
-    }, 50);
+    },50);
 }
 
 function verifyKey(key){
@@ -151,8 +146,13 @@ function verifyKey(key){
     const ref = db.child(key);
 
     ref.transaction(current=>{
-        if(!current) return;
-        if(current.remainingUses <= 0) return;
+        if(current === null){
+            return current;
+        }
+
+        if(current.remainingUses <= 0){
+            return current;
+        }
 
         current.remainingUses--;
 
@@ -161,7 +161,7 @@ function verifyKey(key){
         }
 
         return current;
-    }, (err, committed)=>{
+    }, (err, committed, snap)=>{
 
         if(err){
             msg.textContent = "Lỗi hệ thống";
@@ -169,8 +169,14 @@ function verifyKey(key){
             return;
         }
 
+        if(!snap.exists()){
+            msg.textContent = "Key không tồn tại";
+            msg.className = "message error";
+            return;
+        }
+
         if(!committed){
-            msg.textContent = "Key sai hoặc hết hạn";
+            msg.textContent = "Key hết hạn";
             msg.className = "message error";
             return;
         }
@@ -183,6 +189,10 @@ function verifyKey(key){
         },1000);
     });
 }
+
+document.getElementById("keyInput").addEventListener("keypress", e=>{
+    if(e.key === "Enter") startVerify();
+});
 </script>
 
 </body>
