@@ -3,102 +3,82 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Verify</title>
+<title>Verify Key</title>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <style>
-body{
-    margin:0;
-    height:100vh;
-    background:#000;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    font-family:-apple-system, BlinkMacSystemFont;
-    padding:20px;
+* { box-sizing: border-box; }
+
+body {
+    margin: 0; min-height: 100vh;
+    background: linear-gradient(135deg, #0f0f11, #000000);
+    background-image: radial-gradient(circle at 50% 0%, #1a3a5c 0%, transparent 70%);
+    display: flex; justify-content: center; align-items: center;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-.popup{
-    width:100%;
-    max-width:340px;
-    background:#1c1c1e;
-    border-radius:22px;
-    padding:24px 20px;
-    text-align:center;
-    box-shadow:0 25px 60px rgba(0,0,0,0.6);
+.glass-box {
+    width: 90%; max-width: 340px;
+    padding: 30px 25px;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
+    text-align: center;
 }
 
-h3{
-    color:#fff;
-    margin-bottom:10px;
-    font-weight:500;
+h3 { color: #fff; margin-top: 0; margin-bottom: 20px; font-weight: 500; letter-spacing: 0.5px; }
+
+input {
+    width: 100%; padding: 16px; margin-bottom: 15px;
+    border-radius: 14px; border: 1px solid rgba(255,255,255,0.05);
+    background: rgba(0,0,0,0.3); color: #fff; font-size: 16px;
+    text-align: center; outline: none; transition: 0.3s;
 }
 
-input{
-    width:100%;
-    padding:14px;
-    border-radius:14px;
-    border:none;
-    margin:12px 0;
-    background:#2c2c2e;
-    color:#fff;
-    text-align:center;
-    font-size:17px;
-    outline:none;
+input:focus { border-color: #0a84ff; background: rgba(0,0,0,0.5); }
+
+button {
+    width: 100%; padding: 16px; border: none; border-radius: 14px;
+    background: rgba(10, 132, 255, 0.9); color: #fff;
+    font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s;
 }
 
-button{
-    width:100%;
-    padding:14px;
-    border:none;
-    border-radius:14px;
-    background:#0a84ff;
-    color:#fff;
-    font-size:17px;
-    font-weight:500;
+button:hover { background: rgba(10, 132, 255, 1); }
+button:disabled { background: #444; color: #888; cursor: not-allowed; }
+
+.progress-container {
+    margin-top: 15px; height: 6px; background: rgba(0,0,0,0.3);
+    border-radius: 10px; overflow: hidden; display: none;
 }
 
-.progress{
-    margin-top:12px;
-    height:5px;
-    background:#2c2c2e;
-    border-radius:10px;
-    overflow:hidden;
-    display:none;
+.progress-bar {
+    height: 100%; width: 0%; background: #0a84ff;
+    border-radius: 10px; transition: width 0.1s linear;
 }
 
-.bar{
-    height:100%;
-    width:0%;
-    background:#0a84ff;
-    border-radius:10px;
-}
-
-.message{
-    margin-top:12px;
-    font-size:14px;
-    color:#aaa;
-}
-
-.success{ color:#30d158; }
-.error{ color:#ff453a; }
+#msg { margin-top: 15px; font-size: 14px; color: #aaa; min-height: 20px; }
+.success { color: #32d74b !important; }
+.error { color: #ff453a !important; }
 </style>
 </head>
 
 <body>
 
-<div class="popup">
-    <h3>Nhập Key</h3>
-    <input id="keyInput" placeholder="Enter key">
-    <button onclick="startVerify()">Xác minh</button>
+<div class="glass-box">
+    <h3>Xác Minh Hệ Thống</h3>
+    <input id="keyInput" placeholder="Nhập Key của bạn" autocomplete="off">
+    <button id="btnVerify" onclick="startVerify()">Đăng Nhập</button>
 
-    <div class="progress" id="progress">
-        <div class="bar" id="bar"></div>
+    <div class="progress-container" id="progress">
+        <div class="progress-bar" id="bar"></div>
     </div>
 
-    <div class="message" id="msg">Chờ nhập key...</div>
+    <div id="msg">Vui lòng nhập key để tiếp tục...</div>
 </div>
 
 <script>
@@ -106,92 +86,101 @@ const firebaseConfig = {
     apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE",
     databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app"
 };
-
-firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database().ref("keys");
 
-function startVerify(){
-    const key = document.getElementById("keyInput").value.trim().toUpperCase();
+function startVerify() {
+    const key = document.getElementById("keyInput").value.trim().toUpperCase().replace(/\s+/g, "");
     const msg = document.getElementById("msg");
     const bar = document.getElementById("bar");
     const progress = document.getElementById("progress");
+    const btn = document.getElementById("btnVerify");
 
-    if(!key){
-        msg.textContent = "Nhập key đi";
-        msg.className = "message error";
-        return;
+    if (!key) {
+        msg.textContent = "Bạn chưa nhập Key!";
+        msg.className = "error"; return;
     }
 
+    // Khóa giao diện
+    btn.disabled = true;
+    document.getElementById("keyInput").disabled = true;
+    
+    // Chạy hiệu ứng Progress Bar
     bar.style.width = "0%";
     progress.style.display = "block";
-
-    msg.textContent = "Đang xác minh...";
-    msg.className = "message";
+    msg.textContent = "Đang kiểm tra dữ liệu...";
+    msg.className = "";
 
     let percent = 0;
-
-    const interval = setInterval(()=>{
-        percent += 100/60;
+    const interval = setInterval(() => {
+        percent += 5; // Tăng nhanh hơn chút cho mượt
         bar.style.width = percent + "%";
 
-        if(percent >= 100){
+        if (percent >= 100) {
             clearInterval(interval);
-            verifyKey(key);
+            verifyKeyInDatabase(key, msg, btn); // Gọi Firebase khi bar chạy xong
         }
-    },50);
+    }, 30);
 }
 
-function verifyKey(key){
-    const msg = document.getElementById("msg");
+function verifyKeyInDatabase(key, msg, btn) {
     const ref = db.child(key);
 
-    ref.transaction(current=>{
-        if(current === null){
-            return current;
+    ref.transaction((currentData) => {
+        // 1. Nếu key không tồn tại
+        if (currentData === null) return null; 
+
+        // 2. Xử lý logic theo từng loại Key
+        if (currentData.type === "ONCE") {
+            if (currentData.used === true) return undefined; // Hủy nếu đã dùng
+            currentData.used = true; // Đánh dấu đã dùng
+            return currentData;
         }
 
-        if(current.remainingUses <= 0){
-            return current;
+        if (currentData.type === "TIME") {
+            if (Date.now() > currentData.expiresAt) return undefined; // Hủy nếu hết hạn
+            return currentData;
         }
 
-        current.remainingUses--;
-
-        if(current.remainingUses <= 0){
-            return null;
+        if (currentData.type === "INFINITE") {
+            return currentData; // Cho qua luôn
         }
 
-        return current;
-    }, (err, committed, snap)=>{
+        return undefined; // Hủy nếu lỗi cấu trúc
+    }, (error, committed, snapshot) => {
+        
+        // Mở khóa giao diện
+        btn.disabled = false;
+        document.getElementById("keyInput").disabled = false;
 
-        if(err){
-            msg.textContent = "Lỗi hệ thống";
-            msg.className = "message error";
-            return;
+        if (error) {
+            msg.textContent = "Lỗi kết nối máy chủ!";
+            msg.className = "error";
+        } else if (!snapshot.exists()) {
+            msg.textContent = "Key không tồn tại hoặc sai chính tả!";
+            msg.className = "error";
+        } else if (!committed) {
+            msg.textContent = "Key đã được sử dụng hoặc đã hết hạn!";
+            msg.className = "error";
+        } else {
+            // THÀNH CÔNG
+            msg.textContent = "Xác minh thành công! Đang vào trang chủ...";
+            msg.className = "success";
+            
+            // Lưu trạng thái để trang index.html biết là đã xác minh
+            localStorage.setItem("userVerified", "true");
+
+            // Chuyển hướng
+            setTimeout(() => {
+                window.location.href = "index.html";
+            }, 1000);
         }
-
-        if(!snap.exists()){
-            msg.textContent = "Key không tồn tại";
-            msg.className = "message error";
-            return;
-        }
-
-        if(!committed){
-            msg.textContent = "Key hết hạn";
-            msg.className = "message error";
-            return;
-        }
-
-        msg.textContent = "Xác minh thành công";
-        msg.className = "message success";
-
-        setTimeout(()=>{
-            window.location.href = "index.html";
-        },1000);
     });
 }
 
-document.getElementById("keyInput").addEventListener("keypress", e=>{
-    if(e.key === "Enter") startVerify();
+// Bắt sự kiện nhấn Enter
+document.getElementById("keyInput").addEventListener("keypress", e => {
+    if (e.key === "Enter") startVerify();
 });
 </script>
 
