@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Quản lý Key</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f7fafc;
+            margin: 0;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 2rem;
+        }
+        h1, h2 {
+            color: #2d3748;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #4a5568;
+        }
+        input[type="text"], select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .checkbox-group label {
+            display: inline;
+            font-weight: normal;
+            margin-left: 0.25rem;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s;
+            margin-right: 0.5rem;
+        }
+        button:hover {
+            background: #5a67d8;
+        }
+        button.danger {
+            background: #e53e3e;
+        }
+        button.danger:hover {
+            background: #c53030;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 2rem;
+        }
+        th, td {
+            text-align: left;
+            padding: 0.75rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        th {
+            background: #edf2f7;
+            font-weight: 600;
+        }
+        .key-display {
+            font-family: monospace;
+            background: #f7fafc;
+            padding: 0.25rem 0.5rem;
+            border-radius: 3px;
+        }
+        .actions button {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+            margin: 0 0.25rem;
+        }
+        .message {
+            padding: 1rem;
+            background: #c6f6d5;
+            color: #22543d;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔑 Admin Panel - Quản lý Key</h1>
+        
+        <div id="successMessage" class="message"></div>
+
+        <div class="form-group">
+            <label for="keyInput">Key (để trống để tự tạo ngẫu nhiên)</label>
+            <input type="text" id="keyInput" placeholder="Nhập key hoặc để trống">
+        </div>
+
+        <div class="form-group">
+            <label for="keyType">Loại key</label>
+            <select id="keyType">
+                <option value="single">Dùng một lần</option>
+                <option value="multi">Dùng nhiều lần (tối đa 9999 lần)</option>
+            </select>
+        </div>
+
+        <button onclick="generateKey()">➕ Tạo key</button>
+        <button class="danger" onclick="clearAllKeys()">🗑️ Xóa tất cả key</button>
+
+        <h2>Danh sách key hiện có</h2>
+        <table id="keyTable">
+            <thead>
+                <tr>
+                    <th>Key</th>
+                    <th>Loại</th>
+                    <th>Số lượt còn lại</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody id="keyList">
+                <!-- Danh sách key sẽ được render bằng JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Hàm tạo key ngẫu nhiên
+        function generateRandomKey(length = 8) {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        // Lấy danh sách key từ localStorage
+        function getKeys() {
+            return JSON.parse(localStorage.getItem('validKeys')) || [];
+        }
+
+        // Lưu danh sách key vào localStorage
+        function saveKeys(keys) {
+            localStorage.setItem('validKeys', JSON.stringify(keys));
+        }
+
+        // Hiển thị danh sách key
+        function renderKeys() {
+            const keys = getKeys();
+            const tbody = document.getElementById('keyList');
+            tbody.innerHTML = '';
+
+            if (keys.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Chưa có key nào</td></tr>';
+                return;
+            }
+
+            keys.forEach((keyData, index) => {
+                const row = document.createElement('tr');
+                const typeText = keyData.maxUses === 1 ? 'Một lần' : 'Nhiều lần';
+                const remaining = keyData.remainingUses;
+                
+                row.innerHTML = `
+                    <td><span class="key-display">${keyData.key}</span></td>
+                    <td>${typeText}</td>
+                    <td>${remaining > 999 ? '∞' : remaining}</td>
+                    <td class="actions">
+                        <button onclick="deleteKey('${keyData.key}')">Xóa</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Tạo key mới
+        function generateKey() {
+            const keyInput = document.getElementById('keyInput').value.trim();
+            const keyType = document.getElementById('keyType').value;
+            
+            let newKey = keyInput || generateRandomKey(10);
+            
+            // Kiểm tra key đã tồn tại chưa
+            const keys = getKeys();
+            if (keys.some(k => k.key === newKey)) {
+                showMessage('Key đã tồn tại! Vui lòng nhập key khác.', 'error');
+                return;
+            }
+
+            // Tạo object key
+            const keyData = {
+                key: newKey,
+                maxUses: keyType === 'single' ? 1 : 9999,
+                remainingUses: keyType === 'single' ? 1 : 9999
+            };
+
+            keys.push(keyData);
+            saveKeys(keys);
+            renderKeys();
+            document.getElementById('keyInput').value = ''; // Xóa input
+            showMessage(`Đã tạo key thành công: ${newKey}`, 'success');
+        }
+
+        // Xóa một key
+        function deleteKey(key) {
+            let keys = getKeys();
+            keys = keys.filter(k => k.key !== key);
+            saveKeys(keys);
+            renderKeys();
+            showMessage('Đã xóa key', 'success');
+        }
+
+        // Xóa tất cả key
+        function clearAllKeys() {
+            if (confirm('Bạn có chắc chắn muốn xóa tất cả key?')) {
+                localStorage.removeItem('validKeys');
+                renderKeys();
+                showMessage('Đã xóa tất cả key', 'success');
+            }
+        }
+
+        // Hiển thị thông báo
+        function showMessage(text, type = 'success') {
+            const msgDiv = document.getElementById('successMessage');
+            msgDiv.style.display = 'block';
+            msgDiv.textContent = text;
+            msgDiv.style.background = type === 'success' ? '#c6f6d5' : '#fed7d7';
+            msgDiv.style.color = type === 'success' ? '#22543d' : '#742a2a';
+            
+            setTimeout(() => {
+                msgDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // Render khi trang load
+        document.addEventListener('DOMContentLoaded', renderKeys);
+    </script>
+</body>
+</html>
