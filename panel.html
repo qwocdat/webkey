@@ -3,10 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>quocdat</title>
-    <!-- Firebase SDK (CDN) -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"></script>
+    <title>Admin Panel</title>
     <style>
         body { font-family: Arial, sans-serif; background: #f7fafc; margin:0; padding:2rem; }
         .container { max-width:800px; margin:0 auto; background:white; border-radius:10px; padding:2rem; box-shadow:0 4px 6px rgba(0,0,0,0.1); }
@@ -26,175 +23,235 @@
         .message { padding:1rem; border-radius:5px; margin-bottom:1rem; display:none; }
         .message.success { background:#c6f6d5; color:#22543d; }
         .message.error { background:#fed7d7; color:#742a2a; }
+        .loading { text-align:center; color:#718096; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🔑 Admin Panel - Firebase Key Management</h1>
-        <div id="successMessage" class="message"></div>
+        <div id="statusMessage" class="message"></div>
+        <div id="firebaseLoadStatus" class="loading">Đang tải Firebase SDK...</div>
 
-        <div class="form-group">
-            <label for="keyInput">Key (để trống để tự tạo ngẫu nhiên)</label>
-            <input type="text" id="keyInput" placeholder="Nhập key hoặc để trống">
+        <div id="mainContent" style="display:none;">
+            <div class="form-group">
+                <label for="keyInput">Key (để trống để tự tạo ngẫu nhiên)</label>
+                <input type="text" id="keyInput" placeholder="Nhập key hoặc để trống">
+            </div>
+
+            <div class="form-group">
+                <label for="keyType">Loại key</label>
+                <select id="keyType">
+                    <option value="single">Dùng một lần</option>
+                    <option value="multi">Dùng nhiều lần (tối đa 9999 lần)</option>
+                </select>
+            </div>
+
+            <button onclick="generateKey()">➕ Tạo key</button>
+            <button class="danger" onclick="clearAllKeys()">🗑️ Xóa tất cả key</button>
+
+            <h2>Danh sách key hiện có (real-time)</h2>
+            <table>
+                <thead><tr><th>Key</th><th>Loại</th><th>Số lượt còn lại</th><th>Thao tác</th></tr></thead>
+                <tbody id="keyList"><tr><td colspan="4" style="text-align:center;">Đang tải dữ liệu...</td></tr></tbody>
+            </table>
         </div>
-
-        <div class="form-group">
-            <label for="keyType">Loại key</label>
-            <select id="keyType">
-                <option value="single">Dùng một lần</option>
-                <option value="multi">Dùng nhiều lần (tối đa 9999 lần)</option>
-            </select>
-        </div>
-
-        <button onclick="generateKey()">➕ Tạo key</button>
-        <button class="danger" onclick="clearAllKeys()">🗑️ Xóa tất cả key</button>
-
-        <h2>Danh sách key hiện có (real-time)</h2>
-        <table>
-            <thead><tr><th>Key</th><th>Loại</th><th>Số lượt còn lại</th><th>Thao tác</th></tr></thead>
-            <tbody id="keyList"><tr><td colspan="4" style="text-align:center;">Đang tải dữ liệu...</td></tr></tbody>
-        </table>
     </div>
 
+    <!-- Thêm script tải Firebase với fallback -->
     <script>
-        // 🔥 CẤU HÌNH FIREBASE CỦA BẠN
-        const firebaseConfig = {
-            apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE",
-            authDomain: "keyquocdat.firebaseapp.com",
-            databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "keyquocdat",
-            storageBucket: "keyquocdat.firebasestorage.app",
-            messagingSenderId: "940819957535",
-            appId: "1:940819957535:web:6e8e9a4c9838740da3122a",
-            measurementId: "G-8G9690PZNV"
-        };
+        (function loadFirebase() {
+            const loadStatus = document.getElementById('firebaseLoadStatus');
+            const mainContent = document.getElementById('mainContent');
 
-        // Khởi tạo Firebase
-        try {
-            firebase.initializeApp(firebaseConfig);
-            console.log("✅ Firebase initialized successfully");
-        } catch (error) {
-            console.error("❌ Firebase initialization error:", error);
-            alert("Lỗi khởi tạo Firebase: " + error.message);
-        }
+            function showError(msg) {
+                loadStatus.innerHTML = `<span style="color:red;">❌ ${msg}</span>`;
+                console.error(msg);
+            }
 
-        const database = firebase.database();
-        const keysRef = database.ref('keys');
+            // Hàm tải script tuần tự
+            function loadScript(src, callback) {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = callback;
+                script.onerror = () => callback(new Error(`Failed to load ${src}`));
+                document.head.appendChild(script);
+            }
 
-        // Hàm tạo key ngẫu nhiên
-        function generateRandomKey(length = 8) {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-            let result = '';
-            for (let i = 0; i < length; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
-            return result;
-        }
+            // Thử tải từ CDN chính
+            loadScript('https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js', function(err) {
+                if (err) {
+                    showError('Không thể tải firebase-app.js từ CDN Google. Thử CDN dự phòng...');
+                    // Thử CDN dự phòng (jsDelivr)
+                    loadScript('https://cdn.jsdelivr.net/npm/firebase@10.7.1/dist/firebase-app.js', function(err2) {
+                        if (err2) {
+                            showError('Không thể tải Firebase SDK từ bất kỳ CDN nào. Vui lòng kiểm tra kết nối mạng hoặc tường lửa.');
+                            return;
+                        }
+                        // Tiếp tục tải database
+                        loadScript('https://cdn.jsdelivr.net/npm/firebase@10.7.1/dist/firebase-database.js', function(err3) {
+                            if (err3) {
+                                showError('Không thể tải firebase-database.js');
+                                return;
+                            }
+                            loadStatus.style.display = 'none';
+                            mainContent.style.display = 'block';
+                            initializeApp();
+                        });
+                    });
+                } else {
+                    // Tải thành công, tiếp tục tải database
+                    loadScript('https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js', function(errDb) {
+                        if (errDb) {
+                            showError('Không thể tải firebase-database.js từ Google CDN');
+                            return;
+                        }
+                        loadStatus.style.display = 'none';
+                        mainContent.style.display = 'block';
+                        initializeApp();
+                    });
+                }
+            });
 
-        // Render danh sách key real-time
-        function renderKeys(snapshot) {
-            const keys = snapshot.val();
-            const tbody = document.getElementById('keyList');
-            if (!keys) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Chưa có key nào</td></tr>';
+        })();
+    </script>
+
+    <script>
+        // Phần này sẽ chạy sau khi Firebase đã được tải
+        function initializeApp() {
+            // 🔥 CẤU HÌNH FIREBASE CỦA BẠN
+            const firebaseConfig = {
+                apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE",
+                authDomain: "keyquocdat.firebaseapp.com",
+                databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app",
+                projectId: "keyquocdat",
+                storageBucket: "keyquocdat.firebasestorage.app",
+                messagingSenderId: "940819957535",
+                appId: "1:940819957535:web:6e8e9a4c9838740da3122a",
+                measurementId: "G-8G9690PZNV"
+            };
+
+            try {
+                firebase.initializeApp(firebaseConfig);
+                console.log("✅ Firebase initialized successfully");
+            } catch (error) {
+                console.error("❌ Firebase initialization error:", error);
+                showMessage('Lỗi khởi tạo Firebase: ' + error.message, 'error');
                 return;
             }
-            let html = '';
-            Object.keys(keys).forEach(keyId => {
-                const k = keys[keyId];
-                const typeText = k.maxUses === 1 ? 'Một lần' : 'Nhiều lần';
-                const remaining = k.remainingUses > 999 ? '∞' : k.remainingUses;
-                html += `<tr><td><span class="key-display">${k.key}</span></td><td>${typeText}</td><td>${remaining}</td>
-                        <td class="actions"><button onclick="deleteKey('${k.key}')">Xóa</button></td></tr>`;
-            });
-            tbody.innerHTML = html;
-        }
 
-        // Lắng nghe thay đổi từ Firebase
-        keysRef.on('value', renderKeys, (error) => {
-            console.error("❌ Firebase read error:", error);
-            document.getElementById('keyList').innerHTML = '<tr><td colspan="4" style="text-align:center; color:red;">Lỗi đọc dữ liệu: ' + error.message + '</td></tr>';
-        });
+            const database = firebase.database();
+            const keysRef = database.ref('keys');
 
-        // Tạo key mới
-        function generateKey() {
-            const keyInput = document.getElementById('keyInput').value.trim();
-            const keyType = document.getElementById('keyType').value;
-            const newKey = keyInput || generateRandomKey(10);
+            // Hàm tạo key ngẫu nhiên
+            function generateRandomKey(length = 8) {
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                let result = '';
+                for (let i = 0; i < length; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
+                return result;
+            }
 
-            console.log("🔑 Attempting to create key:", newKey);
-
-            // Kiểm tra key đã tồn tại chưa
-            keysRef.child(newKey).once('value')
-                .then(snapshot => {
-                    if (snapshot.exists()) {
-                        showMessage('❌ Key đã tồn tại!', 'error');
-                        return;
-                    }
-
-                    const maxUses = keyType === 'single' ? 1 : 9999;
-                    const keyData = {
-                        key: newKey,
-                        maxUses: maxUses,
-                        remainingUses: maxUses
-                    };
-
-                    // Ghi lên Firebase
-                    return keysRef.child(newKey).set(keyData);
-                })
-                .then(() => {
-                    if (newKey) { // Nếu không phải return sớm do key tồn tại
-                        console.log("✅ Key created successfully:", newKey);
-                        document.getElementById('keyInput').value = '';
-                        showMessage(`✅ Đã tạo key: ${newKey}`, 'success');
-                    }
-                })
-                .catch(error => {
-                    console.error("❌ Error creating key:", error);
-                    showMessage('❌ Lỗi: ' + error.message, 'error');
+            // Render danh sách key real-time
+            function renderKeys(snapshot) {
+                const keys = snapshot.val();
+                const tbody = document.getElementById('keyList');
+                if (!keys) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Chưa có key nào</td></tr>';
+                    return;
+                }
+                let html = '';
+                Object.keys(keys).forEach(keyId => {
+                    const k = keys[keyId];
+                    const typeText = k.maxUses === 1 ? 'Một lần' : 'Nhiều lần';
+                    const remaining = k.remainingUses > 999 ? '∞' : k.remainingUses;
+                    html += `<tr><td><span class="key-display">${k.key}</span></td><td>${typeText}</td><td>${remaining}</td>
+                            <td class="actions"><button onclick="deleteKey('${k.key}')">Xóa</button></td></tr>`;
                 });
-        }
+                tbody.innerHTML = html;
+            }
 
-        // Xóa key
-        function deleteKey(key) {
-            if (confirm(`Xóa key "${key}"?`)) {
-                keysRef.child(key).remove()
+            // Lắng nghe thay đổi từ Firebase
+            keysRef.on('value', renderKeys, (error) => {
+                console.error("❌ Firebase read error:", error);
+                document.getElementById('keyList').innerHTML = '<tr><td colspan="4" style="text-align:center; color:red;">Lỗi đọc dữ liệu: ' + error.message + '</td></tr>';
+            });
+
+            // Tạo key mới
+            window.generateKey = function() {
+                const keyInput = document.getElementById('keyInput').value.trim();
+                const keyType = document.getElementById('keyType').value;
+                const newKey = keyInput || generateRandomKey(10);
+
+                console.log("🔑 Attempting to create key:", newKey);
+
+                keysRef.child(newKey).once('value')
+                    .then(snapshot => {
+                        if (snapshot.exists()) {
+                            showMessage('❌ Key đã tồn tại!', 'error');
+                            return;
+                        }
+
+                        const maxUses = keyType === 'single' ? 1 : 9999;
+                        const keyData = {
+                            key: newKey,
+                            maxUses: maxUses,
+                            remainingUses: maxUses
+                        };
+
+                        return keysRef.child(newKey).set(keyData);
+                    })
                     .then(() => {
-                        console.log("✅ Key deleted:", key);
-                        showMessage(`✅ Đã xóa key: ${key}`, 'success');
+                        if (newKey) {
+                            console.log("✅ Key created successfully:", newKey);
+                            document.getElementById('keyInput').value = '';
+                            showMessage(`✅ Đã tạo key: ${newKey}`, 'success');
+                        }
                     })
                     .catch(error => {
-                        console.error("❌ Error deleting key:", error);
+                        console.error("❌ Error creating key:", error);
                         showMessage('❌ Lỗi: ' + error.message, 'error');
                     });
+            };
+
+            // Xóa key
+            window.deleteKey = function(key) {
+                if (confirm(`Xóa key "${key}"?`)) {
+                    keysRef.child(key).remove()
+                        .then(() => {
+                            console.log("✅ Key deleted:", key);
+                            showMessage(`✅ Đã xóa key: ${key}`, 'success');
+                        })
+                        .catch(error => {
+                            console.error("❌ Error deleting key:", error);
+                            showMessage('❌ Lỗi: ' + error.message, 'error');
+                        });
+                }
+            };
+
+            // Xóa tất cả key
+            window.clearAllKeys = function() {
+                if (confirm('⚠️ Xóa tất cả key?')) {
+                    keysRef.remove()
+                        .then(() => {
+                            console.log("✅ All keys deleted");
+                            showMessage('✅ Đã xóa tất cả key', 'success');
+                        })
+                        .catch(error => {
+                            console.error("❌ Error clearing keys:", error);
+                            showMessage('❌ Lỗi: ' + error.message, 'error');
+                        });
+                }
+            };
+
+            // Hiển thị thông báo
+            function showMessage(text, type = 'success') {
+                const msg = document.getElementById('statusMessage');
+                msg.style.display = 'block';
+                msg.textContent = text;
+                msg.className = 'message ' + type;
+                setTimeout(() => msg.style.display = 'none', 4000);
             }
-        }
 
-        // Xóa tất cả key
-        function clearAllKeys() {
-            if (confirm('⚠️ Xóa tất cả key?')) {
-                keysRef.remove()
-                    .then(() => {
-                        console.log("✅ All keys deleted");
-                        showMessage('✅ Đã xóa tất cả key', 'success');
-                    })
-                    .catch(error => {
-                        console.error("❌ Error clearing keys:", error);
-                        showMessage('❌ Lỗi: ' + error.message, 'error');
-                    });
-            }
-        }
-
-        // Hiển thị thông báo
-        function showMessage(text, type = 'success') {
-            const msg = document.getElementById('successMessage');
-            msg.style.display = 'block';
-            msg.textContent = text;
-            msg.className = 'message ' + type;
-            setTimeout(() => msg.style.display = 'none', 4000);
-        }
-
-        // Kiểm tra kết nối Firebase khi load trang
-        window.addEventListener('load', function() {
-            // Kiểm tra xem database có thể truy cập không
+            // Kiểm tra kết nối
             keysRef.once('value')
                 .then(snapshot => {
                     console.log("✅ Firebase connection OK, keys count:", snapshot.numChildren());
@@ -203,7 +260,7 @@
                     console.error("❌ Firebase connection test failed:", error);
                     showMessage('⚠️ Không thể kết nối Firebase. Kiểm tra rules và cấu hình.', 'error');
                 });
-        });
+        }
     </script>
 </body>
 </html>
