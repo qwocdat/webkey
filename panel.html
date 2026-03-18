@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Firebase Key Management</title>
+    <title>quocdat</title>
     <!-- Firebase SDK (CDN) -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"></script>
@@ -23,7 +23,9 @@
         th { background:#edf2f7; }
         .key-display { font-family:monospace; background:#f7fafc; padding:0.25rem 0.5rem; border-radius:3px; }
         .actions button { padding:0.25rem 0.5rem; font-size:0.8rem; margin:0 0.25rem; }
-        .message { padding:1rem; background:#c6f6d5; color:#22543d; border-radius:5px; margin-bottom:1rem; display:none; }
+        .message { padding:1rem; border-radius:5px; margin-bottom:1rem; display:none; }
+        .message.success { background:#c6f6d5; color:#22543d; }
+        .message.error { background:#fed7d7; color:#742a2a; }
     </style>
 </head>
 <body>
@@ -68,7 +70,14 @@
         };
 
         // Khởi tạo Firebase
-        firebase.initializeApp(firebaseConfig);
+        try {
+            firebase.initializeApp(firebaseConfig);
+            console.log("✅ Firebase initialized successfully");
+        } catch (error) {
+            console.error("❌ Firebase initialization error:", error);
+            alert("Lỗi khởi tạo Firebase: " + error.message);
+        }
+
         const database = firebase.database();
         const keysRef = database.ref('keys');
 
@@ -99,7 +108,11 @@
             tbody.innerHTML = html;
         }
 
-        keysRef.on('value', renderKeys);
+        // Lắng nghe thay đổi từ Firebase
+        keysRef.on('value', renderKeys, (error) => {
+            console.error("❌ Firebase read error:", error);
+            document.getElementById('keyList').innerHTML = '<tr><td colspan="4" style="text-align:center; color:red;">Lỗi đọc dữ liệu: ' + error.message + '</td></tr>';
+        });
 
         // Tạo key mới
         function generateKey() {
@@ -107,51 +120,90 @@
             const keyType = document.getElementById('keyType').value;
             const newKey = keyInput || generateRandomKey(10);
 
-            keysRef.child(newKey).once('value', snapshot => {
-                if (snapshot.exists()) {
-                    showMessage('Key đã tồn tại!', 'error');
-                    return;
-                }
-                const keyData = {
-                    key: newKey,
-                    maxUses: keyType === 'single' ? 1 : 9999,
-                    remainingUses: keyType === 'single' ? 1 : 9999
-                };
-                keysRef.child(newKey).set(keyData)
-                    .then(() => {
+            console.log("🔑 Attempting to create key:", newKey);
+
+            // Kiểm tra key đã tồn tại chưa
+            keysRef.child(newKey).once('value')
+                .then(snapshot => {
+                    if (snapshot.exists()) {
+                        showMessage('❌ Key đã tồn tại!', 'error');
+                        return;
+                    }
+
+                    const maxUses = keyType === 'single' ? 1 : 9999;
+                    const keyData = {
+                        key: newKey,
+                        maxUses: maxUses,
+                        remainingUses: maxUses
+                    };
+
+                    // Ghi lên Firebase
+                    return keysRef.child(newKey).set(keyData);
+                })
+                .then(() => {
+                    if (newKey) { // Nếu không phải return sớm do key tồn tại
+                        console.log("✅ Key created successfully:", newKey);
                         document.getElementById('keyInput').value = '';
-                        showMessage(`Đã tạo key: ${newKey}`, 'success');
-                    })
-                    .catch(err => showMessage('Lỗi: ' + err.message, 'error'));
-            });
+                        showMessage(`✅ Đã tạo key: ${newKey}`, 'success');
+                    }
+                })
+                .catch(error => {
+                    console.error("❌ Error creating key:", error);
+                    showMessage('❌ Lỗi: ' + error.message, 'error');
+                });
         }
 
-        // Xoá key
+        // Xóa key
         function deleteKey(key) {
-            if (confirm('Xoá key này?')) {
+            if (confirm(`Xóa key "${key}"?`)) {
                 keysRef.child(key).remove()
-                    .then(() => showMessage('Đã xoá key', 'success'))
-                    .catch(err => showMessage('Lỗi: ' + err.message, 'error'));
+                    .then(() => {
+                        console.log("✅ Key deleted:", key);
+                        showMessage(`✅ Đã xóa key: ${key}`, 'success');
+                    })
+                    .catch(error => {
+                        console.error("❌ Error deleting key:", error);
+                        showMessage('❌ Lỗi: ' + error.message, 'error');
+                    });
             }
         }
 
-        // Xoá tất cả
+        // Xóa tất cả key
         function clearAllKeys() {
-            if (confirm('Xoá tất cả key?')) {
+            if (confirm('⚠️ Xóa tất cả key?')) {
                 keysRef.remove()
-                    .then(() => showMessage('Đã xoá tất cả key', 'success'))
-                    .catch(err => showMessage('Lỗi: ' + err.message, 'error'));
+                    .then(() => {
+                        console.log("✅ All keys deleted");
+                        showMessage('✅ Đã xóa tất cả key', 'success');
+                    })
+                    .catch(error => {
+                        console.error("❌ Error clearing keys:", error);
+                        showMessage('❌ Lỗi: ' + error.message, 'error');
+                    });
             }
         }
 
+        // Hiển thị thông báo
         function showMessage(text, type = 'success') {
             const msg = document.getElementById('successMessage');
             msg.style.display = 'block';
             msg.textContent = text;
-            msg.style.background = type === 'success' ? '#c6f6d5' : '#fed7d7';
-            msg.style.color = type === 'success' ? '#22543d' : '#742a2a';
-            setTimeout(() => msg.style.display = 'none', 3000);
+            msg.className = 'message ' + type;
+            setTimeout(() => msg.style.display = 'none', 4000);
         }
+
+        // Kiểm tra kết nối Firebase khi load trang
+        window.addEventListener('load', function() {
+            // Kiểm tra xem database có thể truy cập không
+            keysRef.once('value')
+                .then(snapshot => {
+                    console.log("✅ Firebase connection OK, keys count:", snapshot.numChildren());
+                })
+                .catch(error => {
+                    console.error("❌ Firebase connection test failed:", error);
+                    showMessage('⚠️ Không thể kết nối Firebase. Kiểm tra rules và cấu hình.', 'error');
+                });
+        });
     </script>
 </body>
 </html>
