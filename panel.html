@@ -3,48 +3,65 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Panel</title>
+<title>Panel</title>
 
-<style>
-body { font-family: Arial; background:#f7fafc; padding:2rem; }
-.container { max-width:800px; margin:auto; background:white; padding:2rem; border-radius:10px; }
-button { padding:8px 12px; margin:5px; cursor:pointer; }
-.danger { background:red; color:white; }
-table { width:100%; margin-top:20px; border-collapse:collapse; }
-td, th { border-bottom:1px solid #ddd; padding:8px; }
-.key { font-family:monospace; }
-</style>
-
-<!-- Firebase v8 -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
+<style>
+body{
+    margin:0;
+    height:100vh;
+    background:#000;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-family:-apple-system;
+}
+
+.box{
+    width:320px;
+    padding:20px;
+    border-radius:20px;
+    background:rgba(255,255,255,0.08);
+    backdrop-filter:blur(20px);
+    border:1px solid rgba(255,255,255,0.15);
+    text-align:center;
+}
+
+input{
+    width:100%;
+    padding:14px;
+    border-radius:14px;
+    border:none;
+    margin:10px 0;
+    background:rgba(255,255,255,0.1);
+    color:#fff;
+    text-align:center;
+}
+
+button{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:14px;
+    background:#0a84ff;
+    color:#fff;
+}
+
+p{color:#fff;font-size:14px;}
+</style>
 </head>
+
 <body>
 
-<div class="container">
-<h2>🔑 Firebase Key Manager</h2>
-
-<input id="keyInput" placeholder="Nhập key hoặc để trống">
-<select id="keyType">
-<option value="single">1 lần</option>
-<option value="multi">Nhiều lần</option>
-</select>
-
-<br>
-<button onclick="generateKey()">Tạo key</button>
-<button class="danger" onclick="clearAll()">Xóa tất cả</button>
-
-<table>
-<thead>
-<tr><th>Key</th><th>Loại</th><th>Còn lại</th><th></th></tr>
-</thead>
-<tbody id="list"></tbody>
-</table>
+<div class="box">
+    <input id="key" placeholder="Nhập key">
+    <button onclick="create()">Tạo key</button>
+    <p id="msg"></p>
 </div>
 
 <script>
-// CONFIG
 const firebaseConfig = {
     apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE",
     databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app"
@@ -53,87 +70,24 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database().ref("keys");
 
-// escape XSS
-function esc(str){
-    return str.replace(/[&<>"']/g, m => ({
-        "&":"&amp;","<":"&lt;",">":"&gt;",
-        '"':"&quot;","'":"&#39;"
-    }[m]));
+function normalizeKey(k){
+    return k.trim().toUpperCase().replace(/\s+/g,"");
 }
 
-// random key
-function randomKey(len=10){
-    const c="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    let r="";
-    for(let i=0;i<len;i++) r+=c[Math.floor(Math.random()*c.length)];
-    return r;
-}
+function create(){
+    const key = normalizeKey(document.getElementById("key").value);
+    const msg = document.getElementById("msg");
 
-// render
-db.on("value", snap=>{
-    const data = snap.val();
-    const el = document.getElementById("list");
-
-    if(!data){
-        el.innerHTML = "<tr><td colspan='4'>Chưa có key</td></tr>";
+    if(!key){
+        msg.textContent = "Nhập key";
         return;
     }
 
-    let html="";
-    Object.values(data).forEach(k=>{
-        html += `
-        <tr>
-            <td class="key">${esc(k.key)}</td>
-            <td>${k.maxUses==1?"1 lần":"nhiều lần"}</td>
-            <td>${k.remainingUses}</td>
-            <td><button onclick="del('${k.key}')">Xóa</button></td>
-        </tr>`;
+    db.child(key).set({
+        used:false
     });
 
-    el.innerHTML = html;
-});
-
-// create
-function generateKey(){
-    const input = document.getElementById("keyInput").value.trim();
-    const type = document.getElementById("keyType").value;
-
-    const key = input || randomKey();
-    const max = type==="single"?1:9999;
-
-    db.child(key).transaction(cur=>{
-        if(cur===null){
-            return {
-                key:key,
-                maxUses:max,
-                remainingUses:max
-            };
-        }
-        return; // tồn tại rồi
-    }, (err, committed)=>{
-        if(err){
-            alert("Lỗi: "+err.message);
-        } else if(!committed){
-            alert("Key đã tồn tại!");
-        } else {
-            document.getElementById("keyInput").value="";
-            alert("Tạo thành công: "+key);
-        }
-    });
-}
-
-// delete
-function del(key){
-    if(confirm("Xóa "+key+"?")){
-        db.child(key).remove();
-    }
-}
-
-// clear all
-function clearAll(){
-    if(confirm("Xóa hết?")){
-        db.remove();
-    }
+    msg.textContent = "Đã tạo: " + key;
 }
 </script>
 
