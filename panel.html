@@ -8,19 +8,21 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"></script>
     <style>
-        /* Giữ nguyên style của panel (tôi chỉ để phần cần thiết, bạn copy lại từ file cũ) */
         body { font-family: Arial, sans-serif; background: #f7fafc; margin:0; padding:2rem; }
         .container { max-width:800px; margin:0 auto; background:white; border-radius:10px; padding:2rem; box-shadow:0 4px 6px rgba(0,0,0,0.1); }
         h1, h2 { color:#2d3748; }
         .form-group { margin-bottom:1rem; }
         label { display:block; margin-bottom:0.5rem; font-weight:600; color:#4a5568; }
-        input[type="text"], select { width:100%; padding:0.75rem; border:1px solid #e2e8f0; border-radius:5px; font-size:1rem; }
-        button { background:#667eea; color:white; border:none; padding:0.75rem 1.5rem; border-radius:5px; cursor:pointer; margin-right:0.5rem; }
+        input[type="text"], select { width:100%; padding:0.75rem; border:1px solid #e2e8f0; border-radius:5px; font-size:1rem; box-sizing:border-box; }
+        button { background:#667eea; color:white; border:none; padding:0.75rem 1.5rem; border-radius:5px; cursor:pointer; margin-right:0.5rem; transition:background 0.3s; }
+        button:hover { background:#5a67d8; }
         button.danger { background:#e53e3e; }
+        button.danger:hover { background:#c53030; }
         table { width:100%; border-collapse:collapse; margin-top:2rem; }
         th, td { text-align:left; padding:0.75rem; border-bottom:1px solid #e2e8f0; }
         th { background:#edf2f7; }
         .key-display { font-family:monospace; background:#f7fafc; padding:0.25rem 0.5rem; border-radius:3px; }
+        .actions button { padding:0.25rem 0.5rem; font-size:0.8rem; margin:0 0.25rem; }
         .message { padding:1rem; background:#c6f6d5; color:#22543d; border-radius:5px; margin-bottom:1rem; display:none; }
     </style>
 </head>
@@ -53,16 +55,16 @@
     </div>
 
     <script>
-        // 🔥 CẤU HÌNH FIREBASE (giống hệt key.html)
+        // 🔥 CẤU HÌNH FIREBASE CỦA BẠN
         const firebaseConfig = {
-            apiKey: "AIzaSyDM5EOHtjhxrWvGxL7hegMi5n0TbdV9cpw",
-            authDomain: "taikhoan-fc704.firebaseapp.com",
-            databaseURL: "https://taikhoan-fc704-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "taikhoan-fc704",
-            storageBucket: "taikhoan-fc704.firebasestorage.app",
-            messagingSenderId: "867203109533",
-            appId: "1:867203109533:web:d8af9bf7900162def37a74",
-            measurementId: "G-8WGZQPSM68"
+            apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE",
+            authDomain: "keyquocdat.firebaseapp.com",
+            databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "keyquocdat",
+            storageBucket: "keyquocdat.firebasestorage.app",
+            messagingSenderId: "940819957535",
+            appId: "1:940819957535:web:6e8e9a4c9838740da3122a",
+            measurementId: "G-8G9690PZNV"
         };
 
         // Khởi tạo Firebase
@@ -92,7 +94,7 @@
                 const typeText = k.maxUses === 1 ? 'Một lần' : 'Nhiều lần';
                 const remaining = k.remainingUses > 999 ? '∞' : k.remainingUses;
                 html += `<tr><td><span class="key-display">${k.key}</span></td><td>${typeText}</td><td>${remaining}</td>
-                        <td><button onclick="deleteKey('${k.key}')">Xóa</button></td></tr>`;
+                        <td class="actions"><button onclick="deleteKey('${k.key}')">Xóa</button></td></tr>`;
             });
             tbody.innerHTML = html;
         }
