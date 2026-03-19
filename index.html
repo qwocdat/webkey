@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>tối ưu panel · quocdat · liquid glass</title>
+    <title>tối ưu panel · quocdat · ios confirm · cmd game</title>
     <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -168,7 +168,7 @@
             backdrop-filter: blur(4px);
             box-shadow: inset 0 1px 6px rgba(90, 40, 140, 0.2);
             overflow: hidden;
-            display: none; /* ẩn ban đầu */
+            display: none;
         }
         .progress-bar {
             height: 100%;
@@ -194,7 +194,7 @@
             100% { transform: translateX(100%); }
         }
 
-        /* Bảng chương trình kiểu macOS */
+        /* Bảng chương trình kiểu macOS + CMD log */
         .program-section {
             background: rgba(250, 240, 255, 0.4);
             backdrop-filter: blur(20px);
@@ -265,37 +265,39 @@
             border-radius: 30px;
         }
 
-        /* Khu vực log giả */
+        /* Khu vực log giả dạng CMD */
         .log-console {
-            background: rgba(20, 5, 30, 0.2);
+            background: rgba(10, 5, 20, 0.85);
             backdrop-filter: blur(4px);
-            border: 1px solid #cbb2ff;
-            border-radius: 36px;
-            padding: 16px 18px;
+            border: 1px solid #bb9bff;
+            border-radius: 28px;
+            padding: 18px 20px;
             font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
             font-size: 0.8rem;
-            color: #3c1d6b;
-            max-height: 140px;
+            color: #b5f0ff;
+            max-height: 200px;
             overflow-y: auto;
-            box-shadow: inset 0 0 12px #decbff;
+            box-shadow: inset 0 0 20px #2a0e4a, 0 6px 12px rgba(0,0,0,0.3);
+            text-shadow: 0 0 4px #a772ff;
         }
         .log-line {
-            padding: 4px 0;
-            border-bottom: 0.5px dashed rgba(150, 80, 255, 0.2);
+            padding: 5px 0;
+            border-bottom: 0.5px dashed #6f3faf;
             display: flex;
-            gap: 10px;
+            gap: 12px;
+            font-family: inherit;
         }
         .log-line .timestamp {
-            color: #8a4ed3;
-            min-width: 65px;
+            color: #ffb27f;
+            min-width: 70px;
         }
         .log-line .message {
-            color: #281447;
+            color: #d7ffad;
             word-break: break-word;
         }
         .log-line .status {
             margin-left: auto;
-            color: #aa7cff;
+            color: #ff9ae0;
         }
 
         /* Footer */
@@ -377,7 +379,101 @@
             color: #6a39b3;
         }
 
-        /* Popup liquid glass */
+        /* Popup xác nhận iOS */
+        .confirm-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.2);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.2s ease;
+        }
+        .confirm-overlay.show {
+            visibility: visible;
+            opacity: 1;
+        }
+        .confirm-card {
+            background: rgba(255, 240, 255, 0.7);
+            backdrop-filter: blur(30px) saturate(200%);
+            -webkit-backdrop-filter: blur(30px) saturate(200%);
+            border: 2px solid rgba(255, 255, 255, 0.7);
+            border-radius: 48px;
+            padding: 32px 36px;
+            width: 340px;
+            box-shadow: 0 40px 60px rgba(128, 0, 255, 0.3), 0 10px 25px rgba(0,0,0,0.2), inset 0 2px 10px white;
+            color: #310564;
+            text-align: center;
+            transform: scale(0.9);
+            transition: 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+        }
+        .confirm-overlay.show .confirm-card {
+            transform: scale(1);
+        }
+        .confirm-card i {
+            font-size: 3.8rem;
+            background: linear-gradient(145deg, #ba7dff, #ffb3fe);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 16px;
+        }
+        .confirm-card h2 {
+            font-weight: 600;
+            font-size: 1.9rem;
+            margin-bottom: 8px;
+        }
+        .confirm-card p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.3);
+            padding: 10px 0;
+            border-radius: 60px;
+        }
+        .confirm-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        .confirm-btn {
+            border: none;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 14px 30px;
+            border-radius: 60px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #3d0f73;
+            border: 1px solid white;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 6px 14px rgba(125, 40, 215, 0.3);
+            flex: 1;
+        }
+        .confirm-btn.cancel {
+            background: rgba(255, 220, 240, 0.6);
+            color: #5b2680;
+        }
+        .confirm-btn.confirm {
+            background: #b77aff;
+            color: white;
+            border: 1px solid #f1dcff;
+        }
+        .confirm-btn:hover {
+            transform: scale(1.04);
+            background: white;
+            color: #6a1fba;
+        }
+
+        /* Popup hoàn thành liquid glass (giữ lại) */
         .popup-overlay {
             position: fixed;
             top: 0;
@@ -399,7 +495,7 @@
             border: 2px solid rgba(220, 170, 255, 0.7);
             border-radius: 50px;
             padding: 28px 50px;
-            box-shadow: 0 30px 50px rgba(155, 80, 255, 0.4), 0 10px 25px rgba(0,0,0,0.2), inset 0 2px 6px white;
+            box-shadow: 0 30px 50px rgba(155, 80, 255, 0.4), inset 0 2px 6px white;
             color: #2d0759;
             font-weight: 550;
             font-size: 2rem;
@@ -407,29 +503,11 @@
             flex-direction: column;
             align-items: center;
             gap: 15px;
-            transform: scale(0.9);
-            transition: all 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.2);
             border: 1px solid rgba(255, 255, 255, 0.6);
             pointer-events: none;
         }
-        .popup-liquid i {
-            font-size: 3.5rem;
-            background: linear-gradient(145deg, #b57aff, #ffb3fe);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            filter: drop-shadow(0 8px 12px #deaaff);
-        }
-        .popup-liquid span {
-            background: rgba(255, 255, 255, 0.4);
-            padding: 8px 28px;
-            border-radius: 60px;
-            font-size: 1.3rem;
-            color: #2f0759;
-        }
         .popup-overlay.show {
             visibility: visible;
-            pointer-events: none;
         }
         .popup-overlay.show .popup-liquid {
             animation: liquidPop 0.5s ease forwards;
@@ -477,8 +555,8 @@
                 </div>
                 <div class="opt-card" id="opt2" data-opt="boost">
                     <i class="fa-solid fa-gauge-high"></i>
-                    <h3>Support HeadLock</h3>
-                    <p>Hỗ Trợ kéo tâm</p>
+                    <h3>Tăng tốc</h3>
+                    <p>memory boost</p>
                 </div>
                 <div class="opt-card" id="opt3" data-opt="startup">
                     <i class="fa-solid fa-rocket"></i>
@@ -492,11 +570,11 @@
                 <div class="progress-bar" id="progressBar"></div>
             </div>
 
-            <!-- Bảng chương trình kiểu macOS + log giả -->
+            <!-- Bảng chương trình kiểu macOS + CMD log game -->
             <div class="program-section">
                 <div class="program-label">
                     <i class="fa-brands fa-apple"></i>
-                    <span>chương trình · log</span>
+                    <span>chương trình · CMD game</span>
                     <i class="fa-regular fa-square" style="margin-left:auto; opacity:0.5;"></i>
                 </div>
                 <div class="mac-dock">
@@ -513,57 +591,4 @@
                         <span>Activity</span>
                     </div>
                     <div class="dock-item">
-                        <i class="fa-solid fa-trash-can"></i>
-                        <span>Trash</span>
-                    </div>
-                    <div class="dock-item">
-                        <i class="fa-solid fa-gear"></i>
-                        <span>Settings</span>
-                    </div>
-                </div>
-                <!-- Khu vực log giả (sẽ được cập nhật động) -->
-                <div class="log-console" id="logConsole">
-                    <div class="log-line"><span class="timestamp">[10:15:42]</span><span class="message">system idle</span><span class="status">⚡</span></div>
-                    <div class="log-line"><span class="timestamp">[10:15:45]</span><span class="message">ready for task</span><span class="status">⏳</span></div>
-                </div>
-            </div>
-
-            <!-- Footer thông tin tác giả và Zalo -->
-            <div class="footer">
-                <div class="owner">
-                    <div class="avatar">Q</div>
-                    <div class="info">
-                        <h4>quocdat</h4>
-                        <p><i class="fa-regular fa-id-card"></i> Owner · dev</p>
-                    </div>
-                </div>
-                <div class="zalo">
-                    <i class="fa-solid fa-phone"></i>
-                    <a href="#">0989249990</a>
-                    <i class="fa-regular fa-message" style="color:#a16cf4;"></i>
-                </div>
-            </div>
-
-            <!-- Dòng chữ hacker -->
-            <div style="text-align:center; margin-top: 18px; font-size:0.7rem; color:#ba9cf0; font-family: monospace; letter-spacing:2px;">
-                <i class="fa-regular fa-keyboard"></i> --==[ init system v.9.2 ]==-- 
-                <span style="background:#c7adff20; padding:3px 8px; border-radius: 30px; margin-left: 6px;">#tối ưu</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Popup thông báo hoàn thành (liquid glass) -->
-    <div class="popup-overlay" id="popupOverlay">
-        <div class="popup-liquid">
-            <i class="fa-regular fa-circle-check"></i>
-            <span>Hoàn tất tối ưu</span>
-        </div>
-    </div>
-
-    <script>
-        (function() {
-            // ripple effect cho các card
-            const cards = document.querySelectorAll('.opt-card, .dock-item');
-            cards.forEach(card => {
-                card.addEventListener('click', function(e) {
-                    const ripple = do
+                        <i class="fa-solid fa
