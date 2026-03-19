@@ -1,881 +1,507 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>tối ưu panel · quocdat</title>
+    <!-- Font Awesome 6 (free) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
-            font-family: 'Courier New', monospace;
-            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
-            color: #7700ff;
             min-height: 100vh;
-            overflow-x: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at 30% 30%, #f0eaff, #d9c9ff);
+            /* lưới màn hình kiểu hacker nhẹ */
+            background-image: 
+                repeating-linear-gradient(0deg, rgba(138, 43, 226, 0.03) 0px, rgba(138, 43, 226, 0.03) 2px, transparent 2px, transparent 8px),
+                radial-gradient(circle at 30% 30%, #f0eaff, #d9c9ff);
+            padding: 16px;
             position: relative;
         }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-            position: relative;
-            z-index: 10;
+        /* hiệu ứng chữ glitch cho tên hacker */
+        @keyframes glitch {
+            0% { text-shadow: 2px 0 #ff00c1, -2px 0 #00fff9; }
+            20% { text-shadow: -2px 0 #ff00c1, 2px 0 #00fff9; }
+            40% { text-shadow: 2px 0 #00fff9, -2px 0 #ff00c1; }
+            60% { text-shadow: -2px 0 #00fff9, 2px 0 #ff00c1; }
+            80% { text-shadow: 2px 0 #ff00c1, -2px 0 #00fff9; }
+            100% { text-shadow: -2px 0 #ff00c1, 2px 0 #00fff9; }
         }
 
+        /* hiệu ứng fade + scale khi vào app */
+        @keyframes appear {
+            0% { opacity: 0; transform: scale(0.96) translateY(20px); backdrop-filter: blur(0px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); backdrop-filter: blur(16px); }
+        }
+
+        .app {
+            width: 100%;
+            max-width: 720px;
+            animation: appear 0.6s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+        }
+
+        /* panel chính – kính mờ iOS + tím sáng */
+        .panel {
+            background: rgba(255, 245, 255, 0.65);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border: 1.5px solid rgba(180, 130, 255, 0.35);
+            border-radius: 42px;
+            box-shadow: 0 20px 40px rgba(105, 50, 180, 0.25), 0 8px 20px rgba(0, 0, 0, 0.1), inset 0 1px 2px rgba(255, 255, 255, 0.8);
+            padding: 32px 28px;
+            color: #2d1b4e;
+        }
+
+        /* header kiểu terminal nhẹ */
         .header {
-            text-align: center;
-            margin-bottom: 30px;
-            animation: fadeInDown 1s ease-out;
-        }
-
-        .title {
-            font-size: 2.5rem;
-            color: #ffffff;
-            text-shadow: 0 0 20px #8c00ff, 0 0 40px #7700ff;
-            margin-bottom: 10px;
-            letter-spacing: 3px;
-        }
-
-        .subtitle {
-            font-size: 1.2rem;
-            color: #a8a8a8;
-            opacity: 0.8;
-        }
-
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-
-        .hack-panel,
-        .terminal-panel {
-            background: rgba(20, 20, 40, 0.9);
-            border: 2px solid #a250ff;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 0 30px rgba(204, 164, 255, 0.774);
-            backdrop-filter: blur(10px);
-        }
-
-        .panel-header {
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .panel-header h2 {
-            color: #ffffff;
-            font-size: 1.5rem;
-            text-shadow: 0 0 10px #7700ff;
-        }
-
-        .hack-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .hack-btn {
-            position: relative;
-            background: linear-gradient(45deg, #1a1a2e, #16213e);
-            border: 3px solid #1a2133;
-            border-radius: 10px;
-            padding: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            overflow: hidden;
-        }
-
-        .hack-btn:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(140, 0, 255, 0.5);
-            border-color: #003f69;
-        }
-
-        .hack-btn:active {
-            transform: translateY(-2px) scale(0.98);
-        }
-
-        .btn-content {
             display: flex;
             align-items: center;
-            gap: 15px;
-            position: relative;
-            z-index: 2;
-        }
-
-        .btn-content i {
-            font-size: 1.5rem;
-            color: #aa41ff;
-            transition: color 0.3s ease;
-        }
-
-        .hack-btn:hover .btn-content i {
-            color: #cf94ff;
-        }
-
-        .btn-text {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #fff;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .btn-glow {
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .hack-btn:hover .btn-glow {
-            left: 100%;
-        }
-
-        .terminal-panel {
-            min-height: 400px;
-        }
-
-        .terminal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #2a2a3e;
-            margin: -20px -20px 20px -20px;
-            padding: 15px 20px;
-            border-radius: 15px 15px 0 0;
-            border-bottom: 1px solid #363338;
-        }
-
-        .terminal-controls {
-            display: flex;
             gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 1px dashed #a07ae0;
+            padding-bottom: 18px;
+        }
+        .header i {
+            font-size: 28px;
+            color: #7d3acb;
+            filter: drop-shadow(0 2px 4px #d3b5ff);
+        }
+        .header h1 {
+            font-weight: 590;
+            font-size: 2rem;
+            letter-spacing: -0.5px;
+            background: linear-gradient(130deg, #481f77, #b46ef3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 2px 5px rgba(170, 120, 255, 0.3);
+        }
+        .header .prompt {
+            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+            color: #a33df0;
+            font-size: 1rem;
+            margin-left: auto;
+            background: rgba(200, 165, 255, 0.25);
+            padding: 6px 14px;
+            border-radius: 60px;
+            border: 1px solid #c7a2ff;
+            backdrop-filter: blur(4px);
+            box-shadow: inset 0 1px 3px white;
+        }
+        .header .prompt i {
+            font-size: 12px;
+            margin-right: 6px;
+            color: #5e2a9c;
         }
 
-        .control {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
-
-        .control.close {
-            background: #ff5f56;
-        }
-
-        .control.minimize {
-            background: #ffbd2e;
-        }
-
-        .control.maximize {
-            background: #27ca3f;
-        }
-
-        .terminal-title {
-            color: #ffffff;
-            font-weight: bold;
-        }
-
-        .terminal-body {
-            min-height: 300px;
-            padding: 10px;
-            background: #000;
-            border-radius: 5px;
-            overflow-y: auto;
-            max-height: 400px;
-        }
-
-        .terminal-line {
-            margin-bottom: 8px;
-            line-height: 1.5;
-        }
-
-        .prompt {
-            color: #14ff14;
-            font-weight: bold;
-        }
-
-        .command {
-            color: #fff;
-            margin-left: 10px;
-        }
-
-        .output {
-            color: #888;
-            margin-left: 20px;
-        }
-
-        .success {
-            color: #00ff41;
-            margin-left: 20px;
-        }
-
-        .error {
-            color: #ff0066;
-            margin-left: 20px;
-        }
-
-        .cursor {
-            animation: blink 1s infinite;
-            color: #00ff41;
-        }
-
-        @keyframes blink {
-            0%,
-            50% {
-                opacity: 1;
-            }
-            51%,
-            100% {
-                opacity: 0;
-            }
-        }
-
-        .progress-container {
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 5px;
-            border: 1px solid #311a50;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 20px;
-            background: #333;
-            border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 10px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #991cff, #5bfce1, #9718ff);
-            background-size: 200% 100%;
-            animation: progressGlow 2s linear infinite;
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-
-        @keyframes progressGlow {
-            0% {
-                background-position: 200% 0;
-            }
-            100% {
-                background-position: -200% 0;
-            }
-        }
-
-        .progress-text {
-            text-align: center;
-            color: #00ff41;
-            font-weight: bold;
-        }
-
-        .status-bar {
+        /* 3 chức năng tối ưu */
+        .optimize-grid {
             display: flex;
-            justify-content: space-between;
-            background: rgba(20, 20, 40, 0.9);
-            border: 2px solid #22265c;
-            border-radius: 10px;
-            padding: 15px 20px;
-            backdrop-filter: blur(10px);
+            gap: 18px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .opt-card {
+            flex: 1 1 140px;
+            background: rgba(255, 240, 255, 0.55);
+            backdrop-filter: blur(8px);
+            border: 1.5px solid rgba(190, 130, 250, 0.5);
+            border-radius: 32px;
+            padding: 22px 8px 18px;
+            text-align: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 6px 12px rgba(151, 96, 239, 0.15);
+            cursor: pointer;
+            color: #2f195f;
+            position: relative;
+            overflow: hidden;
+        }
+        .opt-card:hover {
+            transform: translateY(-4px);
+            border-color: #b27afe;
+            background: rgba(255, 250, 255, 0.8);
+            box-shadow: 0 14px 22px rgba(139, 80, 255, 0.3);
+        }
+        .opt-card i {
+            font-size: 42px;
+            background: linear-gradient(145deg, #9b4dff, #c56fff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 4px 6px #e2c4ff);
+        }
+        .opt-card h3 {
+            font-weight: 550;
+            font-size: 1.2rem;
+            margin-bottom: 6px;
+            letter-spacing: -0.2px;
+        }
+        .opt-card p {
+            font-size: 0.75rem;
+            font-family: 'Menlo', monospace;
+            opacity: 0.8;
+            color: #6230a2;
+            text-transform: uppercase;
         }
 
-        .status-item {
+        /* Bảng chương trình kiểu macOS (dock thu nhỏ) */
+        .program-section {
+            background: rgba(250, 240, 255, 0.4);
+            backdrop-filter: blur(20px);
+            border-radius: 48px;
+            padding: 22px 24px;
+            margin-bottom: 40px;
+            border: 1px solid rgba(205, 155, 255, 0.5);
+            box-shadow: inset 0 1px 5px rgba(255, 255, 255, 0.7), 0 10px 15px -6px #bba4e0;
+        }
+        .program-label {
             display: flex;
             align-items: center;
             gap: 8px;
-            color: #888;
+            margin-bottom: 20px;
+        }
+        .program-label span {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #6b3cb0;
+            background: rgba(200, 175, 255, 0.4);
+            padding: 4px 14px;
+            border-radius: 30px;
+            border: 0.6px solid #ad85e6;
+        }
+        .program-label i {
+            color: #7d3fe0;
+            font-size: 20px;
+        }
+        .mac-dock {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-evenly;
+            gap: 15px 5px;
+        }
+        .dock-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 8px;
+            min-width: 70px;
+            border-radius: 24px;
+            background: transparent;
+            transition: 0.2s;
+            cursor: default;
+            border: 1px solid transparent;
+        }
+        .dock-item:hover {
+            background: rgba(255, 255, 255, 0.5);
+            border-color: #dabcff;
+            backdrop-filter: blur(4px);
+            transform: scale(1.05);
+        }
+        .dock-item i {
+            font-size: 32px;
+            color: #3f1d74;
+            text-shadow: 0 4px 8px #e0c5ff;
+        }
+        .dock-item span {
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: #2b104b;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 2px 10px;
+            border-radius: 30px;
         }
 
-        .status-online {
-            color: #a200ff;
-            animation: pulse 2s infinite;
+        /* footer thông tin tác giả + zalo */
+        .footer {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px dotted #bc9aff;
         }
-
-        @keyframes pulse {
-            0%,
-            100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.5;
-            }
+        .owner {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
-
-        .particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .particle {
-            position: absolute;
-            width: 2px;
-            height: 2px;
-            background: #8400ff;
+        .owner .avatar {
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
-            animation: float 10s linear infinite;
-            box-shadow: 0 0 10px #c300ff;
+            background: linear-gradient(135deg, #b27cf0, #7a4fd0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.4rem;
+            box-shadow: 0 6px 14px #c7abff;
+        }
+        .owner .info h4 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            color: #2b0652;
+            animation: glitch 3s infinite step-start 1s;
+        }
+        .owner .info p {
+            font-size: 0.9rem;
+            color: #4a2b77;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.6);
+            padding: 4px 14px;
+            border-radius: 40px;
+            border: 1px solid #bba2f0;
+            backdrop-filter: blur(2px);
+        }
+        .zalo {
+            background: rgba(235, 220, 255, 0.7);
+            backdrop-filter: blur(8px);
+            padding: 12px 24px;
+            border-radius: 60px;
+            border: 1.5px solid #b57aed;
+            font-weight: 560;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 4px 15px #deb8ff;
+            transition: 0.2s;
+        }
+        .zalo i {
+            font-size: 28px;
+            color: #6a39b3;
+        }
+        .zalo a {
+            text-decoration: none;
+            color: #310b62;
+            font-size: 1.2rem;
+            letter-spacing: 0.5px;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 5px 18px;
+            border-radius: 60px;
+            border: 1px solid white;
+        }
+        .zalo a:hover {
+            background: white;
+            color: #6a39b3;
         }
 
-        @keyframes float {
-            0% {
-                transform: translateY(100vh) translateX(0);
-                opacity: 0;
-            }
-            10% {
-                opacity: 1;
-            }
-            90% {
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-100vh) translateX(100px);
-                opacity: 0;
-            }
+        /* hiệu ứng ripple khi bấm */
+        .ripple-effect {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(200, 150, 255, 0.6) 0%, rgba(180, 130, 255, 0.2) 80%);
+            transform: scale(0);
+            animation: ripple 0.5s linear;
+            pointer-events: none;
+        }
+        @keyframes ripple {
+            to { transform: scale(6); opacity: 0; }
         }
 
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .hack-btn.clicked {
-            animation: clickPulse 0.6s ease;
-        }
-
-        @keyframes clickPulse {
-            0% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.05);
-                box-shadow: 0 0 50px rgba(132, 0, 255, 0.8);
-            }
-            100% {
-                transform: scale(1);
-            }
-        }
-
-        @media (max-width: 1024px) {
-            .main-content {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-            .title {
-                font-size: 2rem;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 15px;
-            }
-            .hack-btn {
-                padding: 15px;
-            }
-            .btn-text {
-                font-size: 1rem;
-            }
-            .status-bar {
-                flex-direction: column;
-                gap: 10px;
-            }
-        }
-
-        .swal2-popup {
-            background: linear-gradient(135deg, #1a1a2e, #16213e) !important;
-            border: 2px solid #a200ff !important;
-            color: #fff !important;
-        }
-
-        .swal2-title {
-            color: #a200ff !important;
-            text-shadow: 0 0 19px #ab69d1 !important;
-        }
-
-        .swal2-confirm {
-            background: linear-gradient(45deg, #a200ff, #58008b) !important;
-            border: none !important;
-            box-shadow: 0 0 20px rgba(140, 0, 255, 0.5) !important;
-        }
-
-        .swal2-confirm:hover {
-            box-shadow: 0 0 30px rgba(119, 0, 255, 0.8) !important;
+        /* media query nhỏ */
+        @media (max-width: 550px) {
+            .panel { padding: 20px; }
+            .footer { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .zalo { width: 100%; justify-content: center; }
         }
     </style>
-
 </head>
-
 <body>
-    <div class="container">
-        <div class="header">
-            <h1 class="title">
-                <i class="fas fa-bars"></i> Fluck MENU V3 FAROS <i class="fas fa-bars"></i> 
-            </h1>
-            <div class="subtitle">Boost Sensitivity Smooth</div>
-        </div>
+    <div class="app">
+        <div class="panel">
 
-        <div class="main-content">
-            <div class="hack-panel">
-                <div class="panel-header">
-                    <h2><i class="fas fa-bug"></i> 
-Main Functions <i class="fas fa-bug"></i> </h2>
-                </div>
-
-                <div class="hack-buttons">
-                    <button class="hack-btn" id="speedhack" data-hack="speed">
-                        <div class="btn-content">
-                            <i class="fas fa-gun"></i>
-                            <span class="btn-text">- Support Lockhead </span>
-                            <div class="btn-glow"></div>
-                        </div>
-                    </button>
-
-  <button class="hack-btn" id="unlimitedAmmo" data-hack="ammo">
-                        <div class="btn-content">
-                            <i class="fas fa-crosshairs"></i>
-                            <span class="btn-text">- Support Device </span>
-
-
-                    <button class="hack-btn" id="infiniteHealth" data-hack="health">
-                        <div class="btn-content">
-                            <i class="fas fa-bolt"></i>
-                            <span class="btn-text">- Sensitivity</span>
-                            <div class="btn-glow"></div>
-                        </div>
-                    </button>
-
-
-
-
-                            <div class="btn-glow"></div>
-                        </div>
-                    </button>
+            <!-- header: hacker + tên tác giả xuất hiện ở góc -->
+            <div class="header">
+                <i class="fa-solid fa-terminal" style="background: linear-gradient(145deg,#8a4bf3,#c48aff); -webkit-background-clip:text; background-clip:text; color:transparent;"></i>
+                <h1>opt panel</h1>
+                <div class="prompt">
+                    <i class="fa-regular fa-circle"></i> quocdat@hackintosh ~ %
                 </div>
             </div>
 
-            <div class="terminal-panel">
-                <div class="terminal-header">
-                    <div class="terminal-controls">
-                        <span class="control close"></span>
-                        <span class="control minimize"></span>
-                        <span class="control maximize"></span>
-                    </div>
-                    <div class="terminal-title">
-                        <i class="fas fa-terminal"></i> Command Terminal
-                    </div>
+            <!-- 3 chức năng tối ưu máy (click có ripple) -->
+            <div class="optimize-grid">
+                <div class="opt-card" id="opt1">
+                    <i class="fa-solid fa-broom"></i>
+                    <h3>Dọn rác</h3>
+                    <p>disk cleanup</p>
                 </div>
-
-                <div class="terminal-body" id="terminal">
-                    <div class="terminal-line">
-                        <span class="prompt"> Aimlock.Interface</span>
-                        <span class="cursor">_</span>
-                    </div>
+                <div class="opt-card" id="opt2">
+                    <i class="fa-solid fa-gauge-high"></i>
+                    <h3>Tăng tốc</h3>
+                    <p>memory boost</p>
                 </div>
-
-                <div class="progress-container" id="progressContainer" style="display: none;">
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progressFill"></div>
-                    </div>
-                    <div class="progress-text" id="progressText">Function Initializing...</div>
+                <div class="opt-card" id="opt3">
+                    <i class="fa-solid fa-rocket"></i>
+                    <h3>Khởi động</h3>
+                    <p>startup optimizer</p>
                 </div>
             </div>
-        </div>
 
-        <div class="status-bar">
-            <div class="status-item">
-                <i class="fas fa-phone"></i>
-                <span>ZaLo: +84 389148483</span>
+            <!-- Bảng chương trình kiểu macOS (dock style) -->
+            <div class="program-section">
+                <div class="program-label">
+                    <i class="fa-brands fa-apple"></i>
+                    <span>chương trình</span>
+                    <i class="fa-regular fa-square" style="margin-left:auto; opacity:0.5;"></i>
+                </div>
+                <div class="mac-dock">
+                    <div class="dock-item">
+                        <i class="fa-solid fa-folder-open"></i>
+                        <span>Finder</span>
+                    </div>
+                    <div class="dock-item">
+                        <i class="fa-solid fa-terminal"></i>
+                        <span>Terminal</span>
+                    </div>
+                    <div class="dock-item">
+                        <i class="fa-solid fa-chart-simple"></i>
+                        <span>Activity</span>
+                    </div>
+                    <div class="dock-item">
+                        <i class="fa-solid fa-trash-can"></i>
+                        <span>Trash</span>
+                    </div>
+                    <div class="dock-item">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>Settings</span>
+                    </div>
+                </div>
+                <!-- dòng trạng thái giống mac (hacker) -->
+                <div style="display:flex; justify-content:flex-end; margin-top:12px; font-size:0.7rem; font-family:monospace; color:#794bb5;">
+                    <span>>_ 9 processes running</span>
+                </div>
             </div>
-            <div class="status-item">
-                <i class="fas fa-user"></i>
-                <span>Admin: @FAROS</span>
+
+            <!-- Footer: giới thiệu tác giả và zalo -->
+            <div class="footer">
+                <div class="owner">
+                    <div class="avatar">Q</div>
+                    <div class="info">
+                        <h4>quocdat</h4>
+                        <p><i class="fa-regular fa-id-card"></i> Owner · dev</p>
+                    </div>
+                </div>
+                <div class="zalo">
+                    <i class="fa-solid fa-phone"></i>
+                    <a href="#">0989249990</a>
+                    <i class="fa-regular fa-message" style="color:#a16cf4;"></i>
+                </div>
             </div>
-            <div class="status-item">
-                <i class="fas fa-clock"></i>
-                <span id="currentTime"></span>
+
+            <!-- dòng chữ nhỏ kiểu hacker (ẩn hiệu ứng) -->
+            <div style="text-align:center; margin-top: 18px; font-size:0.7rem; color:#ba9cf0; font-family: monospace; letter-spacing:2px;">
+                <i class="fa-regular fa-keyboard"></i> --==[ init system v.9.2 ]==-- 
+                <span style="background:#c7adff20; padding:3px 8px; border-radius: 30px; margin-left: 6px;">#tối ưu</span>
             </div>
         </div>
     </div>
 
-    <div class="particles" id="particles"></div>
+    <!-- hiệu ứng bấm ripple (JavaScript) -->
     <script>
-        class GameModInterface {
-            constructor() {
-                this.terminal = document.getElementById('terminal');
-                this.progressContainer = document.getElementById('progressContainer');
-                this.progressFill = document.getElementById('progressFill');
-                this.progressText = document.getElementById('progressText');
-                this.isExecuting = false;
-
-                this.hackCommands = {
-                    speed: [
-                       '[FAROS – Kích hoạt HKEY_CURRENT_USER\Control AimLock FAROS\Accessibility\On()]',
-                            'FAROS – Kết_nối_bộ_nhớ_trò_chơi(com.dts.freefireth, com.dts.freefiremax)',
-                            'FAROS – Khởi_chạy_hệ_thống_LockHead()',
-                            'FAROS – Quét_toàn_bộ_nhớ()',
-                            'FAROS – Xác_định_tọa_độ()',
-                            'FAROS – Khoá_Tâm(2.5x)',
-                            'FAROS – Antiband(100%)',
-                            'FAROS – Ghi_dữ_liệu_vào_bộ_nhớ()',
-                            'FAROS – Xác_minh_thành_công()',
-                            'FAROS – AimLock_đã_kích_hoạt()',
-                            'FAROS – Khởi_chạy_SpeedHack()',
-                            'SUCCESS: Chế độ HEADLOCK đã bật!'
-                    ],
-                    health: [
-                        '[FAROS – Kích hoạt chế độ AIMLOCK 70%()]',
-                            'FAROS – Kết nối hệ thống quản lý AIMLOCK()',
-                            'FAROS – Khởi chạy chế độ hỗ trợ ghìm tâm()',
-                            'FAROS – Quét data và cache game()',
-                            'FAROS – Xác định và khoá tâm súng()',
-                            'FAROS – Ổn định tâm súng ở mức tối đa()',
-                            'FAROS – Kích hoạt chế độ đạn bay mượt()',
-                            'FAROS – Quét bộ nhớ vận hành thiết bị()',
-                            'FAROS – Đồng bộ chức năng()',
-                            'FAROS – Tăng cường khả năng khoá đầu(2.5x)',
-                            'FAROS – Bảo vệ hệ thống khỏi xung đột()',
-                            'FAROS – Ghi thiết lập tối ưu()',
-                            'FAROS – Xác minh áp dụng thành công()',
-                            'FAROS – Tạo điểm dữ liệu()',
-                            'FAROS – Kích hoạt bộ lọc Files đã cài()',
-                            'FAROS – Điều hướng và khoá chức năng()',
-                            'FAROS – Bật chế độ AIMLOCK 70% HOÀN TẤT()',
-                             'SUCCESS: Chế độ AIMLOCK 70% đã bật!'
-
-                    ],
-                    ammo: [
-                        'FAROS – import hệ thống quản lý Data và Cache()',
-                            'FAROS – From Sys com.dts.freefireth / com.dts.freefiremax import Data()',
-                            'FAROS – Initializing chế độ tối ưu tâm súng()',
-                            'FAROS – Scanning danh sách data game()',
-                            'FAROS – Initializing chế độ di chuyển mượt()',
-                            'FAROS – Scanning thông số vận hành files()',
-                            'FAROS – Finding tham số tốc độ(0x7FF12A45B890)',
-                            'FAROS – Injecting hệ thống tăng tốc khoá tâm(2.5)',
-                            'FAROS – Bảo vệ hệ thống khỏi xung đột()',
-                            'FAROS – Writing thiết lập mới(0x7FF12A45B890, value=2.5)',
-                            'FAROS – Verifying thành công()',
-                            'FAROS – Finding bộ đếm tài nguyên()',
-                            'FAROS – Located vị trí quản lý File(0x7FF12A45D450)',
-                            'FAROS – Ổn định thông số Data và file()',
-                            'FAROS – Setting chế độ bổ sung tự động files thiếu ()',
-                            'FAROS – Tối ưu quá trình ra đạn()',
-                            'FAROS – Hệ thống tối ưu đường đạn sẵn sàng()',
-                            'SUCCESS: Chế độ tối ưu đường đạn đã kích hoạt!'
-                    ]
-                };
-
-                this.init();
-            }
-
-            init() {
-                this.setupEventListeners();
-                this.createParticles();
-                this.updateTime();
-                this.showWelcomeMessage();
-            }
-
-            setupEventListeners() {
-                document.querySelectorAll('.hack-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => this.executeHack(e));
-                });
-                setInterval(() => this.updateTime(), 1000);
-            }
-
-            async executeHack(event) {
-                if (this.isExecuting) return;
-
-                const button = event.currentTarget;
-                const hackType = button.dataset.hack;
-
-                button.classList.add('clicked');
-                setTimeout(() => button.classList.remove('clicked'), 600);
-                this.createClickEffect(button);
-
-                this.isExecuting = true;
-                await this.runHackSequence(hackType);
-                this.isExecuting = false;
-            }
-
-            async runHackSequence(hackType) {
-                const commands = this.hackCommands[hackType];
-
-                this.clearTerminal();
-
-                this.showProgress();
-                this.addTerminalLine('prompt', `Function execute_${hackType}_hack()`);
-
-                for (let i = 0; i < commands.length; i++) {
-                    await this.delay(Math.random() * 800 + 400);
-
-                    const command = commands[i];
-                    const isSuccess = command.includes('SUCCESS:');
-                    const isError = command.includes('ERROR:');
-
-                    if (isSuccess) {
-                        this.addTerminalLine('success', command);
-                    } else if (isError) {
-                        this.addTerminalLine('error', command);
-                    } else {
-                        this.addTerminalLine('output', `> ${command}`);
-                    }
-                    const progress = ((i + 1) / commands.length) * 100;
-                    this.updateProgress(progress, this.getProgressText(hackType, i, commands.length));
-                    this.scrollTerminal();
-                }
-
-                setTimeout(() => {
-                    this.hideProgress();
-                    this.showSuccessAlert(hackType);
-                }, 500);
-            }
-
-            addTerminalLine(type, text) {
-                const line = document.createElement('div');
-                line.className = 'terminal-line';
-
-                if (type === 'prompt') {
-                    line.innerHTML = `<span class="prompt">Function</span> <span class="command">${text.replace('mod@hackInterface:~$ ', '')}</span>`;
-                } else {
-                    line.innerHTML = `<span class="${type}">${text}</span>`;
-                }
-
-                line.style.opacity = '0';
-                this.terminal.appendChild(line);
-
-                setTimeout(() => {
-                    line.style.opacity = '1';
-                    line.style.transition = 'opacity 0.3s ease';
-                }, 50);
-            }
-
-            clearTerminal() {
-                this.terminal.innerHTML = '<div class="terminal-line"><span class="prompt">Initialization</span><span class="cursor">_</span></div>';
-            }
-
-            scrollTerminal() {
-                this.terminal.scrollTop = this.terminal.scrollHeight;
-            }
-
-            showProgress() {
-                this.progressContainer.style.display = 'block';
-                this.updateProgress(0, 'Initializing hack sequence...');
-            }
-
-            hideProgress() {
-                this.progressContainer.style.display = 'none';
-            }
-
-            updateProgress(percent, text) {
-                this.progressFill.style.width = `${percent}%`;
-                this.progressText.textContent = text;
-            }
-
-            getProgressText(hackType, step, total) {
-                const percentage = Math.round(((step + 1) / total) * 100);
-                const texts = {
-                    speed: [
-                        'Scanning memory...',
-                        'Locating speed variables...',
-                        'Injecting modifications...',
-                        'Bypassing security...',
-                        'Finalizing hack...'
-                    ],
-                    health: [
-                        'Analyzing health system...',
-                        'Finding memory addresses...',
-                        'Creating protection hooks...',
-                        'Implementing safeguards...',
-                        'Activating infinite health...'
-                    ],
-                    ammo: [
-                        'Scanning weapon data...',
-                        'Locating ammo counters...',
-                        'Modifying reload mechanics...',
-                        'Bypassing limitations...',
-                        'Enabling unlimited ammo...'
-                    ]
-                };
-
-                const stepIndex = Math.min(Math.floor((step / total) * texts[hackType].length), texts[hackType].length - 1);
-                return `${texts[hackType][stepIndex]} (${percentage}%)`;
-            }
-
-            async showSuccessAlert(hackType) {
-                const messages = {
-                    speed: {
-                        title: 'Sensitivity FAROS!',
-                        text: 'Đã kích Hoạt Buff Sensi !',
-                        icon: 'success'
-                    },
-                    health: {
-                        title: 'LockMode FAROS!',
-                        text: 'Đã kích Hoạt LOCK MODE!',
-                        icon: 'success'
-                    },
-                    ammo: {
-                        title: 'SpeedAim FAROS!',
-                        text: 'Đã kích Hoạt Speed Aim FAROS!',
-                        icon: 'success'
-                    }
-                };
-
-                const config = messages[hackType];
-
-                await Swal.fire({
-                    title: config.title,
-                    text: config.text,
-                    icon: config.icon,
-                    confirmButtonText: 'Awesome!',
-                    background: 'linear-gradient(135deg, #1a1a2e, #16213e)',
-                    color: '#fff',
-                    confirmButtonColor: '#00ff41',
-                    showClass: {
-                        popup: 'animate__animated animate__fadeInDown'
-                    },
-                    hideClass: {
-                        popup: 'animate__animated animate__fadeOutUp'
-                    }
-                });
-            }
-
-            createClickEffect(button) {
-                const rect = button.getBoundingClientRect();
-                const ripple = document.createElement('div');
-                ripple.style.position = 'absolute';
-                ripple.style.width = '10px';
-                ripple.style.height = '10px';
-                ripple.style.background = '#00ff41';
-                ripple.style.borderRadius = '50%';
-                ripple.style.transform = 'scale(0)';
-                ripple.style.animation = 'ripple 0.6s linear';
-                ripple.style.left = '50%';
-                ripple.style.top = '50%';
-                ripple.style.pointerEvents = 'none';
-
-                button.style.position = 'relative';
-                button.appendChild(ripple);
-
-                setTimeout(() => {
-                    ripple.remove();
-                }, 600);
-            }
-
-            createParticles() {
-                const particlesContainer = document.getElementById('particles');
-
-                for (let i = 0; i < 50; i++) {
+        (function() {
+            // tạo hiệu ứng gợn sóng khi click vào các thẻ .opt-card
+            const cards = document.querySelectorAll('.opt-card');
+            cards.forEach(card => {
+                card.addEventListener('click', function(e) {
+                    // tạo phần tử ripple
+                    const ripple = document.createElement('span');
+                    ripple.classList.add('ripple-effect');
+                    
+                    // vị trí click trong card
+                    const rect = card.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    ripple.style.width = ripple.style.height = size + 'px';
+                    ripple.style.left = (e.clientX - rect.left - size/2) + 'px';
+                    ripple.style.top = (e.clientY - rect.top - size/2) + 'px';
+                    
+                    // style để ripple nằm trong card
+                    ripple.style.position = 'absolute';
+                    ripple.style.backgroundColor = 'transparent'; // màu đã xử lý qua radial-gradient trong class
+                    
+                    // đảm bảo card có position relative (đã có sẵn .opt-card {position: relative} )
+                    card.appendChild(ripple);
+                    
+                    // xóa ripple sau khi animation kết thúc
                     setTimeout(() => {
-                        this.createParticle(particlesContainer);
-                    }, i * 200);
-                }
-                setInterval(() => {
-                    this.createParticle(particlesContainer);
-                }, 2000);
-            }
+                        ripple.remove();
+                    }, 500);
+                });
+            });
 
-            createParticle(container) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
-                particle.style.animationDelay = Math.random() * 2 + 's';
-
-                container.appendChild(particle);
-                setTimeout(() => {
-                    particle.remove();
-                }, 15000);
-            }
-
-            updateTime() {
-                const now = new Date();
-                const timeString = now.toLocaleTimeString();
-                document.getElementById('currentTime').textContent = timeString;
-            }
-
-            showWelcomeMessage() {
-                setTimeout(() => {
-                    this.addTerminalLine('output', 'AimlockTracking initialized');
-                    this.addTerminalLine('output', 'Security protocols bypassed');
-                    this.addTerminalLine('success', 'Ready for hack execution');
-                    this.addTerminalLine('prompt', '');
-                }, 1000);
-            }
-
-            delay(ms) {
-                return new Promise(resolve => setTimeout(resolve, ms));
-            }
-        }
-        const style = document.createElement('style');
-        style.textContent = `
-    @keyframes ripple {
-        to {
-            transform: scale(40);
-            opacity: 0;
-        }
-    }
-`;
-        document.head.appendChild(style);
-        document.addEventListener('DOMContentLoaded', () => {
-            new GameModInterface();
-        });
-        document.addEventListener('mousemove', (e) => {
-            if (Math.random() > 0.97) {
-                const trail = document.createElement('div');
-                trail.style.position = 'fixed';
-                trail.style.left = e.clientX + 'px';
-                trail.style.top = e.clientY + 'px';
-                trail.style.width = '2px';
-                trail.style.height = '2px';
-                trail.style.background = '#00ff41';
-                trail.style.borderRadius = '50%';
-                trail.style.pointerEvents = 'none';
-                trail.style.animation = 'fade 1s linear forwards';
-                trail.style.zIndex = '5';
-
-                document.body.appendChild(trail);
-
-                setTimeout(() => {
-                    trail.remove();
-                }, 1000);
-            }
-        });
-
-        const trailStyle = document.createElement('style');
-        trailStyle.textContent = `
-    @keyframes fade {
-        from { opacity: 1; transform: scale(1); }
-        to { opacity: 0; transform: scale(0); }
-    }
-`;
-        document.head.appendChild(trailStyle);
+            // thêm hiệu ứng riêng cho các dock-item (không bắt buộc nhưng vui)
+            const dockItems = document.querySelectorAll('.dock-item');
+            dockItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    const ripple = document.createElement('span');
+                    ripple.classList.add('ripple-effect');
+                    const rect = item.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    ripple.style.width = ripple.style.height = size + 'px';
+                    ripple.style.left = (e.clientX - rect.left - size/2) + 'px';
+                    ripple.style.top = (e.clientY - rect.top - size/2) + 'px';
+                    ripple.style.position = 'absolute';
+                    // item mặc định không relative, cần set relative
+                    item.style.position = 'relative';
+                    item.appendChild(ripple);
+                    setTimeout(() => ripple.remove(), 500);
+                });
+            });
+        })();
     </script>
-</body>
 
+    <!-- thêm style động cho ripple (đã có class nhưng đảm bảo) -->
+    <style>
+        /* đảm bảo card có relative */
+        .opt-card, .dock-item {
+            position: relative;
+            overflow: hidden;
+        }
+        .ripple-effect {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(230, 200, 255, 0.7) 0%, rgba(180, 130, 255, 0.2) 80%);
+            transform: scale(0);
+            animation: ripple 0.5s ease-out;
+            pointer-events: none;
+            z-index: 10;
+        }
+        @keyframes ripple {
+            0% { transform: scale(0); opacity: 0.6; }
+            100% { transform: scale(5); opacity: 0; }
+        }
+        /* tối ưu hiển thị số zalo */
+        .zalo a {
+            transition: 0.2s;
+        }
+        .zalo a:hover {
+            background: #f0e4ff;
+            transform: scale(1.02);
+        }
+        /* hiệu ứng bổ sung cho tên quocdat */
+        .owner .info h4:hover {
+            animation: glitch 0.6s infinite;
+        }
+    </style>
+</body>
 </html>
