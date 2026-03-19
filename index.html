@@ -1,18 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>tối ưu panel · quocdat · ios confirm · cmd game</title>
-    <!-- Font Awesome 6 -->
+    <title>Ultimate Opt Panel • QuocDat</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        :root {
+            --primary-glow: #8a4bf3;
+            --matrix-green: #00ff41;
+            --matrix-red: #ff0044;
+            --matrix-yellow: #ffff00;
+            --glass-bg: rgba(255, 245, 255, 0.65);
         }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'SF Pro Display', -apple-system, sans-serif; }
 
         body {
             min-height: 100vh;
@@ -20,575 +22,269 @@
             align-items: center;
             justify-content: center;
             background: radial-gradient(circle at 30% 30%, #f0eaff, #d9c9ff);
-            background-image: 
-                repeating-linear-gradient(0deg, rgba(138, 43, 226, 0.03) 0px, rgba(138, 43, 226, 0.03) 2px, transparent 2px, transparent 8px),
-                radial-gradient(circle at 30% 30%, #f0eaff, #d9c9ff);
+            background-image: repeating-linear-gradient(0deg, rgba(138, 43, 226, 0.03) 0px, rgba(138, 43, 226, 0.03) 2px, transparent 2px, transparent 8px), radial-gradient(circle at 30% 30%, #f0eaff, #d9c9ff);
             padding: 16px;
-            position: relative;
         }
 
-        @keyframes glitch {
-            0% { text-shadow: 2px 0 #ff00c1, -2px 0 #00fff9; }
-            20% { text-shadow: -2px 0 #ff00c1, 2px 0 #00fff9; }
-            40% { text-shadow: 2px 0 #00fff9, -2px 0 #ff00c1; }
-            60% { text-shadow: -2px 0 #00fff9, 2px 0 #ff00c1; }
-            80% { text-shadow: 2px 0 #ff00c1, -2px 0 #00fff9; }
-            100% { text-shadow: -2px 0 #ff00c1, 2px 0 #00fff9; }
-        }
-
-        @keyframes appear {
-            0% { opacity: 0; transform: scale(0.96) translateY(20px); backdrop-filter: blur(0px); }
-            100% { opacity: 1; transform: scale(1) translateY(0); backdrop-filter: blur(16px); }
-        }
-
-        @keyframes liquidPop {
-            0% { opacity: 0; transform: scale(0.8) translateY(20px); backdrop-filter: blur(0px); }
-            50% { opacity: 1; transform: scale(1.05) translateY(0); backdrop-filter: blur(16px); }
-            100% { opacity: 1; transform: scale(1) translateY(0); backdrop-filter: blur(16px); }
-        }
-
-        .app {
+        /* --- Panel Chính --- */
+        .panel {
             width: 100%;
             max-width: 760px;
-            animation: appear 0.6s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
-        }
-
-        .panel {
-            background: rgba(255, 245, 255, 0.65);
-            backdrop-filter: blur(16px) saturate(180%);
-            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
             border: 1.5px solid rgba(180, 130, 255, 0.35);
             border-radius: 42px;
-            box-shadow: 0 20px 40px rgba(105, 50, 180, 0.25), 0 8px 20px rgba(0, 0, 0, 0.1), inset 0 1px 2px rgba(255, 255, 255, 0.8);
-            padding: 32px 28px;
-            color: #2d1b4e;
-            position: relative;
+            box-shadow: 0 25px 50px rgba(105, 50, 180, 0.25), inset 0 1px 2px rgba(255, 255, 255, 0.8);
+            padding: 32px;
+            animation: appear 0.6s cubic-bezier(0.2, 0.9, 0.3, 1);
         }
 
         .header {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 30px;
+            gap: 12px;
+            margin-bottom: 25px;
             border-bottom: 1px dashed #a07ae0;
-            padding-bottom: 18px;
+            padding-bottom: 15px;
         }
-        .header i {
-            font-size: 28px;
-            color: #7d3acb;
-            filter: drop-shadow(0 2px 4px #d3b5ff);
-        }
+
         .header h1 {
-            font-weight: 590;
-            font-size: 2rem;
-            letter-spacing: -0.5px;
+            font-size: 1.8rem;
             background: linear-gradient(130deg, #481f77, #b46ef3);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 2px 5px rgba(170, 120, 255, 0.3);
         }
-        .header .prompt {
-            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
-            color: #a33df0;
-            font-size: 1rem;
+
+        .prompt {
             margin-left: auto;
-            background: rgba(200, 165, 255, 0.25);
-            padding: 6px 14px;
-            border-radius: 60px;
-            border: 1px solid #c7a2ff;
-            backdrop-filter: blur(4px);
-            box-shadow: inset 0 1px 3px white;
-        }
-        .header .prompt i {
-            font-size: 12px;
-            margin-right: 6px;
-            color: #5e2a9c;
-        }
-
-        /* 3 chức năng */
-        .optimize-grid {
-            display: flex;
-            gap: 18px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .opt-card {
-            flex: 1 1 140px;
-            background: rgba(255, 240, 255, 0.55);
-            backdrop-filter: blur(8px);
-            border: 1.5px solid rgba(190, 130, 250, 0.5);
-            border-radius: 32px;
-            padding: 22px 8px 18px;
-            text-align: center;
-            transition: all 0.2s ease;
-            box-shadow: 0 6px 12px rgba(151, 96, 239, 0.15);
-            cursor: pointer;
-            color: #2f195f;
-            position: relative;
-            overflow: hidden;
-        }
-        .opt-card:hover {
-            transform: translateY(-4px);
-            border-color: #b27afe;
-            background: rgba(255, 250, 255, 0.8);
-            box-shadow: 0 14px 22px rgba(139, 80, 255, 0.3);
-        }
-        .opt-card i {
-            font-size: 42px;
-            background: linear-gradient(145deg, #9b4dff, #c56fff);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-bottom: 10px;
-            filter: drop-shadow(0 4px 6px #e2c4ff);
-        }
-        .opt-card h3 {
-            font-weight: 550;
-            font-size: 1.2rem;
-            margin-bottom: 6px;
-            letter-spacing: -0.2px;
-        }
-        .opt-card p {
-            font-size: 0.75rem;
             font-family: 'Menlo', monospace;
-            opacity: 0.8;
-            color: #6230a2;
-            text-transform: uppercase;
+            font-size: 0.85rem;
+            color: #a33df0;
+            background: rgba(200, 165, 255, 0.25);
+            padding: 6px 15px;
+            border-radius: 50px;
+            border: 1px solid #c7a2ff;
         }
 
-        /* Thanh tiến trình */
+        /* --- Grid Chức Năng --- */
+        .optimize-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .opt-card {
+            background: rgba(255, 255, 255, 0.4);
+            border: 1.5px solid rgba(190, 130, 250, 0.4);
+            border-radius: 28px;
+            padding: 20px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .opt-card:hover {
+            transform: translateY(-5px);
+            background: white;
+            border-color: #b27afe;
+            box-shadow: 0 10px 20px rgba(139, 80, 255, 0.2);
+        }
+
+        .opt-card i { font-size: 35px; color: #7d3acb; margin-bottom: 10px; }
+        .opt-card h3 { font-size: 1.1rem; color: #2d1b4e; }
+
+        /* --- Terminal Matrix --- */
+        .terminal-container {
+            background: #0d0216;
+            border-radius: 24px;
+            border: 1px solid #7d3acb;
+            padding: 15px;
+            margin-top: 20px;
+            box-shadow: inset 0 0 15px #2a0e4a;
+        }
+
+        .log-console {
+            height: 220px;
+            overflow-y: auto;
+            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            padding-right: 5px;
+        }
+
+        /* Tùy chỉnh thanh cuộn terminal */
+        .log-console::-webkit-scrollbar { width: 4px; }
+        .log-console::-webkit-scrollbar-thumb { background: #4b2382; border-radius: 10px; }
+
+        .log-line { display: flex; gap: 10px; margin-bottom: 4px; border-bottom: 0.1px solid rgba(125, 58, 203, 0.2); }
+        .ts { color: #888; min-width: 65px; }
+        .msg { flex: 1; word-break: break-all; }
+        .stt { font-weight: bold; color: var(--matrix-green); }
+
+        /* --- Progress Bar --- */
         .progress-container {
-            margin: 20px 0 20px;
-            background: rgba(230, 210, 255, 0.3);
-            border-radius: 60px;
-            height: 20px;
-            border: 1px solid #c19eff;
-            backdrop-filter: blur(4px);
-            box-shadow: inset 0 1px 6px rgba(90, 40, 140, 0.2);
+            height: 10px;
+            background: rgba(125, 58, 203, 0.1);
+            border-radius: 10px;
+            margin: 15px 0;
             overflow: hidden;
             display: none;
         }
         .progress-bar {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #b57aff, #e2b0ff, #c285ff);
-            border-radius: 60px;
-            box-shadow: 0 0 12px #d9b0ff;
+            width: 0%; height: 100%;
+            background: linear-gradient(90deg, #b57aff, #00ff41);
             transition: width 0.1s linear;
-            position: relative;
-        }
-        .progress-bar::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
-            animation: shimmer 1.2s infinite;
-        }
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
         }
 
-        /* Bảng chương trình kiểu macOS + CMD log */
-        .program-section {
-            background: rgba(250, 240, 255, 0.4);
-            backdrop-filter: blur(20px);
-            border-radius: 48px;
-            padding: 22px 24px;
-            margin-bottom: 25px;
-            border: 1px solid rgba(205, 155, 255, 0.5);
-            box-shadow: inset 0 1px 5px rgba(255, 255, 255, 0.7), 0 10px 15px -6px #bba4e0;
-        }
-        .program-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-        .program-label span {
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: #6b3cb0;
-            background: rgba(200, 175, 255, 0.4);
-            padding: 4px 14px;
-            border-radius: 30px;
-            border: 0.6px solid #ad85e6;
-        }
-        .program-label i {
-            color: #7d3fe0;
-            font-size: 20px;
-        }
-        .mac-dock {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-evenly;
-            gap: 15px 5px;
-            margin-bottom: 20px;
-        }
-        .dock-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-            padding: 10px 8px;
-            min-width: 70px;
-            border-radius: 24px;
-            background: transparent;
-            transition: 0.2s;
-            cursor: default;
-            border: 1px solid transparent;
-        }
-        .dock-item:hover {
-            background: rgba(255, 255, 255, 0.5);
-            border-color: #dabcff;
-            backdrop-filter: blur(4px);
-            transform: scale(1.05);
-        }
-        .dock-item i {
-            font-size: 32px;
-            color: #3f1d74;
-            text-shadow: 0 4px 8px #e0c5ff;
-        }
-        .dock-item span {
-            font-size: 0.7rem;
-            font-weight: 500;
-            color: #2b104b;
-            background: rgba(255, 255, 255, 0.5);
-            padding: 2px 10px;
-            border-radius: 30px;
-        }
-
-        /* Khu vực log giả dạng CMD */
-        .log-console {
-            background: rgba(10, 5, 20, 0.85);
-            backdrop-filter: blur(4px);
-            border: 1px solid #bb9bff;
-            border-radius: 28px;
-            padding: 18px 20px;
-            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
-            font-size: 0.8rem;
-            color: #b5f0ff;
-            max-height: 200px;
-            overflow-y: auto;
-            box-shadow: inset 0 0 20px #2a0e4a, 0 6px 12px rgba(0,0,0,0.3);
-            text-shadow: 0 0 4px #a772ff;
-        }
-        .log-line {
-            padding: 5px 0;
-            border-bottom: 0.5px dashed #6f3faf;
-            display: flex;
-            gap: 12px;
-            font-family: inherit;
-        }
-        .log-line .timestamp {
-            color: #ffb27f;
-            min-width: 70px;
-        }
-        .log-line .message {
-            color: #d7ffad;
-            word-break: break-word;
-        }
-        .log-line .status {
-            margin-left: auto;
-            color: #ff9ae0;
-        }
-
-        /* Footer */
-        .footer {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 2px dotted #bc9aff;
-        }
-        .owner {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .owner .avatar {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #b27cf0, #7a4fd0);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            font-size: 1.4rem;
-            box-shadow: 0 6px 14px #c7abff;
-        }
-        .owner .info h4 {
-            font-size: 1.4rem;
-            font-weight: 600;
-            letter-spacing: -0.5px;
-            color: #2b0652;
-            animation: glitch 3s infinite step-start 1s;
-        }
-        .owner .info p {
-            font-size: 0.9rem;
-            color: #4a2b77;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(255, 255, 255, 0.6);
-            padding: 4px 14px;
-            border-radius: 40px;
-            border: 1px solid #bba2f0;
-            backdrop-filter: blur(2px);
-        }
-        .zalo {
-            background: rgba(235, 220, 255, 0.7);
-            backdrop-filter: blur(8px);
-            padding: 12px 24px;
-            border-radius: 60px;
-            border: 1.5px solid #b57aed;
-            font-weight: 560;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 4px 15px #deb8ff;
-            transition: 0.2s;
-        }
-        .zalo i {
-            font-size: 28px;
-            color: #6a39b3;
-        }
-        .zalo a {
-            text-decoration: none;
-            color: #310b62;
-            font-size: 1.2rem;
-            letter-spacing: 0.5px;
-            background: rgba(255, 255, 255, 0.5);
-            padding: 5px 18px;
-            border-radius: 60px;
-            border: 1px solid white;
-        }
-        .zalo a:hover {
-            background: white;
-            color: #6a39b3;
-        }
-
-        /* Popup xác nhận iOS */
+        /* --- Footer & Popups --- */
+        .footer { display: flex; justify-content: space-between; align-items: center; margin-top: 25px; padding-top: 20px; border-top: 1px solid #dabcff; }
+        .owner { display: flex; align-items: center; gap: 10px; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; background: #7d3acb; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        
+        /* Overlay confirm */
         .confirm-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.2);
-            backdrop-filter: blur(8px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            visibility: hidden;
-            opacity: 0;
-            transition: 0.2s ease;
+            position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(10px);
+            display: flex; align-items: center; justify-content: center; z-index: 100;
+            visibility: hidden; opacity: 0; transition: 0.3s;
         }
-        .confirm-overlay.show {
-            visibility: visible;
-            opacity: 1;
-        }
-        .confirm-card {
-            background: rgba(255, 240, 255, 0.7);
-            backdrop-filter: blur(30px) saturate(200%);
-            -webkit-backdrop-filter: blur(30px) saturate(200%);
-            border: 2px solid rgba(255, 255, 255, 0.7);
-            border-radius: 48px;
-            padding: 32px 36px;
-            width: 340px;
-            box-shadow: 0 40px 60px rgba(128, 0, 255, 0.3), 0 10px 25px rgba(0,0,0,0.2), inset 0 2px 10px white;
-            color: #310564;
-            text-align: center;
-            transform: scale(0.9);
-            transition: 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.2);
-        }
-        .confirm-overlay.show .confirm-card {
-            transform: scale(1);
-        }
-        .confirm-card i {
-            font-size: 3.8rem;
-            background: linear-gradient(145deg, #ba7dff, #ffb3fe);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-bottom: 16px;
-        }
-        .confirm-card h2 {
-            font-weight: 600;
-            font-size: 1.9rem;
-            margin-bottom: 8px;
-        }
-        .confirm-card p {
-            font-size: 1.2rem;
-            opacity: 0.9;
-            margin-bottom: 30px;
-            background: rgba(255, 255, 255, 0.3);
-            padding: 10px 0;
-            border-radius: 60px;
-        }
-        .confirm-actions {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-        }
-        .confirm-btn {
-            border: none;
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
-            padding: 14px 30px;
-            border-radius: 60px;
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: #3d0f73;
-            border: 1px solid white;
-            cursor: pointer;
-            transition: 0.2s;
-            box-shadow: 0 6px 14px rgba(125, 40, 215, 0.3);
-            flex: 1;
-        }
-        .confirm-btn.cancel {
-            background: rgba(255, 220, 240, 0.6);
-            color: #5b2680;
-        }
-        .confirm-btn.confirm {
-            background: #b77aff;
-            color: white;
-            border: 1px solid #f1dcff;
-        }
-        .confirm-btn:hover {
-            transform: scale(1.04);
-            background: white;
-            color: #6a1fba;
-        }
+        .confirm-overlay.show { visibility: visible; opacity: 1; }
+        .confirm-card { background: white; padding: 30px; border-radius: 35px; width: 320px; text-align: center; transform: scale(0.8); transition: 0.3s; }
+        .confirm-overlay.show .confirm-card { transform: scale(1); }
+        .c-btns { display: flex; gap: 10px; margin-top: 20px; }
+        .btn { flex: 1; padding: 12px; border-radius: 15px; border: none; cursor: pointer; font-weight: bold; }
+        .btn-ok { background: #7d3acb; color: white; }
 
-        /* Popup hoàn thành liquid glass (giữ lại) */
-        .popup-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: transparent;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            pointer-events: none;
-            z-index: 1000;
-            visibility: hidden;
-        }
-        .popup-liquid {
-            background: rgba(255, 240, 255, 0.6);
-            backdrop-filter: blur(24px) saturate(200%);
-            -webkit-backdrop-filter: blur(24px) saturate(200%);
-            border: 2px solid rgba(220, 170, 255, 0.7);
-            border-radius: 50px;
-            padding: 28px 50px;
-            box-shadow: 0 30px 50px rgba(155, 80, 255, 0.4), inset 0 2px 6px white;
-            color: #2d0759;
-            font-weight: 550;
-            font-size: 2rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            pointer-events: none;
-        }
-        .popup-overlay.show {
-            visibility: visible;
-        }
-        .popup-overlay.show .popup-liquid {
-            animation: liquidPop 0.5s ease forwards;
-        }
-
-        /* ripple */
-        .ripple-effect {
-            position: absolute;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(230, 200, 255, 0.7) 0%, rgba(180, 130, 255, 0.2) 80%);
-            transform: scale(0);
-            animation: ripple 0.5s ease-out;
-            pointer-events: none;
-            z-index: 10;
-        }
-        @keyframes ripple {
-            0% { transform: scale(0); opacity: 0.6; }
-            100% { transform: scale(5); opacity: 0; }
-        }
-
-        @media (max-width: 550px) {
-            .panel { padding: 20px; }
-            .footer { flex-direction: column; align-items: flex-start; gap: 15px; }
-            .zalo { width: 100%; justify-content: center; }
-        }
+        @keyframes appear { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
-    <div class="app">
-        <div class="panel">
-            <div class="header">
-                <i class="fa-solid fa-terminal" style="background: linear-gradient(145deg,#8a4bf3,#c48aff); -webkit-background-clip:text; background-clip:text; color:transparent;"></i>
-                <h1>opt panel</h1>
-                <div class="prompt">
-                    <i class="fa-regular fa-circle"></i> quocdat@hackintosh ~ %
+
+    <div class="panel">
+        <div class="header">
+            <i class="fa-solid fa-microchip" style="color: #7d3acb; font-size: 24px;"></i>
+            <h1>QuocDat Opt</h1>
+            <div class="prompt">root@system:~#</div>
+        </div>
+
+        <div class="optimize-grid">
+            <div class="opt-card" data-task="CLEAN">
+                <i class="fa-solid fa-broom"></i>
+                <h3>Dọn rác</h3>
+            </div>
+            <div class="opt-card" data-task="BOOST">
+                <i class="fa-solid fa-bolt"></i>
+                <h3>Tối ưu Game</h3>
+            </div>
+            <div class="opt-card" data-task="SECURITY">
+                <i class="fa-solid fa-shield-virus"></i>
+                <h3>Bảo mật</h3>
+            </div>
+        </div>
+
+        <div class="progress-container" id="pContainer">
+            <div class="progress-bar" id="pBar"></div>
+        </div>
+
+        <div class="terminal-container">
+            <div class="log-console" id="console">
+                <div class="log-line">
+                    <span class="ts">[INFO]</span>
+                    <span class="msg" style="color: #aaa;">Hệ thống sẵn sàng. Vui lòng chọn chức năng...</span>
                 </div>
             </div>
+        </div>
 
-            <!-- 3 chức năng tối ưu -->
-            <div class="optimize-grid">
-                <div class="opt-card" id="opt1" data-opt="clean">
-                    <i class="fa-solid fa-broom"></i>
-                    <h3>Dọn rác</h3>
-                    <p>disk cleanup</p>
-                </div>
-                <div class="opt-card" id="opt2" data-opt="boost">
-                    <i class="fa-solid fa-gauge-high"></i>
-                    <h3>Tăng tốc</h3>
-                    <p>memory boost</p>
-                </div>
-                <div class="opt-card" id="opt3" data-opt="startup">
-                    <i class="fa-solid fa-rocket"></i>
-                    <h3>Khởi động</h3>
-                    <p>startup optimizer</p>
-                </div>
+        <div class="footer">
+            <div class="owner">
+                <div class="avatar">QD</div>
+                <div><strong>Quoc Dat</strong><br><small>Developer</small></div>
             </div>
+            <button class="btn btn-ok" style="max-width: 120px;">Liên hệ</button>
+        </div>
+    </div>
 
-            <!-- Thanh tiến trình (ẩn ban đầu) -->
-            <div class="progress-container" id="progressContainer">
-                <div class="progress-bar" id="progressBar"></div>
+    <div class="confirm-overlay" id="confirmOverlay">
+        <div class="confirm-card">
+            <h2 id="confirmTitle">Xác nhận</h2>
+            <p id="confirmDesc" style="margin-top: 10px; color: #666;">Bạn có chắc chắn muốn thực hiện hành động này?</p>
+            <div class="c-btns">
+                <button class="btn" onclick="closeConfirm()">Hủy</button>
+                <button class="btn btn-ok" id="btnGo">Thực thi</button>
             </div>
+        </div>
+    </div>
 
-            <!-- Bảng chương trình kiểu macOS + CMD log game -->
-            <div class="program-section">
-                <div class="program-label">
-                    <i class="fa-brands fa-apple"></i>
-                    <span>chương trình · CMD game</span>
-                    <i class="fa-regular fa-square" style="margin-left:auto; opacity:0.5;"></i>
-                </div>
-                <div class="mac-dock">
-                    <div class="dock-item">
-                        <i class="fa-solid fa-folder-open"></i>
-                        <span>Finder</span>
-                    </div>
-                    <div class="dock-item">
-                        <i class="fa-solid fa-terminal"></i>
-                        <span>Terminal</span>
-                    </div>
-                    <div class="dock-item">
-                        <i class="fa-solid fa-chart-simple"></i>
-                        <span>Activity</span>
-                    </div>
-                    <div class="dock-item">
-                        <i class="fa-solid fa
+    <script>
+        const payloads = [
+            { m: "Accessing kernel memory...", s: "EXEC", c: "#00ff41" },
+            { m: "Clearing cache at 0x884F...", s: "OK", c: "#00ff41" },
+            { m: "Warning: Low entropy detected.", s: "WARN", c: "#ffff00" },
+            { m: "Deleting temp files: 1.4GB", s: "OK", c: "#00ff41" },
+            { m: "Optimizing GPU clock...", s: "DONE", c: "#00ff41" },
+            { m: "Establishing secure link...", s: "SECURE", c: "#00ff41" },
+            { m: "Error: Sector 7 blocked.", s: "FAIL", c: "#ff0044" },
+            { m: "Retrying bypass logic...", s: "RETRY", c: "#ffff00" },
+            { m: "Process prioritized (PID: 409).", s: "OK", c: "#00ff41" },
+            { m: "Garbage collection success.", s: "OK", c: "#00ff41" },
+            { m: "Finalizing optimization...", s: "EXEC", c: "#00ff41" }
+        ];
+
+        const logConsole = document.getElementById('console');
+        const overlay = document.getElementById('confirmOverlay');
+        let currentTask = "";
+
+        // Mở confirm
+        document.querySelectorAll('.opt-card').forEach(card => {
+            card.onclick = () => {
+                currentTask = card.getAttribute('data-task');
+                document.getElementById('confirmTitle').innerText = card.querySelector('h3').innerText;
+                overlay.classList.add('show');
+            }
+        });
+
+        function closeConfirm() { overlay.classList.remove('show'); }
+
+        // Logic chính
+        document.getElementById('btnGo').onclick = () => {
+            closeConfirm();
+            document.getElementById('pContainer').style.display = 'block';
+            logConsole.innerHTML = '';
+            
+            let lines = 0;
+            const maxLines = 15;
+            
+            const run = setInterval(() => {
+                if (lines >= maxLines) {
+                    clearInterval(run);
+                    addLog("TẤT CẢ TÁC VỤ HOÀN TẤT!", "SUCCESS", "#ffff00");
+                    return;
+                }
+
+                const data = payloads[Math.floor(Math.random() * payloads.length)];
+                addLog(data.m, data.s, data.c);
+                
+                // Cập nhật progress bar
+                document.getElementById('pBar').style.width = ((lines / maxLines) * 100) + "%";
+                lines++;
+            }, 150);
+        };
+
+        function addLog(message, status, color) {
+            const time = new Date().toLocaleTimeString('en-GB', { hour12: false });
+            const line = document.createElement('div');
+            line.className = 'log-line';
+            line.innerHTML = `
+                <span class="ts">[${time}]</span>
+                <span class="msg" style="color: ${color}">${message}</span>
+                <span class="stt" style="color: ${color}">[${status}]</span>
+            `;
+            logConsole.appendChild(line);
+            
+            // AUTO SCROLL
+            logConsole.scrollTop = logConsole.scrollHeight;
+        }
+    </script>
+</body>
+</html>
