@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>tối ưu panel · quocdat</title>
-    <!-- Font Awesome 6 (free) -->
+    <title>tối ưu panel · quocdat · liquid glass</title>
+    <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
@@ -20,7 +20,6 @@
             align-items: center;
             justify-content: center;
             background: radial-gradient(circle at 30% 30%, #f0eaff, #d9c9ff);
-            /* lưới màn hình kiểu hacker nhẹ */
             background-image: 
                 repeating-linear-gradient(0deg, rgba(138, 43, 226, 0.03) 0px, rgba(138, 43, 226, 0.03) 2px, transparent 2px, transparent 8px),
                 radial-gradient(circle at 30% 30%, #f0eaff, #d9c9ff);
@@ -28,7 +27,6 @@
             position: relative;
         }
 
-        /* hiệu ứng chữ glitch cho tên hacker */
         @keyframes glitch {
             0% { text-shadow: 2px 0 #ff00c1, -2px 0 #00fff9; }
             20% { text-shadow: -2px 0 #ff00c1, 2px 0 #00fff9; }
@@ -38,19 +36,23 @@
             100% { text-shadow: -2px 0 #ff00c1, 2px 0 #00fff9; }
         }
 
-        /* hiệu ứng fade + scale khi vào app */
         @keyframes appear {
             0% { opacity: 0; transform: scale(0.96) translateY(20px); backdrop-filter: blur(0px); }
             100% { opacity: 1; transform: scale(1) translateY(0); backdrop-filter: blur(16px); }
         }
 
+        @keyframes liquidPop {
+            0% { opacity: 0; transform: scale(0.8) translateY(20px); backdrop-filter: blur(0px); }
+            50% { opacity: 1; transform: scale(1.05) translateY(0); backdrop-filter: blur(16px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); backdrop-filter: blur(16px); }
+        }
+
         .app {
             width: 100%;
-            max-width: 720px;
+            max-width: 760px;
             animation: appear 0.6s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
         }
 
-        /* panel chính – kính mờ iOS + tím sáng */
         .panel {
             background: rgba(255, 245, 255, 0.65);
             backdrop-filter: blur(16px) saturate(180%);
@@ -60,9 +62,9 @@
             box-shadow: 0 20px 40px rgba(105, 50, 180, 0.25), 0 8px 20px rgba(0, 0, 0, 0.1), inset 0 1px 2px rgba(255, 255, 255, 0.8);
             padding: 32px 28px;
             color: #2d1b4e;
+            position: relative;
         }
 
-        /* header kiểu terminal nhẹ */
         .header {
             display: flex;
             align-items: center;
@@ -104,11 +106,11 @@
             color: #5e2a9c;
         }
 
-        /* 3 chức năng tối ưu */
+        /* 3 chức năng */
         .optimize-grid {
             display: flex;
             gap: 18px;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
             flex-wrap: wrap;
             justify-content: center;
         }
@@ -156,13 +158,49 @@
             text-transform: uppercase;
         }
 
-        /* Bảng chương trình kiểu macOS (dock thu nhỏ) */
+        /* Thanh tiến trình */
+        .progress-container {
+            margin: 20px 0 20px;
+            background: rgba(230, 210, 255, 0.3);
+            border-radius: 60px;
+            height: 20px;
+            border: 1px solid #c19eff;
+            backdrop-filter: blur(4px);
+            box-shadow: inset 0 1px 6px rgba(90, 40, 140, 0.2);
+            overflow: hidden;
+            display: none; /* ẩn ban đầu */
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #b57aff, #e2b0ff, #c285ff);
+            border-radius: 60px;
+            box-shadow: 0 0 12px #d9b0ff;
+            transition: width 0.1s linear;
+            position: relative;
+        }
+        .progress-bar::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+            animation: shimmer 1.2s infinite;
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Bảng chương trình kiểu macOS */
         .program-section {
             background: rgba(250, 240, 255, 0.4);
             backdrop-filter: blur(20px);
             border-radius: 48px;
             padding: 22px 24px;
-            margin-bottom: 40px;
+            margin-bottom: 25px;
             border: 1px solid rgba(205, 155, 255, 0.5);
             box-shadow: inset 0 1px 5px rgba(255, 255, 255, 0.7), 0 10px 15px -6px #bba4e0;
         }
@@ -192,6 +230,7 @@
             flex-wrap: wrap;
             justify-content: space-evenly;
             gap: 15px 5px;
+            margin-bottom: 20px;
         }
         .dock-item {
             display: flex;
@@ -226,7 +265,40 @@
             border-radius: 30px;
         }
 
-        /* footer thông tin tác giả + zalo */
+        /* Khu vực log giả */
+        .log-console {
+            background: rgba(20, 5, 30, 0.2);
+            backdrop-filter: blur(4px);
+            border: 1px solid #cbb2ff;
+            border-radius: 36px;
+            padding: 16px 18px;
+            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: #3c1d6b;
+            max-height: 140px;
+            overflow-y: auto;
+            box-shadow: inset 0 0 12px #decbff;
+        }
+        .log-line {
+            padding: 4px 0;
+            border-bottom: 0.5px dashed rgba(150, 80, 255, 0.2);
+            display: flex;
+            gap: 10px;
+        }
+        .log-line .timestamp {
+            color: #8a4ed3;
+            min-width: 65px;
+        }
+        .log-line .message {
+            color: #281447;
+            word-break: break-word;
+        }
+        .log-line .status {
+            margin-left: auto;
+            color: #aa7cff;
+        }
+
+        /* Footer */
         .footer {
             display: flex;
             flex-wrap: wrap;
@@ -305,20 +377,79 @@
             color: #6a39b3;
         }
 
-        /* hiệu ứng ripple khi bấm */
+        /* Popup liquid glass */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            z-index: 1000;
+            visibility: hidden;
+        }
+        .popup-liquid {
+            background: rgba(255, 240, 255, 0.6);
+            backdrop-filter: blur(24px) saturate(200%);
+            -webkit-backdrop-filter: blur(24px) saturate(200%);
+            border: 2px solid rgba(220, 170, 255, 0.7);
+            border-radius: 50px;
+            padding: 28px 50px;
+            box-shadow: 0 30px 50px rgba(155, 80, 255, 0.4), 0 10px 25px rgba(0,0,0,0.2), inset 0 2px 6px white;
+            color: #2d0759;
+            font-weight: 550;
+            font-size: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            transform: scale(0.9);
+            transition: all 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            pointer-events: none;
+        }
+        .popup-liquid i {
+            font-size: 3.5rem;
+            background: linear-gradient(145deg, #b57aff, #ffb3fe);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            filter: drop-shadow(0 8px 12px #deaaff);
+        }
+        .popup-liquid span {
+            background: rgba(255, 255, 255, 0.4);
+            padding: 8px 28px;
+            border-radius: 60px;
+            font-size: 1.3rem;
+            color: #2f0759;
+        }
+        .popup-overlay.show {
+            visibility: visible;
+            pointer-events: none;
+        }
+        .popup-overlay.show .popup-liquid {
+            animation: liquidPop 0.5s ease forwards;
+        }
+
+        /* ripple */
         .ripple-effect {
             position: absolute;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(200, 150, 255, 0.6) 0%, rgba(180, 130, 255, 0.2) 80%);
+            background: radial-gradient(circle, rgba(230, 200, 255, 0.7) 0%, rgba(180, 130, 255, 0.2) 80%);
             transform: scale(0);
-            animation: ripple 0.5s linear;
+            animation: ripple 0.5s ease-out;
             pointer-events: none;
+            z-index: 10;
         }
         @keyframes ripple {
-            to { transform: scale(6); opacity: 0; }
+            0% { transform: scale(0); opacity: 0.6; }
+            100% { transform: scale(5); opacity: 0; }
         }
 
-        /* media query nhỏ */
         @media (max-width: 550px) {
             .panel { padding: 20px; }
             .footer { flex-direction: column; align-items: flex-start; gap: 15px; }
@@ -329,8 +460,6 @@
 <body>
     <div class="app">
         <div class="panel">
-
-            <!-- header: hacker + tên tác giả xuất hiện ở góc -->
             <div class="header">
                 <i class="fa-solid fa-terminal" style="background: linear-gradient(145deg,#8a4bf3,#c48aff); -webkit-background-clip:text; background-clip:text; color:transparent;"></i>
                 <h1>opt panel</h1>
@@ -339,30 +468,35 @@
                 </div>
             </div>
 
-            <!-- 3 chức năng tối ưu máy (click có ripple) -->
+            <!-- 3 chức năng tối ưu -->
             <div class="optimize-grid">
-                <div class="opt-card" id="opt1">
+                <div class="opt-card" id="opt1" data-opt="clean">
                     <i class="fa-solid fa-broom"></i>
                     <h3>Dọn rác</h3>
                     <p>disk cleanup</p>
                 </div>
-                <div class="opt-card" id="opt2">
+                <div class="opt-card" id="opt2" data-opt="boost">
                     <i class="fa-solid fa-gauge-high"></i>
-                    <h3>Tăng tốc</h3>
-                    <p>memory boost</p>
+                    <h3>Support HeadLock</h3>
+                    <p>Hỗ Trợ kéo tâm</p>
                 </div>
-                <div class="opt-card" id="opt3">
+                <div class="opt-card" id="opt3" data-opt="startup">
                     <i class="fa-solid fa-rocket"></i>
                     <h3>Khởi động</h3>
                     <p>startup optimizer</p>
                 </div>
             </div>
 
-            <!-- Bảng chương trình kiểu macOS (dock style) -->
+            <!-- Thanh tiến trình (ẩn ban đầu) -->
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+
+            <!-- Bảng chương trình kiểu macOS + log giả -->
             <div class="program-section">
                 <div class="program-label">
                     <i class="fa-brands fa-apple"></i>
-                    <span>chương trình</span>
+                    <span>chương trình · log</span>
                     <i class="fa-regular fa-square" style="margin-left:auto; opacity:0.5;"></i>
                 </div>
                 <div class="mac-dock">
@@ -387,13 +521,14 @@
                         <span>Settings</span>
                     </div>
                 </div>
-                <!-- dòng trạng thái giống mac (hacker) -->
-                <div style="display:flex; justify-content:flex-end; margin-top:12px; font-size:0.7rem; font-family:monospace; color:#794bb5;">
-                    <span>>_ 9 processes running</span>
+                <!-- Khu vực log giả (sẽ được cập nhật động) -->
+                <div class="log-console" id="logConsole">
+                    <div class="log-line"><span class="timestamp">[10:15:42]</span><span class="message">system idle</span><span class="status">⚡</span></div>
+                    <div class="log-line"><span class="timestamp">[10:15:45]</span><span class="message">ready for task</span><span class="status">⏳</span></div>
                 </div>
             </div>
 
-            <!-- Footer: giới thiệu tác giả và zalo -->
+            <!-- Footer thông tin tác giả và Zalo -->
             <div class="footer">
                 <div class="owner">
                     <div class="avatar">Q</div>
@@ -409,7 +544,7 @@
                 </div>
             </div>
 
-            <!-- dòng chữ nhỏ kiểu hacker (ẩn hiệu ứng) -->
+            <!-- Dòng chữ hacker -->
             <div style="text-align:center; margin-top: 18px; font-size:0.7rem; color:#ba9cf0; font-family: monospace; letter-spacing:2px;">
                 <i class="fa-regular fa-keyboard"></i> --==[ init system v.9.2 ]==-- 
                 <span style="background:#c7adff20; padding:3px 8px; border-radius: 30px; margin-left: 6px;">#tối ưu</span>
@@ -417,91 +552,18 @@
         </div>
     </div>
 
-    <!-- hiệu ứng bấm ripple (JavaScript) -->
+    <!-- Popup thông báo hoàn thành (liquid glass) -->
+    <div class="popup-overlay" id="popupOverlay">
+        <div class="popup-liquid">
+            <i class="fa-regular fa-circle-check"></i>
+            <span>Hoàn tất tối ưu</span>
+        </div>
+    </div>
+
     <script>
         (function() {
-            // tạo hiệu ứng gợn sóng khi click vào các thẻ .opt-card
-            const cards = document.querySelectorAll('.opt-card');
+            // ripple effect cho các card
+            const cards = document.querySelectorAll('.opt-card, .dock-item');
             cards.forEach(card => {
                 card.addEventListener('click', function(e) {
-                    // tạo phần tử ripple
-                    const ripple = document.createElement('span');
-                    ripple.classList.add('ripple-effect');
-                    
-                    // vị trí click trong card
-                    const rect = card.getBoundingClientRect();
-                    const size = Math.max(rect.width, rect.height);
-                    ripple.style.width = ripple.style.height = size + 'px';
-                    ripple.style.left = (e.clientX - rect.left - size/2) + 'px';
-                    ripple.style.top = (e.clientY - rect.top - size/2) + 'px';
-                    
-                    // style để ripple nằm trong card
-                    ripple.style.position = 'absolute';
-                    ripple.style.backgroundColor = 'transparent'; // màu đã xử lý qua radial-gradient trong class
-                    
-                    // đảm bảo card có position relative (đã có sẵn .opt-card {position: relative} )
-                    card.appendChild(ripple);
-                    
-                    // xóa ripple sau khi animation kết thúc
-                    setTimeout(() => {
-                        ripple.remove();
-                    }, 500);
-                });
-            });
-
-            // thêm hiệu ứng riêng cho các dock-item (không bắt buộc nhưng vui)
-            const dockItems = document.querySelectorAll('.dock-item');
-            dockItems.forEach(item => {
-                item.addEventListener('click', function(e) {
-                    const ripple = document.createElement('span');
-                    ripple.classList.add('ripple-effect');
-                    const rect = item.getBoundingClientRect();
-                    const size = Math.max(rect.width, rect.height);
-                    ripple.style.width = ripple.style.height = size + 'px';
-                    ripple.style.left = (e.clientX - rect.left - size/2) + 'px';
-                    ripple.style.top = (e.clientY - rect.top - size/2) + 'px';
-                    ripple.style.position = 'absolute';
-                    // item mặc định không relative, cần set relative
-                    item.style.position = 'relative';
-                    item.appendChild(ripple);
-                    setTimeout(() => ripple.remove(), 500);
-                });
-            });
-        })();
-    </script>
-
-    <!-- thêm style động cho ripple (đã có class nhưng đảm bảo) -->
-    <style>
-        /* đảm bảo card có relative */
-        .opt-card, .dock-item {
-            position: relative;
-            overflow: hidden;
-        }
-        .ripple-effect {
-            position: absolute;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(230, 200, 255, 0.7) 0%, rgba(180, 130, 255, 0.2) 80%);
-            transform: scale(0);
-            animation: ripple 0.5s ease-out;
-            pointer-events: none;
-            z-index: 10;
-        }
-        @keyframes ripple {
-            0% { transform: scale(0); opacity: 0.6; }
-            100% { transform: scale(5); opacity: 0; }
-        }
-        /* tối ưu hiển thị số zalo */
-        .zalo a {
-            transition: 0.2s;
-        }
-        .zalo a:hover {
-            background: #f0e4ff;
-            transform: scale(1.02);
-        }
-        /* hiệu ứng bổ sung cho tên quocdat */
-        .owner .info h4:hover {
-            animation: glitch 0.6s infinite;
-        }
-    </style>
-</body>
-</html>
+                    const ripple = do
