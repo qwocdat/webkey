@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Admin - Quản lý App</title>
+  <title>Admin - Quản lý App Cao Cấp</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -18,19 +18,34 @@
       justify-content: center;
       padding: 20px;
     }
-    .admin-container { max-width: 700px; width: 100%; }
+    .admin-container { max-width: 750px; width: 100%; }
     .glass {
       background: rgba(28,28,30,0.65);
       backdrop-filter: blur(24px);
       border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 28px;
-      padding: 20px;
+      border-radius: 24px;
+      padding: 24px;
       margin-bottom: 16px;
     }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .stat-box {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 16px;
+      padding: 16px;
+      text-align: center;
+    }
+    .stat-box p { font-size: 13px; color: rgba(255,255,255,0.5); }
+    .stat-box h2 { font-size: 24px; font-weight: 700; margin-top: 4px; }
     .btn {
       background: rgba(255,255,255,0.08);
       border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 16px;
+      border-radius: 14px;
       padding: 12px 20px;
       color: white;
       font-weight: 600;
@@ -40,60 +55,89 @@
       margin-top: 8px;
     }
     .btn-primary { background: white; color: black; border: none; }
-    .btn-danger { background: rgba(255,69,58,0.15); border-color: rgba(255,69,58,0.3); }
-    .btn:active { transform: scale(0.96); }
-    input {
+    .btn-danger { background: rgba(255,69,58,0.15); border-color: rgba(255,69,58,0.3); color: #ff453a; }
+    .btn:active { transform: scale(0.97); }
+    input, textarea {
       background: rgba(255,255,255,0.05);
       border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 14px;
-      padding: 14px;
+      border-radius: 12px;
+      padding: 12px;
       color: white;
       width: 100%;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       outline: none;
+      font-family: inherit;
     }
+    textarea { height: 70px; resize: none; }
     .app-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 12px;
+      padding: 14px;
       background: rgba(255,255,255,0.02);
-      border-radius: 18px;
-      margin-bottom: 8px;
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: 16px;
+      margin-bottom: 10px;
     }
-    .app-row img { width: 40px; height: 40px; border-radius: 12px; margin-right: 12px; }
+    .app-row img { width: 46px; height: 46px; border-radius: 12px; margin-right: 14px; object-fit: cover; }
     .flex { display: flex; align-items: center; }
     .gap-1 { gap: 8px; }
-    .hidden { display: none; }
+    .hidden { display: none !important; }
+    label { display: block; font-size: 13px; color: rgba(255,255,255,0.6); margin-bottom: 6px; }
   </style>
 </head>
 <body>
   <div class="admin-container" id="admin-app">
-    <div class="glass">
-      <h2 style="font-weight:700;">🛠️ Admin - Thêm ứng dụng</h2>
-      <input type="file" id="icon-file" accept="image/*">
-      <img id="icon-preview" style="width:80px;height:80px;border-radius:20px;margin:10px 0;display:none;">
-      <input type="text" id="app-name" placeholder="Tên ứng dụng">
-      <input type="text" id="app-link" placeholder="Link tải về (URL)">
-      <input type="text" id="app-size" placeholder="Dung lượng (VD: 45 MB)">
-      <button class="btn btn-primary" id="upload-btn">📤 Đăng tải</button>
+    
+    <div class="stats-grid">
+      <div class="stat-box">
+        <p>📦 Tổng ứng dụng</p>
+        <h2 id="stat-total-apps">0</h2>
+      </div>
+      <div class="stat-box">
+        <p>📥 Tổng lượt tải về</p>
+        <h2 id="stat-total-downloads">0</h2>
+      </div>
     </div>
 
     <div class="glass">
-      <h3>📋 Danh sách ứng dụng</h3>
+      <h2 style="font-weight:700; margin-bottom: 16px;">🛠️ Thêm ứng dụng mới</h2>
+      
+      <label>Ảnh biểu tượng (Icon)</label>
+      <input type="file" id="icon-file" accept="image/*">
+      <img id="icon-preview" style="width:70px;height:70px;border-radius:16px;margin-bottom:12px;display:none;object-fit:cover;">
+      
+      <input type="text" id="app-name" placeholder="Tên ứng dụng (Bắt buộc)">
+      <input type="text" id="app-link" placeholder="Link tải về URL (Bắt buộc)">
+      
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <input type="text" id="app-size" placeholder="Dung lượng (VD: 45 MB)">
+        <input type="text" id="app-version" placeholder="Phiên bản (VD: v1.0.2)">
+      </div>
+      <textarea id="app-desc" placeholder="Giới thiệu ngắn về ứng dụng..."></textarea>
+      
+      <button class="btn btn-primary" id="upload-btn">📤 Đăng tải ứng dụng</button>
+    </div>
+
+    <div class="glass">
+      <h3 style="margin-bottom:16px;">📋 Danh sách ứng dụng hiện có</h3>
       <div id="app-list-admin"></div>
     </div>
 
-    <div id="edit-modal" class="glass hidden" style="position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:10; width:90%; max-width:500px;">
-      <h4>Chỉnh sửa</h4>
+    <div id="edit-modal" class="glass hidden" style="position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:100; width:90%; max-width:500px; box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
+      <h3 style="margin-bottom:12px;">✏️ Chỉnh sửa ứng dụng</h3>
       <input type="text" id="edit-name" placeholder="Tên">
       <input type="text" id="edit-link" placeholder="Link">
-      <input type="text" id="edit-size" placeholder="Dung lượng">
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <input type="text" id="edit-size" placeholder="Dung lượng">
+        <input type="text" id="edit-version" placeholder="Phiên bản">
+      </div>
+      <textarea id="edit-desc" placeholder="Giới thiệu..."></textarea>
+      <label>Thay đổi Icon mới (Không chọn nếu giữ nguyên)</label>
       <input type="file" id="edit-icon-file" accept="image/*">
-      <img id="edit-icon-preview" style="width:60px;height:60px;border-radius:16px;margin:8px 0;display:none;">
-      <div class="flex gap-1">
-        <button class="btn btn-primary" id="save-edit-btn">Lưu</button>
-        <button class="btn" id="cancel-edit-btn">Huỷ</button>
+      <div class="flex gap-1" style="margin-top:12px;">
+        <button class="btn btn-primary" id="save-edit-btn">Lưu cập nhật</button>
+        <button class="btn" id="cancel-edit-btn">Huỷ bỏ</button>
       </div>
     </div>
   </div>
@@ -112,122 +156,164 @@
 
     let currentEditId = null;
 
-    // Upload icon + tạo app
-    document.getElementById('upload-btn').addEventListener('click', async () => {
-      const iconFile = document.getElementById('icon-file').files[0];
-      const name = document.getElementById('app-name').value.trim();
-      const link = document.getElementById('app-link').value.trim();
-      const size = document.getElementById('app-size').value.trim();
-      if (!name || !link) return alert('Nhập tên và link tải!');
-
-      let iconUrl = '';
-      if (iconFile) {
-        const ref = storage.ref('app-icons/' + Date.now() + '_' + iconFile.name);
-        await ref.put(iconFile);
-        iconUrl = await ref.getDownloadURL();
-      }
-
-      const newAppRef = db.ref('apps').push();
-      await newAppRef.set({
-        name,
-        downloadLink: link,
-        icon: iconUrl,
-        size: size || ''
-      });
-
-      alert('Đã thêm!');
-      document.getElementById('app-name').value = '';
-      document.getElementById('app-link').value = '';
-      document.getElementById('app-size').value = '';
-      document.getElementById('icon-file').value = '';
-      document.getElementById('icon-preview').style.display = 'none';
-    });
-
-    // Preview icon khi chọn file
+    // Xem trước Icon khi chọn file
     document.getElementById('icon-file').addEventListener('change', function(e) {
       const file = e.target.files[0];
       if (file) {
         const reader = new FileReader();
         reader.onload = ev => {
-          document.getElementById('icon-preview').src = ev.target.result;
-          document.getElementById('icon-preview').style.display = 'block';
+          const preview = document.getElementById('icon-preview');
+          preview.src = ev.target.result;
+          preview.style.display = 'block';
         };
         reader.readAsDataURL(file);
       }
     });
 
-    // Danh sách app realtime
+    // Thêm app mới kèm bắt lỗi chi tiết
+    document.getElementById('upload-btn').addEventListener('click', async () => {
+      const btn = document.getElementById('upload-btn');
+      const iconFile = document.getElementById('icon-file').files[0];
+      const name = document.getElementById('app-name').value.trim();
+      const link = document.getElementById('app-link').value.trim();
+      const size = document.getElementById('app-size').value.trim();
+      const version = document.getElementById('app-version').value.trim();
+      const desc = document.getElementById('app-desc').value.trim();
+
+      if (!name || !link) return alert('Vui lòng nhập tên và link tải ứng dụng!');
+
+      btn.disabled = true;
+      btn.textContent = '⏳ Đang xử lý dữ liệu...';
+
+      try {
+        let iconUrl = 'https://via.placeholder.com/100'; // ảnh mặc định nếu không up ảnh
+        if (iconFile) {
+          const ref = storage.ref('app-icons/' + Date.now() + '_' + iconFile.name);
+          await ref.put(iconFile);
+          iconUrl = await ref.getDownloadURL();
+        }
+
+        const newAppRef = db.ref('apps').push();
+        await newAppRef.set({
+          name,
+          downloadLink: link,
+          icon: iconUrl,
+          size: size || 'N/A',
+          version: version || '1.0.0',
+          description: desc || 'Chưa có mô tả cho ứng dụng này.',
+          downloads: 0
+        });
+
+        alert('🎉 Đã thêm ứng dụng thành công!');
+        // Reset form
+        document.getElementById('app-name').value = '';
+        document.getElementById('app-link').value = '';
+        document.getElementById('app-size').value = '';
+        document.getElementById('app-version').value = '';
+        document.getElementById('app-desc').value = '';
+        document.getElementById('icon-file').value = '';
+        document.getElementById('icon-preview').style.display = 'none';
+
+      } catch (error) {
+        console.error(error);
+        alert('❌ LỖI UPLOAD: Thao tác thất bại! Hãy chắc chắn bạn đã cấu hình mở khóa Security Rules trong Firebase Storage tab Rules thành: allow read, write: if true;');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '📤 Đăng tải ứng dụng';
+      }
+    });
+
+    // Tải dữ liệu Realtime và tính toán Thống kê
     function loadAppList() {
       db.ref('apps').on('value', snap => {
         const apps = snap.val() || {};
         const container = document.getElementById('app-list-admin');
         container.innerHTML = '';
+        
+        let totalApps = 0;
+        let totalDownloads = 0;
+
         Object.entries(apps).forEach(([id, app]) => {
+          totalApps++;
+          totalDownloads += (app.downloads || 0);
+
           const row = document.createElement('div');
           row.className = 'app-row';
           row.innerHTML = `
-            <div class="flex" style="flex:1;">
-              <img src="${app.icon || ''}" alt="icon">
-              <div>
-                <p style="font-weight:600;">${app.name}</p>
-                <p style="font-size:13px; color:rgba(255,255,255,0.5);">${app.size || 'N/A'}</p>
+            <div class="flex" style="flex:1; overflow:hidden;">
+              <img src="${app.icon}" alt="icon">
+              <div style="overflow:hidden;">
+                <p style="font-weight:600; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">${app.name} <span style="font-size:12px;color:#007fff;">(${app.version || '1.0.0'})</span></p>
+                <p style="font-size:12px; color:rgba(255,255,255,0.5);">Dung lượng: ${app.size} | 📥 Lượt tải: ${app.downloads || 0}</p>
               </div>
             </div>
-            <div class="flex gap-1">
-              <button class="btn" style="width:auto; padding:8px 12px;" data-edit="${id}">✏️</button>
-              <button class="btn btn-danger" style="width:auto; padding:8px 12px;" data-delete="${id}">🗑</button>
+            <div class="flex gap-1" style="flex-shrink:0;">
+              <button class="btn" style="width:auto; padding:8px 12px; margin:0;" data-edit="${id}">✏️</button>
+              <button class="btn btn-danger" style="width:auto; padding:8px 12px; margin:0;" data-delete="${id}">🗑</button>
             </div>
           `;
           container.appendChild(row);
         });
 
-        // Gắn sự kiện edit/delete
+        // Cập nhật lên widget thống kê
+        document.getElementById('stat-total-apps').textContent = totalApps;
+        document.getElementById('stat-total-downloads').textContent = totalDownloads;
+
+        // Sự kiện xóa và sửa
         container.querySelectorAll('[data-edit]').forEach(btn => {
           btn.addEventListener('click', (e) => {
-            const id = e.target.dataset.edit;
+            const id = e.currentTarget.dataset.edit;
             const app = apps[id];
             currentEditId = id;
             document.getElementById('edit-name').value = app.name;
             document.getElementById('edit-link').value = app.downloadLink;
             document.getElementById('edit-size').value = app.size || '';
-            document.getElementById('edit-icon-preview').style.display = 'none';
+            document.getElementById('edit-version').value = app.version || '';
+            document.getElementById('edit-desc').value = app.description || '';
             document.getElementById('edit-modal').classList.remove('hidden');
           });
         });
+
         container.querySelectorAll('[data-delete]').forEach(btn => {
           btn.addEventListener('click', async (e) => {
-            if (confirm('Xoá ứng dụng này?')) {
-              await db.ref('apps/' + e.target.dataset.delete).remove();
+            if (confirm('Bạn chắc chắn có muốn xoá ứng dụng này không?')) {
+              await db.ref('apps/' + e.currentTarget.dataset.delete).remove();
             }
           });
         });
       });
     }
 
-    loadAppList();
-
-    // Edit modal
+    // Modal điều khiển hủy / lưu sửa
     document.getElementById('cancel-edit-btn').addEventListener('click', () => {
       document.getElementById('edit-modal').classList.add('hidden');
     });
+
     document.getElementById('save-edit-btn').addEventListener('click', async () => {
       if (!currentEditId) return;
       const name = document.getElementById('edit-name').value.trim();
       const link = document.getElementById('edit-link').value.trim();
       const size = document.getElementById('edit-size').value.trim();
+      const version = document.getElementById('edit-version').value.trim();
+      const desc = document.getElementById('edit-desc').value.trim();
       const iconFile = document.getElementById('edit-icon-file').files[0];
-      let iconUrl = undefined;
-      if (iconFile) {
-        const ref = storage.ref('app-icons/' + Date.now() + '_' + iconFile.name);
-        await ref.put(iconFile);
-        iconUrl = await ref.getDownloadURL();
+
+      try {
+        const updateData = { name, downloadLink: link, size, version, description: desc };
+        if (iconFile) {
+          const ref = storage.ref('app-icons/' + Date.now() + '_' + iconFile.name);
+          await ref.put(iconFile);
+          updateData.icon = await ref.getDownloadURL();
+        }
+        await db.ref('apps/' + currentEditId).update(updateData);
+        document.getElementById('edit-modal').classList.add('hidden');
+        alert('Đã cập nhật thông tin thành công!');
+      } catch(e) {
+        alert('Lỗi khi cập nhật dữ liệu!');
       }
-      const updateData = { name, downloadLink: link, size };
-      if (iconUrl) updateData.icon = iconUrl;
-      await db.ref('apps/' + currentEditId).update(updateData);
-      document.getElementById('edit-modal').classList.add('hidden');
-      alert('Đã cập nhật!');
     });
+
+    loadAppList();
   </script>
 </body>
 </html>
