@@ -24,59 +24,67 @@
     .code-box { background: rgba(255, 59, 48, 0.1); border: 2px dashed #ff3b30; padding: 15px; border-radius: 12px; font-size: 18px; font-weight: bold; color: #ff3b30; letter-spacing: 1px; margin: 20px 0; word-break: break-all; }
     .hidden { display: none !important; }
     
-    /* Timer & Captcha Box */
     .timer-box { background: rgba(255,0,0,0.1); border: 1px solid rgba(255,59,48,0.3); padding: 8px; border-radius: 10px; font-weight: bold; color: #ff3b30; margin-bottom: 15px; display: inline-block; font-size: 14px; }
     .captcha-box { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px; }
     
-    /* Progress Bar */
     .progress-container { width: 100%; background: rgba(255,255,255,0.1); border-radius: 10px; height: 18px; margin: 20px 0; overflow: hidden; position: relative; border: 1px solid rgba(255,59,48,0.3); }
     .progress-fill { height: 100%; background: linear-gradient(90deg, #ff3b30, #ff9800); width: 0%; transition: width 0.1s linear; box-shadow: 0 0 10px #ff3b30; }
     .progress-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 11px; font-weight: bold; color: white; text-shadow: 1px 1px 2px black; }
 
-    /* Màn hình hết hạn chặn click */
-    .expired-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); backdrop-filter: blur(5px); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
+    /* Màn hình lỗi / khóa chặn click */
+    .error-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); backdrop-filter: blur(8px); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; padding: 20px;}
+    .error-title { color: #ff3b30; font-size: 22px; font-weight: 700; margin-bottom: 10px; text-shadow: 0 0 15px rgba(255,59,48,0.6); }
+    .error-desc { font-size: 14px; color: #ccc; text-align: center; line-height: 1.5; }
   </style>
 </head>
 <body>
   <div class="glass">
     
+    <div id="error-screen" class="error-overlay hidden">
+      <h2 id="error-title" class="error-title">⛔ TRUY CẬP BỊ TỪ CHỐI</h2>
+      <p id="error-desc" class="error-desc">Phát hiện truy cập không hợp lệ.</p>
+      <a href="get-vip.html" class="btn" style="width: auto; padding: 10px 20px; font-size: 13px; margin-top: 20px;">🔄 Tải lại trang hợp lệ</a>
+    </div>
+
     <div id="unlock-section">
       <h2>🔒 Khóa VIP</h2>
       <p style="color: rgba(255,255,255,0.7); font-size: 14px; margin-bottom: 20px;">Bạn cần vượt qua một liên kết rút gọn để hệ thống cấp quyền tạo mã kích hoạt Tài khoản VIP.</p>
-      <a href="#" id="taplayma-btn" class="btn">🔗 Bấm vào đây để Vượt link</a>
+      <a href="#" id="taplayma-btn" class="btn disabled" style="opacity: 0.5; pointer-events: none;">⏳ Đang tạo liên kết an toàn...</a>
     </div>
 
     <div id="result-section" class="hidden">
       
-      <div id="expired-msg" class="expired-overlay hidden">
-        <h2 style="color: #ff3b30; font-size: 24px;">⏳ ĐÃ HẾT HẠN</h2>
-        <p style="font-size: 14px; color: #ccc;">Phiên tạo mã của bạn đã kết thúc.<br>Vui lòng vượt link lại từ đầu.</p>
-      </div>
-
-      <h2>🎉 Chúc mừng!</h2>
-      <div class="timer-box">⏱️ Web sẽ hết hạn sau: <span id="time-display">03:00</span></div>
-      
-      <div id="captcha-step" class="captcha-box">
-        <p style="font-size: 13px; color: #ccc; margin-bottom: 8px;">🤖 <b>Bảo mật chống Bot:</b> Hãy trả lời câu hỏi bên dưới để tiếp tục.</p>
-        <h3 id="captcha-question" style="color: #ffc107; margin-bottom: 12px; font-size: 16px;">Đang tải câu hỏi...</h3>
-        <input type="text" id="captcha-answer" placeholder="Nhập câu trả lời của bạn">
-        <button class="btn" id="verify-captcha-btn" style="padding: 10px; font-size: 14px;">✅ Xác minh</button>
-      </div>
-
-      <div id="generate-step" class="hidden">
-        <p style="font-size: 14px; color: #ccc; margin-bottom: 15px;">Xác minh thành công! Bấm để lấy key.</p>
-        <button class="btn" id="start-gen-btn">⚙️ Khởi tạo Key VIP</button>
+      <div id="main-content-flow" class="hidden">
+        <h2>🎉 Chúc mừng!</h2>
+        <div class="timer-box">⏱️ Web sẽ hết hạn sau: <span id="time-display">03:00</span></div>
         
-        <div id="progress-wrapper" class="progress-container hidden">
-          <div id="progress-bar" class="progress-fill"></div>
-          <span id="progress-text" class="progress-text">0%</span>
+        <div id="captcha-step" class="captcha-box">
+          <p style="font-size: 13px; color: #ccc; margin-bottom: 8px;">🤖 <b>Bảo mật chống Bot:</b> Hãy trả lời câu hỏi bên dưới để tiếp tục.</p>
+          <h3 id="captcha-question" style="color: #ffc107; margin-bottom: 12px; font-size: 16px;">Đang tải câu hỏi...</h3>
+          <input type="text" id="captcha-answer" placeholder="Nhập câu trả lời">
+          <button class="btn" id="verify-captcha-btn" style="padding: 10px; font-size: 14px;">✅ Xác minh</button>
+        </div>
+
+        <div id="generate-step" class="hidden">
+          <p style="font-size: 14px; color: #ccc; margin-bottom: 15px;">Xác minh thành công! Bấm để lấy key.</p>
+          <button class="btn" id="start-gen-btn">⚙️ Khởi tạo Key VIP</button>
+          
+          <div id="progress-wrapper" class="progress-container hidden">
+            <div id="progress-bar" class="progress-fill"></div>
+            <span id="progress-text" class="progress-text">0%</span>
+          </div>
+        </div>
+
+        <div id="final-key-step" class="hidden">
+          <p style="font-size: 14px; color: #28a745; font-weight: bold;">Tạo mã thành công! Đã lưu hệ thống.</p>
+          <div id="code-display" class="code-box"></div>
+          <button class="btn" id="copy-btn">📋 Copy Mã VIP</button>
         </div>
       </div>
-
-      <div id="final-key-step" class="hidden">
-        <p style="font-size: 14px; color: #28a745; font-weight: bold;">Tạo mã thành công! Đã lưu hệ thống.</p>
-        <div id="code-display" class="code-box"></div>
-        <button class="btn" id="copy-btn">📋 Copy Mã VIP</button>
+      
+      <div id="verifying-loader">
+         <h3 style="color: #ffc107;">⏳ Đang xác thực phiên...</h3>
+         <p style="font-size: 12px; color: #aaa;">Vui lòng không đóng trang web.</p>
       </div>
 
     </div>
@@ -94,7 +102,7 @@
     const db = firebase.database();
     const taplaymaToken = "b5c38921-be67-4200-aa50-b136641033c2";
     
-    // Ngân hàng câu hỏi Captcha (Bạn có thể thêm tùy ý)
+    // Ngân hàng câu hỏi Captcha
     const puzzles = [
       { q: "Phép tính: 5 + 7 bằng mấy?", a: "12" },
       { q: "Phép tính: 10 trừ 3 bằng mấy?", a: "7" },
@@ -106,14 +114,79 @@
 
     let currentCaptchaAnswer = "";
     
+    // Đọc URL
     const urlParams = new URLSearchParams(window.location.search);
     const step = urlParams.get('step');
+    const sessionToken = urlParams.get('token'); // Lấy mã Token bảo mật từ URL
+
+    function triggerErrorScreen(title, desc) {
+      const screen = document.getElementById('error-screen');
+      document.getElementById('error-title').textContent = title;
+      document.getElementById('error-desc').innerHTML = desc;
+      screen.classList.remove('hidden');
+    }
 
     if (step === 'success') {
-      // ===== TRẠNG THÁI 2: ĐÃ VƯỢT LINK =====
+      // ===== TRẠNG THÁI 2: ĐÃ TRỞ VỀ TỪ TRANG VƯỢT LINK =====
       document.getElementById('unlock-section').classList.add('hidden');
       document.getElementById('result-section').classList.remove('hidden');
 
+      if (!sessionToken) {
+        // Lỗi: Truy cập ?step=success nhưng không có token (Do tự gõ tay)
+        triggerErrorScreen("⛔ GIAN LẬN PHÁT HIỆN", "Bạn chưa vượt qua hệ thống kiểm tra an toàn của chúng tôi.");
+      } else {
+        // KIỂM TRA TOKEN TRÊN FIREBASE
+        db.ref('sessions/' + sessionToken).once('value', snap => {
+          if (snap.exists() && snap.val().valid === true) {
+            
+            // 🔥 BƯỚC QUAN TRỌNG: ĐỐT CHÁY TOKEN NGAY LẬP TỨC ĐỂ KHÔNG AI DÙNG LẠI ĐƯỢC 🔥
+            db.ref('sessions/' + sessionToken).update({ valid: false });
+            
+            // Xóa chữ "Đang xác thực..." và hiển thị nội dung chính
+            document.getElementById('verifying-loader').classList.add('hidden');
+            document.getElementById('main-content-flow').classList.remove('hidden');
+
+            startSecureFlow(); // Kích hoạt UI (Captcha, Đồng hồ, Khởi tạo)
+            
+          } else {
+            // Lỗi: Có token nhưng đã bị sử dụng (hoặc fake)
+            triggerErrorScreen("⛔ LINK ĐÃ HẾT HẠN", "Liên kết này đã được sử dụng hoặc không tồn tại. Một liên kết vượt chỉ tạo được 1 key duy nhất!");
+          }
+        });
+      }
+    } else {
+      // ===== TRẠNG THÁI 1: CHƯA VƯỢT LINK (KHỞI TẠO TOKEN) =====
+      document.getElementById('unlock-section').classList.remove('hidden');
+      document.getElementById('result-section').classList.add('hidden');
+
+      const btn = document.getElementById('taplayma-btn');
+      
+      // Tạo mã Token mới ngẫu nhiên
+      const newToken = 'session-' + Math.random().toString(36).substr(2, 10);
+      
+      // Lưu Token lên Firebase để chuẩn bị đón người dùng về
+      db.ref('sessions/' + newToken).set({
+        valid: true,
+        createdAt: Date.now()
+      }).then(() => {
+        // Token đã lưu thành công -> Ghép link
+        let currentUrl = window.location.href.split('?')[0]; 
+        let destUrl = currentUrl + "?step=success&token=" + newToken;          
+        
+        btn.href = `https://api.taplayma.com/st?token=${taplaymaToken}&url=${encodeURIComponent(destUrl)}`;
+        
+        // Kích hoạt nút bấm
+        btn.textContent = "🔗 Bấm vào đây để Vượt link";
+        btn.style.opacity = "1";
+        btn.style.pointerEvents = "auto";
+        btn.classList.remove('disabled');
+      }).catch(e => {
+        alert("Lỗi kết nối Máy chủ, không thể khởi tạo link an toàn!");
+      });
+    }
+
+    // ====== HÀM CHẠY LOGIC CHÍNH KHI TOKEN ĐÃ ĐƯỢC CHẤP NHẬN ======
+    function startSecureFlow() {
       // 1. Khởi động bộ đếm 3 phút (180 giây)
       let timeLeft = 180;
       const timeDisplay = document.getElementById('time-display');
@@ -126,48 +199,45 @@
         
         if (timeLeft <= 0) {
           clearInterval(timerInterval);
-          document.getElementById('expired-msg').classList.remove('hidden'); // Khóa màn hình
+          triggerErrorScreen("⏳ ĐÃ HẾT HẠN", "Phiên tạo mã của bạn đã kết thúc do quá thời gian 3 phút.<br>Vui lòng vượt link lại từ đầu.");
         }
       }, 1000);
 
-      // 2. Tạo câu hỏi Captcha ngẫu nhiên
+      // 2. Tạo câu hỏi Captcha
       function loadCaptcha() {
         const randomPuzzle = puzzles[Math.floor(Math.random() * puzzles.length)];
         document.getElementById('captcha-question').textContent = randomPuzzle.q;
         currentCaptchaAnswer = randomPuzzle.a;
-        document.getElementById('captcha-answer').value = ""; // Xóa input cũ
+        document.getElementById('captcha-answer').value = ""; 
       }
       loadCaptcha();
 
-      // 3. Xử lý bấm Xác minh Captcha
+      // 3. Xử lý bấm Xác minh
       document.getElementById('verify-captcha-btn').addEventListener('click', () => {
         const userAnswer = document.getElementById('captcha-answer').value.trim().toLowerCase();
         
         if (userAnswer === currentCaptchaAnswer) {
-          // Đúng -> Ẩn captcha, hiện nút tạo key
           document.getElementById('captcha-step').classList.add('hidden');
           document.getElementById('generate-step').classList.remove('hidden');
         } else {
-          // Sai -> Báo lỗi và đổi câu hỏi khác cho khó lường
           alert("❌ Sai rồi! Bạn có phải là Robot không? Thử lại câu khác nhé.");
           loadCaptcha();
         }
       });
 
-      // 4. Xử lý thanh Loading và Tạo Key (Chỉ cho bấm 1 lần)
+      // 4. Xử lý thanh Loading và Tạo Key (1 lần duy nhất)
       document.getElementById('start-gen-btn').addEventListener('click', function() {
-        this.disabled = true; // Khóa nút ngay lập tức
-        this.classList.add('hidden'); // Ẩn nút đi cho gọn
+        this.disabled = true;
+        this.classList.add('hidden');
         
         const progressWrapper = document.getElementById('progress-wrapper');
         const progressBar = document.getElementById('progress-bar');
         const progressText = document.getElementById('progress-text');
-        progressWrapper.classList.remove('hidden'); // Hiện thanh load
+        progressWrapper.classList.remove('hidden');
         
         let loadPercent = 0;
-        // Chạy thanh load từ 0-100% trong khoảng 2.5 giây
         const loadInterval = setInterval(() => {
-          loadPercent += Math.floor(Math.random() * 5) + 1; // Nhích ngẫu nhiên cho thật
+          loadPercent += Math.floor(Math.random() * 5) + 1;
           if (loadPercent >= 100) loadPercent = 100;
           
           progressBar.style.width = loadPercent + '%';
@@ -175,12 +245,12 @@
           
           if (loadPercent === 100) {
             clearInterval(loadInterval);
-            generateAndSaveKey(); // Gọi hàm tạo key trên Firebase
+            generateAndSaveKey();
           }
         }, 100);
       });
 
-      // Hàm sinh mã và lưu Firebase
+      // Hàm sinh mã
       function generateAndSaveKey() {
         const randomStr = Math.random().toString(36).substring(2, 9).toLowerCase();
         const newCode = `vipuseractive-${randomStr}`;
@@ -189,28 +259,16 @@
           valid: true,
           createdAt: Date.now()
         }).then(() => {
-          // Thành công: Đổi giao diện sang bước cuối
           document.getElementById('generate-step').classList.add('hidden');
           document.getElementById('final-key-step').classList.remove('hidden');
           document.getElementById('code-display').textContent = newCode;
         }).catch(err => {
           alert('❌ Lỗi kết nối Máy chủ Firebase!');
-          console.error(err);
         });
       }
-
-    } else {
-      // ===== TRẠNG THÁI 1: YÊU CẦU VƯỢT LINK =====
-      document.getElementById('unlock-section').classList.remove('hidden');
-      document.getElementById('result-section').classList.add('hidden');
-
-      let currentUrl = window.location.href.split('?')[0]; 
-      let destUrl = currentUrl + "?step=success";          
-      
-      document.getElementById('taplayma-btn').href = `https://api.taplayma.com/st?token=${taplaymaToken}&url=${encodeURIComponent(destUrl)}`;
     }
 
-    // Chức năng Copy Mã (Nằm ngoài để hoạt động độc lập)
+    // Chức năng Copy Mã
     document.getElementById('copy-btn').addEventListener('click', function() {
       const code = document.getElementById('code-display').textContent;
       if(!code || code === '') return;
