@@ -2,243 +2,127 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>QuocDat Drive</title>
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
-  <!-- Firebase SDK -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>AppHub - Tải ứng dụng</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
-  <!-- QR Code -->
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * { margin:0; padding:0; box-sizing:border-box; }
     :root {
       --bg: #0a0a0a;
-      --surface: rgba(28, 28, 30, 0.65);
-      --border: rgba(255, 255, 255, 0.08);
+      --surface: rgba(28,28,30,0.65);
+      --border: rgba(255,255,255,0.08);
       --text: #fff;
-      --text-secondary: rgba(255,255,255,0.6);
-      --accent: #fff;
-      --glow: rgba(255,255,255,0.2);
       --radius: 28px;
-      --blur: 24px;
     }
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: 'Inter', sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
       display: flex;
       justify-content: center;
-      align-items: flex-start;
-      padding: 20px;
-      -webkit-tap-highlight-color: transparent;
-      -webkit-font-smoothing: antialiased;
+      padding: 16px;
     }
-    .app-container {
-      width: 100%;
-      max-width: 520px;
-      margin: 0 auto;
-    }
-    /* Glass card */
+    .container { max-width: 480px; width: 100%; }
     .glass {
       background: var(--surface);
-      backdrop-filter: blur(var(--blur));
-      -webkit-backdrop-filter: blur(var(--blur));
+      backdrop-filter: blur(24px);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.05);
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
     }
-    .glow-border {
-      box-shadow: 0 0 20px var(--glow), 0 8px 32px rgba(0,0,0,0.4);
-    }
-    /* Buttons */
     .btn {
       background: rgba(255,255,255,0.08);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 20px;
-      padding: 14px 24px;
-      color: white;
-      font-weight: 600;
-      font-size: 16px;
-      cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      white-space: nowrap;
-    }
-    .btn:active { transform: scale(0.96); background: rgba(255,255,255,0.15); }
-    .btn-primary { background: white; color: black; border: none; font-weight: 650; }
-    .btn-primary:active { background: #e5e5e5; }
-    .btn-icon { width: 44px; height: 44px; border-radius: 18px; padding: 0; }
-    /* Inputs */
-    input, textarea, select {
-      background: rgba(255,255,255,0.05);
       border: 1px solid rgba(255,255,255,0.1);
       border-radius: 18px;
-      padding: 14px 18px;
+      padding: 14px 20px;
       color: white;
-      font-size: 16px;
-      width: 100%;
-      outline: none;
-      transition: all 0.2s;
-      font-family: inherit;
-    }
-    input:focus, textarea:focus { border-color: rgba(255,255,255,0.4); box-shadow: 0 0 12px rgba(255,255,255,0.1); }
-    /* Progress */
-    .progress-bar {
-      height: 6px;
-      background: rgba(255,255,255,0.1);
-      border-radius: 20px;
-      overflow: hidden;
-    }
-    .progress-fill {
-      height: 100%;
-      background: white;
-      border-radius: 20px;
-      transition: width 0.1s linear;
-    }
-    /* Skeleton loading */
-    .skeleton {
-      background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite;
-      border-radius: 16px;
-    }
-    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-    .file-item {
-      padding: 16px;
-      margin: 10px 0;
-      transition: all 0.2s;
+      font-weight: 600;
       cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+      margin-top: 8px;
+      text-align: center;
     }
-    .file-item:hover { transform: translateY(-2px); background: rgba(255,255,255,0.03); }
-    /* Tilt effect */
-    .tilt {
-      transition: transform 0.1s ease-out;
-      transform-style: preserve-3d;
+    .btn-primary { background: white; color: black; border: none; }
+    .btn:active { transform: scale(0.96); }
+    input {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      padding: 14px;
+      color: white;
+      width: 100%;
+      margin-bottom: 8px;
+      outline: none;
     }
-    /* Modal overlay */
-    .modal-overlay {
-      position: fixed; top:0; left:0; right:0; bottom:0;
-      background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 1000; padding: 20px;
+    .app-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: rgba(255,255,255,0.02);
+      border-radius: 20px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: 0.2s;
     }
-    /* Animations */
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .fade-in { animation: fadeIn 0.3s ease-out; }
+    .app-card:hover { background: rgba(255,255,255,0.05); }
+    .app-icon { width: 60px; height: 60px; border-radius: 16px; object-fit: cover; }
     .hidden { display: none !important; }
-    .flex { display: flex; }
-    .flex-col { flex-direction: column; }
-    .items-center { align-items: center; }
-    .justify-between { justify-content: space-between; }
-    .gap-2 { gap: 8px; } .gap-3 { gap: 12px; } .gap-4 { gap: 16px; }
-    .mt-2 { margin-top: 8px; } .mt-4 { margin-top: 16px; } .mb-4 { margin-bottom: 16px; }
-    .text-sm { font-size: 14px; } .text-xs { font-size: 12px; }
-    .text-secondary { color: var(--text-secondary); }
-    .font-semibold { font-weight: 600; }
-    .truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .w-full { width: 100%; }
-    .p-4 { padding: 16px; }
-    .rounded-full { border-radius: 999px; }
-    .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
-    /* Mobile responsive */
-    @media (max-width: 480px) {
-      body { padding: 12px; }
-      .btn { padding: 12px 20px; font-size: 15px; }
-    }
+    .flex { display: flex; } .flex-col { flex-direction: column; } .items-center { align-items: center; }
+    .gap-2 { gap: 8px; } .mt-4 { margin-top: 16px; }
+    .text-secondary { color: rgba(255,255,255,0.6); font-size: 14px; }
   </style>
 </head>
 <body>
-  <div id="app" class="app-container"></div>
-  
-  <!-- Templates -->
-  <template id="login-template">
-    <div class="fade-in p-4 flex flex-col gap-4" style="margin-top: 25vh;">
-      <h1 style="font-size: 36px; font-weight: 700; letter-spacing: -0.5px;">QuocDat Drive</h1>
-      <p class="text-secondary">Lưu trữ & chia sẻ file an toàn</p>
-      <div class="glass p-4 flex flex-col gap-3 mt-4">
-        <input type="text" id="key-input" placeholder="Nhập key kích hoạt..." autocomplete="off">
-        <button class="btn btn-primary w-full" id="verify-key-btn">Xác minh Key</button>
-        <div class="flex items-center gap-2">
-          <div style="height:1px;background:rgba(255,255,255,0.1);flex:1"></div>
-          <span class="text-xs text-secondary">hoặc</span>
-          <div style="height:1px;background:rgba(255,255,255,0.1);flex:1"></div>
-        </div>
-        <button class="btn w-full" id="google-login-btn">
-          <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#fff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#fff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#fff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#fff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-          Đăng nhập Google
-        </button>
-        <button class="btn w-full" id="email-login-btn">Đăng nhập Email</button>
+  <div class="container" id="app"></div>
+
+  <template id="auth-template">
+    <div class="glass" style="margin-top:20vh;">
+      <h2 style="font-weight:700; margin-bottom:16px;">📱 AppHub</h2>
+      <div id="login-form">
+        <input type="email" id="email-login" placeholder="Email" autocomplete="email">
+        <input type="password" id="password-login" placeholder="Mật khẩu">
+        <button class="btn btn-primary" id="login-btn">Đăng nhập</button>
+        <p class="text-secondary text-center mt-4" style="cursor:pointer;" id="go-register">Chưa có tài khoản? <b>Đăng ký</b></p>
+      </div>
+      <div id="register-form" class="hidden">
+        <input type="email" id="email-reg" placeholder="Email">
+        <input type="password" id="password-reg" placeholder="Mật khẩu">
+        <input type="password" id="password-confirm" placeholder="Xác nhận mật khẩu">
+        <button class="btn btn-primary" id="register-btn">Đăng ký</button>
+        <p class="text-secondary text-center mt-4" style="cursor:pointer;" id="go-login">Đã có tài khoản? <b>Đăng nhập</b></p>
       </div>
     </div>
   </template>
 
   <template id="main-template">
-    <div class="fade-in flex flex-col gap-4">
-      <!-- Header -->
-      <div class="glass p-4 flex items-center justify-between">
-        <h2 style="font-weight:700;font-size:22px;">📁 File của tôi</h2>
-        <div class="flex gap-2">
-          <button class="btn btn-icon" id="profile-btn">
-            <img id="user-avatar" class="avatar" src="" alt="avatar" style="display:none;">
-            <span id="avatar-placeholder">👤</span>
-          </button>
-        </div>
-      </div>
-      <!-- Upload zone -->
-      <div class="glass p-6 flex flex-col items-center gap-3 glow-border" id="drop-zone">
-        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        <p class="text-secondary">Kéo thả file hoặc nhấn để chọn</p>
-        <input type="file" id="file-input" multiple hidden>
-        <div id="preview-container" class="flex flex-wrap gap-2 mt-2 hidden"></div>
-      </div>
-      <!-- Upload queue -->
-      <div id="upload-queue" class="hidden flex flex-col gap-2"></div>
-      <!-- File list -->
-      <div id="file-list-container" class="flex flex-col gap-1">
-        <div class="skeleton" style="height:60px;margin:10px 0;"></div>
-        <div class="skeleton" style="height:60px;margin:10px 0;"></div>
-      </div>
+    <div class="glass flex items-center justify-between">
+      <h3 style="font-weight:700;">📥 Ứng dụng của bạn</h3>
+      <button class="btn" style="width:auto; padding:8px 16px;" id="logout-btn">Đăng xuất</button>
     </div>
+    <div id="app-list"></div>
   </template>
 
-  <template id="file-detail-template">
-    <div class="fade-in flex flex-col gap-4 p-4">
-      <button class="btn" id="back-btn">← Quay lại</button>
-      <div class="glass p-4" id="file-preview"></div>
-      <div class="glass p-4 flex flex-col gap-3">
-        <h3 id="detail-name" class="font-semibold truncate"></h3>
-        <p class="text-sm text-secondary">Dung lượng: <span id="detail-size"></span></p>
-        <p class="text-sm text-secondary">Lượt tải: <span id="detail-downloads"></span></p>
-        <div class="flex gap-2">
-          <button class="btn btn-primary flex-1" id="download-btn">Tải xuống</button>
-          <button class="btn flex-1" id="share-btn">Chia sẻ</button>
-        </div>
-        <div id="share-options" class="hidden flex flex-col gap-3 mt-2">
-          <input type="text" id="share-link" readonly>
-          <div class="flex gap-2">
-            <input type="text" id="share-password" placeholder="Mật khẩu (tuỳ chọn)">
-            <input type="number" id="share-limit" placeholder="Giới hạn lượt">
-          </div>
-          <button class="btn" id="generate-qr-btn">Tạo QR</button>
-          <canvas id="qr-canvas" class="hidden"></canvas>
-        </div>
+  <template id="app-detail-template">
+    <div class="glass">
+      <button class="btn" style="width:auto;" id="back-btn">← Quay lại</button>
+      <div class="flex flex-col items-center gap-4 mt-4">
+        <img id="detail-icon" class="app-icon" style="width:100px;height:100px;border-radius:24px;">
+        <h2 id="detail-name"></h2>
+        <a id="detail-link" class="btn btn-primary" target="_blank">📥 Tải xuống</a>
       </div>
     </div>
   </template>
 
   <script>
-    // Firebase config - GIỮ NGUYÊN
     const firebaseConfig = {
       apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE",
       databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -249,253 +133,84 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.database();
-    const storage = firebase.storage();
 
-    // App state
-    let currentUser = null;
-    let currentKey = null;
-    let filesRef = null;
-    let uploadTasks = [];
+    const appEl = document.getElementById('app');
 
-    const app = document.getElementById('app');
-    
-    // Router đơn giản
-    function render(templateId, data = {}) {
+    function render(templateId) {
       const template = document.getElementById(templateId);
-      if (!template) return;
-      app.innerHTML = '';
-      const clone = template.content.cloneNode(true);
-      app.appendChild(clone);
-      if (templateId === 'main-template') initMain(data);
-      else if (templateId === 'file-detail-template') initFileDetail(data);
-      else if (templateId === 'login-template') initLogin();
+      appEl.innerHTML = '';
+      appEl.appendChild(template.content.cloneNode(true));
+      if (templateId === 'auth-template') initAuth();
+      else if (templateId === 'main-template') initMain();
+      else if (templateId === 'app-detail-template') window._appDetailInit();
     }
 
-    // --- LOGIN FLOW ---
-    function initLogin() {
-      document.getElementById('verify-key-btn').addEventListener('click', verifyKey);
-      document.getElementById('google-login-btn').addEventListener('click', () => {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        auth.signInWithPopup(provider).catch(alert);
+    // AUTH
+    function initAuth() {
+      document.getElementById('login-btn').addEventListener('click', () => {
+        const email = document.getElementById('email-login').value.trim();
+        const pass = document.getElementById('password-login').value;
+        auth.signInWithEmailAndPassword(email, pass).catch(e => alert(e.message));
       });
-      document.getElementById('email-login-btn').addEventListener('click', () => {
-        const email = prompt('Email:');
-        const password = prompt('Mật khẩu:');
-        if (email && password) auth.signInWithEmailAndPassword(email, password).catch(e => {
-          if (e.code === 'auth/user-not-found') {
-            auth.createUserWithEmailAndPassword(email, password).catch(alert);
-          } else alert(e.message);
-        });
+      document.getElementById('register-btn').addEventListener('click', () => {
+        const email = document.getElementById('email-reg').value.trim();
+        const pass = document.getElementById('password-reg').value;
+        const confirm = document.getElementById('password-confirm').value;
+        if (pass !== confirm) return alert('Mật khẩu không khớp');
+        auth.createUserWithEmailAndPassword(email, pass).catch(e => alert(e.message));
+      });
+      document.getElementById('go-register').addEventListener('click', () => {
+        document.getElementById('login-form').classList.add('hidden');
+        document.getElementById('register-form').classList.remove('hidden');
+      });
+      document.getElementById('go-login').addEventListener('click', () => {
+        document.getElementById('register-form').classList.add('hidden');
+        document.getElementById('login-form').classList.remove('hidden');
       });
     }
 
-    async function verifyKey() {
-      const key = document.getElementById('key-input').value.trim();
-      if (!key) return alert('Nhập key');
-      const keyRef = db.ref(`keys/${key}`);
-      try {
-        const result = await keyRef.transaction(keyData => {
-          if (!keyData || keyData.disabled) return;
-          if (keyData.type === 'ONCE') {
-            if (keyData.used) return;
-            keyData.used = true;
-          } else if (keyData.type === 'TIME') {
-            if (keyData.expiresAt && Date.now() > keyData.expiresAt) return;
-          }
-          // INFINITE luôn ok
-          return keyData;
-        });
-        if (result.committed && result.snapshot.val()) {
-          currentKey = key;
-          alert('Key hợp lệ! Đăng nhập để tiếp tục.');
-        } else {
-          alert('Key không hợp lệ hoặc đã hết hạn/sử dụng.');
-        }
-      } catch (e) { alert('Lỗi: ' + e.message); }
-    }
-
-    // Auth listener
     auth.onAuthStateChanged(user => {
-      currentUser = user;
-      if (user) {
-        if (!currentKey && !user.isAnonymous) {
-          // Nếu đã đăng nhập Google/Email, cho phép dùng không cần key (tuỳ chỉnh)
-          currentKey = 'auth';
-        }
-        filesRef = db.ref(`files/${user.uid}`);
-        render('main-template');
-      } else {
-        render('login-template');
-      }
+      if (user) render('main-template');
+      else render('auth-template');
     });
 
-    // --- MAIN INTERFACE ---
+    // MAIN APP LIST
     function initMain() {
-      const avatar = document.getElementById('user-avatar');
-      const placeholder = document.getElementById('avatar-placeholder');
-      if (currentUser.photoURL) {
-        avatar.src = currentUser.photoURL;
-        avatar.style.display = 'block';
-        placeholder.style.display = 'none';
-      }
-      
-      document.getElementById('profile-btn').addEventListener('click', () => {
-        auth.signOut();
-      });
-
-      const dropZone = document.getElementById('drop-zone');
-      const fileInput = document.getElementById('file-input');
-      dropZone.addEventListener('click', () => fileInput.click());
-      dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.background = 'rgba(255,255,255,0.05)'; });
-      dropZone.addEventListener('dragleave', () => dropZone.style.background = '');
-      dropZone.addEventListener('drop', e => {
-        e.preventDefault();
-        dropZone.style.background = '';
-        handleFiles(e.dataTransfer.files);
-      });
-      fileInput.addEventListener('change', e => handleFiles(e.target.files));
-
-      // Realtime file list
-      filesRef.on('value', snapshot => {
-        const files = snapshot.val() || {};
-        renderFileList(files);
-      });
-    }
-
-    function handleFiles(fileList) {
-      const queue = document.getElementById('upload-queue');
-      queue.classList.remove('hidden');
-      queue.innerHTML = '';
-      Array.from(fileList).forEach(file => {
-        const task = uploadFile(file);
-        uploadTasks.push(task);
-        const item = document.createElement('div');
-        item.className = 'glass p-3 flex items-center gap-3';
-        item.innerHTML = `
-          <span class="truncate flex-1">${file.name}</span>
-          <span class="text-xs text-secondary" id="progress-${file.name}">0%</span>
-          <button class="btn btn-icon text-sm cancel-upload" data-name="${file.name}">✕</button>
-        `;
-        queue.appendChild(item);
-        task.on('state_changed', snap => {
-          const pct = Math.round(snap.bytesTransferred / snap.totalBytes * 100);
-          document.getElementById(`progress-${file.name}`).textContent = pct + '%';
-        });
-        task.then(() => {
-          item.querySelector('.cancel-upload').remove();
-          document.getElementById(`progress-${file.name}`).textContent = '✅';
-        }).catch(e => alert('Upload lỗi: ' + e.message));
-        item.querySelector('.cancel-upload').addEventListener('click', () => {
-          task.cancel();
-          item.remove();
+      document.getElementById('logout-btn').addEventListener('click', () => auth.signOut());
+      const listEl = document.getElementById('app-list');
+      db.ref('apps').on('value', snap => {
+        const apps = snap.val() || {};
+        listEl.innerHTML = '';
+        Object.entries(apps).forEach(([id, app]) => {
+          const card = document.createElement('div');
+          card.className = 'app-card';
+          card.innerHTML = `
+            <img class="app-icon" src="${app.icon || ''}" alt="icon">
+            <div style="flex:1;">
+              <p style="font-weight:600;">${app.name}</p>
+              <p class="text-secondary">${app.size || 'N/A'}</p>
+            </div>
+            <span style="font-size:20px;">→</span>
+          `;
+          card.addEventListener('click', () => {
+            window._appDetail = { id, ...app };
+            render('app-detail-template');
+          });
+          listEl.appendChild(card);
         });
       });
     }
 
-    function uploadFile(file) {
-      const storageRef = storage.ref(`${currentUser.uid}/${Date.now()}_${file.name}`);
-      const metadata = {
-        customMetadata: {
-          originalName: file.name,
-          uploadedBy: currentUser.email || currentUser.uid
-        }
-      };
-      const task = storageRef.put(file, metadata);
-      task.on('state_changed', null, null, async () => {
-        const url = await storageRef.getDownloadURL();
-        await filesRef.push({
-          name: file.name,
-          size: file.size,
-          url,
-          createdAt: firebase.database.ServerValue.TIMESTAMP,
-          downloads: 0,
-          password: null,
-          limit: null,
-          expireAt: null
-        });
-      });
-      return task;
-    }
-
-    function renderFileList(files) {
-      const container = document.getElementById('file-list-container');
-      container.innerHTML = '';
-      const entries = Object.entries(files).sort((a,b) => b[1].createdAt - a[1].createdAt);
-      if (entries.length === 0) {
-        container.innerHTML = '<p class="text-secondary text-center p-4">Chưa có file nào</p>';
-        return;
-      }
-      entries.forEach(([id, file]) => {
-        const div = document.createElement('div');
-        div.className = 'glass file-item flex items-center gap-3';
-        div.innerHTML = `
-          <div class="flex-1">
-            <p class="font-semibold truncate">${file.name}</p>
-            <p class="text-xs text-secondary">${formatSize(file.size)} • ${new Date(file.createdAt).toLocaleDateString()}</p>
-          </div>
-          <button class="btn btn-icon text-sm" data-id="${id}">→</button>
-        `;
-        div.addEventListener('click', () => render('file-detail-template', { id, file }));
-        container.appendChild(div);
-      });
-    }
-
-    function formatSize(bytes) {
-      if (bytes < 1024) return bytes + ' B';
-      else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-      else if (bytes < 1073741824) return (bytes / 1048576).toFixed(1) + ' MB';
-      else return (bytes / 1073741824).toFixed(2) + ' GB';
-    }
-
-    // --- FILE DETAIL ---
-    function initFileDetail({id, file}) {
+    // APP DETAIL
+    window._appDetailInit = function() {
+      const app = window._appDetail;
       document.getElementById('back-btn').addEventListener('click', () => render('main-template'));
-      document.getElementById('detail-name').textContent = file.name;
-      document.getElementById('detail-size').textContent = formatSize(file.size);
-      document.getElementById('detail-downloads').textContent = file.downloads || 0;
-      
-      const previewDiv = document.getElementById('file-preview');
-      const ext = file.name.split('.').pop().toLowerCase();
-      if (['jpg','jpeg','png','gif','webp'].includes(ext)) {
-        previewDiv.innerHTML = `<img src="${file.url}" style="max-width:100%;border-radius:20px;" alt="preview">`;
-      } else if (['mp4','mov','mkv'].includes(ext)) {
-        previewDiv.innerHTML = `<video controls style="max-width:100%;border-radius:20px;"><source src="${file.url}"></video>`;
-      } else if (ext === 'pdf') {
-        previewDiv.innerHTML = `<iframe src="${file.url}" style="width:100%;height:400px;border-radius:20px;"></iframe>`;
-      } else if (ext === 'apk') {
-        previewDiv.innerHTML = `<div class="flex flex-col items-center"><span>📱</span><p>APK: ${file.name}</p></div>`;
-      } else {
-        previewDiv.innerHTML = `<div class="flex flex-col items-center"><span style="font-size:48px;">📄</span><p>${ext.toUpperCase()}</p></div>`;
-      }
-
-      document.getElementById('download-btn').addEventListener('click', async () => {
-        // Tăng lượt download
-        await filesRef.child(id).child('downloads').transaction(d => (d || 0) + 1);
-        window.open(file.url, '_blank');
-      });
-
-      document.getElementById('share-btn').addEventListener('click', () => {
-        document.getElementById('share-options').classList.toggle('hidden');
-        document.getElementById('share-link').value = file.url;
-      });
-
-      document.getElementById('generate-qr-btn').addEventListener('click', () => {
-        const canvas = document.getElementById('qr-canvas');
-        canvas.classList.remove('hidden');
-        QRCode.toCanvas(canvas, file.url, { width: 200 });
-      });
-
-      // Cập nhật password/limit nếu có
-      document.getElementById('share-password').addEventListener('change', e => {
-        filesRef.child(id).update({ password: e.target.value || null });
-      });
-      document.getElementById('share-limit').addEventListener('change', e => {
-        filesRef.child(id).update({ limit: parseInt(e.target.value) || null });
-      });
-    }
-
-    // Khởi tạo
-    render('login-template');
+      document.getElementById('detail-icon').src = app.icon || '';
+      document.getElementById('detail-name').textContent = app.name;
+      const link = document.getElementById('detail-link');
+      link.href = app.downloadLink || '#';
+      link.textContent = '📥 Tải ' + app.name;
+    };
   </script>
 </body>
 </html>
