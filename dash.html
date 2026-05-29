@@ -5,373 +5,169 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Admin - Quản lý App Cao Cấp</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
   <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
-
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <style>
+    /* CSS GIỮ NGUYÊN GIAO DIỆN CŨ CỦA BẠN TRƯỚC ĐÓ */
     * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #000000;
-      color: white;
-      display: flex;
-      justify-content: center;
-      padding: 20px;
-    }
+    body { font-family: 'Inter', sans-serif; background: #000; color: white; display: flex; justify-content: center; padding: 20px; }
     .admin-container { max-width: 750px; width: 100%; }
-    
-    .glass {
-      background: rgba(20, 0, 0, 0.65);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid rgba(255, 59, 48, 0.3);
-      border-radius: 24px;
-      padding: 24px;
-      margin-bottom: 16px;
-      box-shadow: 0 8px 32px rgba(255, 59, 48, 0.15);
-    }
-    
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-    .stat-box {
-      background: rgba(255, 59, 48, 0.05);
-      border: 1px solid rgba(255, 59, 48, 0.2);
-      border-radius: 16px;
-      padding: 16px;
-      text-align: center;
-      box-shadow: inset 0 0 20px rgba(255, 59, 48, 0.05);
-    }
+    .glass { background: rgba(20, 0, 0, 0.65); backdrop-filter: blur(24px); border: 1px solid rgba(255, 59, 48, 0.3); border-radius: 24px; padding: 24px; margin-bottom: 16px; box-shadow: 0 8px 32px rgba(255, 59, 48, 0.15); }
+    .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px; }
+    .stat-box { background: rgba(255, 59, 48, 0.05); border: 1px solid rgba(255, 59, 48, 0.2); border-radius: 16px; padding: 16px; text-align: center; box-shadow: inset 0 0 20px rgba(255, 59, 48, 0.05); }
     .stat-box p { font-size: 13px; color: rgba(255,255,255,0.7); }
     .stat-box h2 { font-size: 24px; font-weight: 700; margin-top: 4px; text-shadow: 0 0 10px rgba(255, 59, 48, 0.5); }
-    
-    .btn {
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 14px;
-      padding: 12px 20px;
-      color: white;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      width: 100%;
-      margin-top: 8px;
-    }
-    .btn-primary { 
-      background: #ff3b30; 
-      color: white; 
-      border: none; 
-      box-shadow: 0 0 15px rgba(255, 59, 48, 0.4);
-    }
-    .btn-primary:hover {
-      background: #ff453a;
-      box-shadow: 0 0 25px rgba(255, 59, 48, 0.6);
-    }
+    .btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 12px 20px; color: white; font-weight: 600; cursor: pointer; transition: 0.3s; width: 100%; margin-top: 8px; }
+    .btn-primary { background: #ff3b30; color: white; border: none; box-shadow: 0 0 15px rgba(255, 59, 48, 0.4); }
+    .btn-primary:hover { background: #ff453a; box-shadow: 0 0 25px rgba(255, 59, 48, 0.6); }
     .btn-danger { background: rgba(255,69,58,0.15); border-color: rgba(255,69,58,0.3); color: #ff453a; }
-    .btn:active { transform: scale(0.97); }
-    
-    input, textarea {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 12px;
-      padding: 12px;
-      color: white;
-      width: 100%;
-      margin-bottom: 10px;
-      outline: none;
-      font-family: inherit;
-      transition: all 0.3s ease;
-    }
-    input:focus, textarea:focus {
-      border-color: #ff3b30;
-      box-shadow: 0 0 10px rgba(255, 59, 48, 0.4);
-      background: rgba(255, 59, 48, 0.05);
-    }
+    input, textarea, select { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; color: white; width: 100%; margin-bottom: 10px; outline: none; font-family: inherit; transition: 0.3s; }
+    input:focus, textarea:focus, select:focus { border-color: #ff3b30; box-shadow: 0 0 10px rgba(255, 59, 48, 0.4); background: rgba(255, 59, 48, 0.05); }
+    select option { background: #111; color: white; }
     textarea { height: 70px; resize: none; }
-    
-    .app-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px;
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(255, 59, 48, 0.15);
-      border-radius: 16px;
-      margin-bottom: 10px;
-      transition: 0.3s;
-    }
-    .app-row:hover {
-      border-color: rgba(255, 59, 48, 0.4);
-      box-shadow: 0 4px 15px rgba(255, 59, 48, 0.1);
-    }
+    .app-row { display: flex; align-items: center; justify-content: space-between; padding: 14px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 59, 48, 0.15); border-radius: 16px; margin-bottom: 10px; transition: 0.3s; }
+    .app-row:hover { border-color: rgba(255, 59, 48, 0.4); box-shadow: 0 4px 15px rgba(255, 59, 48, 0.1); }
     .app-row img { width: 46px; height: 46px; border-radius: 12px; margin-right: 14px; object-fit: cover; border: 1px solid rgba(255,59,48,0.3); }
-    .flex { display: flex; align-items: center; }
-    .gap-1 { gap: 8px; }
-    .hidden { display: none !important; }
+    .flex { display: flex; align-items: center; } .gap-1 { gap: 8px; } .hidden { display: none !important; }
     label { display: block; font-size: 13px; color: rgba(255,255,255,0.7); margin-bottom: 6px; }
-
-    /* Custom file upload button giả */
-    .custom-file-upload {
-      display: inline-block;
-      padding: 10px 15px;
-      cursor: pointer;
-      background: rgba(255, 59, 48, 0.1);
-      border: 1px dashed #ff3b30;
-      border-radius: 12px;
-      color: #ff3b30;
-      font-weight: 600;
-      text-align: center;
-      width: 100%;
-      margin-bottom: 12px;
-      transition: 0.3s;
-    }
-    .custom-file-upload:hover {
-      background: rgba(255, 59, 48, 0.2);
-    }
+    .custom-file-upload { display: inline-block; padding: 10px 15px; cursor: pointer; background: rgba(255, 59, 48, 0.1); border: 1px dashed #ff3b30; border-radius: 12px; color: #ff3b30; font-weight: 600; text-align: center; width: 100%; margin-bottom: 12px; }
     input[type="file"] { display: none; }
-
-    /* Modal cắt ảnh */
-    #cropper-modal {
-      position: fixed; top:0; left:0; right:0; bottom:0;
-      background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 9999; padding: 20px;
-    }
-    .cropper-container-box {
-      width: 100%; max-width: 400px;
-      background: #111; border: 1px solid #ff3b30;
-      border-radius: 20px; padding: 20px;
-    }
+    #cropper-modal { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px; }
+    .cropper-container-box { width: 100%; max-width: 400px; background: #111; border: 1px solid #ff3b30; border-radius: 20px; padding: 20px; }
     .img-container { width: 100%; max-height: 350px; margin-bottom: 15px; overflow: hidden; }
-    .img-container img { max-width: 100%; }
+    .badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-left: 6px; }
+    .badge-free { background: #28a745; color: white; }
+    .badge-vip { background: #ffc107; color: black; }
   </style>
 </head>
 <body>
   <div class="admin-container" id="admin-app">
-    
     <div class="stats-grid">
-      <div class="stat-box">
-        <p>📦 Tổng ứng dụng</p>
-        <h2 id="stat-total-apps">0</h2>
-      </div>
-      <div class="stat-box">
-        <p>📥 Tổng lượt tải về</p>
-        <h2 id="stat-total-downloads">0</h2>
-      </div>
+      <div class="stat-box"><p>📦 Tổng ứng dụng</p><h2 id="stat-total-apps">0</h2></div>
+      <div class="stat-box"><p>📥 Tổng lượt tải về</p><h2 id="stat-total-downloads">0</h2></div>
     </div>
 
     <div class="glass">
-      <h2 style="font-weight:700; margin-bottom: 16px; text-shadow: 0 0 10px rgba(255,59,48,0.3);">🛠️ Thêm ứng dụng mới</h2>
-      
+      <h2 style="font-weight:700; margin-bottom: 16px;">🛠️ Thêm ứng dụng mới</h2>
       <label>Ảnh biểu tượng (Icon)</label>
       <label class="custom-file-upload">
-          <input type="file" id="icon-file" accept="image/*">
-          🖼️ Bấm vào đây để Chọn & Cắt ảnh
+          <input type="file" id="icon-file" accept="image/*">🖼️ Bấm vào đây để Chọn & Cắt ảnh
       </label>
+      <img id="icon-preview" style="width:70px;height:70px;border-radius:16px;margin-bottom:12px;display:none;object-fit:cover; border: 2px solid #ff3b30;">
       
-      <img id="icon-preview" style="width:70px;height:70px;border-radius:16px;margin-bottom:12px;display:none;object-fit:cover; border: 2px solid #ff3b30; box-shadow: 0 0 15px rgba(255,59,48,0.4);">
-      
-      <input type="text" id="app-name" placeholder="Tên ứng dụng (Bắt buộc)">
-      <input type="text" id="app-link" placeholder="Link tải về URL (Bắt buộc)">
+      <input type="text" id="app-name" placeholder="Tên ứng dụng">
+      <input type="text" id="app-link" placeholder="Link tải về URL">
       
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-        <input type="text" id="app-size" placeholder="Dung lượng (VD: 45 MB)">
-        <input type="text" id="app-version" placeholder="Phiên bản (VD: v1.0.2)">
+        <input type="text" id="app-size" placeholder="Dung lượng">
+        <input type="text" id="app-version" placeholder="Phiên bản">
       </div>
-      <textarea id="app-desc" placeholder="Giới thiệu ngắn về ứng dụng..."></textarea>
       
+      <label>Quyền tải ứng dụng</label>
+      <select id="app-type">
+        <option value="free">Mọi người đều tải được (Miễn phí)</option>
+        <option value="vip">Chỉ dành cho Tài Khoản VIP</option>
+      </select>
+
+      <textarea id="app-desc" placeholder="Giới thiệu..."></textarea>
       <button class="btn btn-primary" id="upload-btn">📤 Đăng tải ứng dụng</button>
     </div>
 
     <div class="glass">
-      <h3 style="margin-bottom:16px; text-shadow: 0 0 8px rgba(255,255,255,0.3);">📋 Danh sách ứng dụng hiện có</h3>
+      <h3 style="margin-bottom:16px;">📋 Danh sách ứng dụng</h3>
       <div id="app-list-admin"></div>
     </div>
 
-    <div id="edit-modal" class="glass hidden" style="position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:100; width:90%; max-width:500px; box-shadow: 0 20px 50px rgba(255,0,0,0.3); border: 1px solid #ff3b30;">
-      <h3 style="margin-bottom:12px; text-shadow: 0 0 10px rgba(255,59,48,0.5);">✏️ Chỉnh sửa ứng dụng</h3>
+    <div id="edit-modal" class="glass hidden" style="position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:100; width:90%; max-width:500px;">
+      <h3>✏️ Chỉnh sửa ứng dụng</h3><br>
       <input type="text" id="edit-name" placeholder="Tên">
       <input type="text" id="edit-link" placeholder="Link">
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-        <input type="text" id="edit-size" placeholder="Dung lượng">
-        <input type="text" id="edit-version" placeholder="Phiên bản">
+        <input type="text" id="edit-size">
+        <input type="text" id="edit-version">
       </div>
-      <textarea id="edit-desc" placeholder="Giới thiệu..."></textarea>
-      
-      <label class="custom-file-upload">
-          <input type="file" id="edit-icon-file" accept="image/*">
-          🖼️ Bấm vào đây để Đổi & Cắt ảnh mới
-      </label>
-
-      <div class="flex gap-1" style="margin-top:12px;">
-        <button class="btn btn-primary" id="save-edit-btn">Lưu cập nhật</button>
-        <button class="btn" id="cancel-edit-btn">Huỷ bỏ</button>
-      </div>
+      <select id="edit-type">
+        <option value="free">Miễn phí</option>
+        <option value="vip">Chỉ dành cho VIP</option>
+      </select>
+      <textarea id="edit-desc"></textarea>
+      <label class="custom-file-upload"><input type="file" id="edit-icon-file" accept="image/*">🖼️ Đổi & Cắt ảnh mới</label>
+      <div class="flex gap-1"><button class="btn btn-primary" id="save-edit-btn">Lưu</button><button class="btn" id="cancel-edit-btn">Huỷ</button></div>
     </div>
   </div>
 
   <div id="cropper-modal" class="hidden">
     <div class="cropper-container-box">
-      <h3 style="margin-bottom: 12px; color: white;">✂️ Cắt ảnh Icon</h3>
-      <div class="img-container">
-        <img id="image-to-crop" src="">
-      </div>
-      <div class="flex gap-1">
-        <button class="btn btn-primary" id="crop-ok-btn">✅ Xong</button>
-        <button class="btn" id="crop-cancel-btn">❌ Huỷ</button>
-      </div>
+      <h3 style="margin-bottom: 12px;">✂️ Cắt ảnh</h3>
+      <div class="img-container"><img id="image-to-crop" src=""></div>
+      <div class="flex gap-1"><button class="btn btn-primary" id="crop-ok-btn">✅ Xong</button><button class="btn" id="crop-cancel-btn">❌ Huỷ</button></div>
     </div>
   </div>
 
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE",
-      databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "keyquocdat"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    const firebaseConfig = { apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE", databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "keyquocdat" };
+    firebase.initializeApp(firebaseConfig); const db = firebase.database();
+    
+    let currentEditId = null; let cropper = null; let finalBase64Image = null; let editBase64Image = null; let isEditingCrop = false;
 
-    let currentEditId = null;
-    let cropper = null;
-    let finalBase64Image = null; // Biến lưu ảnh đã cắt của form Thêm
-    let editBase64Image = null;  // Biến lưu ảnh đã cắt của form Sửa
-    let isEditingCrop = false;   // Biến để phân biệt đang cắt cho form nào
-
-    // 1. XỬ LÝ SỰ KIỆN CHỌN VÀ HIỂN THỊ KHUNG CẮT ẢNH
     function openCropper(file, isEdit) {
-      isEditingCrop = isEdit;
-      const reader = new FileReader();
+      isEditingCrop = isEdit; const reader = new FileReader();
       reader.onload = function (e) {
         document.getElementById('image-to-crop').src = e.target.result;
         document.getElementById('cropper-modal').classList.remove('hidden');
-        
-        if (cropper) cropper.destroy(); // Hủy bản cũ nếu có
-        cropper = new Cropper(document.getElementById('image-to-crop'), {
-          aspectRatio: 1, // Ép khung vuông
-          viewMode: 1,
-          autoCropArea: 1,
-          background: false
-        });
+        if (cropper) cropper.destroy();
+        cropper = new Cropper(document.getElementById('image-to-crop'), { aspectRatio: 1, viewMode: 1, autoCropArea: 1, background: false });
       };
       reader.readAsDataURL(file);
     }
-
-    document.getElementById('icon-file').addEventListener('change', function(e) {
-      if (e.target.files[0]) openCropper(e.target.files[0], false);
-      this.value = ''; // Reset input để chọn lại ảnh giống hệt được
-    });
-
-    document.getElementById('edit-icon-file').addEventListener('change', function(e) {
-      if (e.target.files[0]) openCropper(e.target.files[0], true);
-      this.value = '';
-    });
-
-    // 2. KHI BẤM "XONG" TRÊN KHUNG CẮT ẢNH
+    document.getElementById('icon-file').addEventListener('change', function(e) { if (e.target.files[0]) openCropper(e.target.files[0], false); this.value = ''; });
+    document.getElementById('edit-icon-file').addEventListener('change', function(e) { if (e.target.files[0]) openCropper(e.target.files[0], true); this.value = ''; });
     document.getElementById('crop-ok-btn').addEventListener('click', function() {
       if (!cropper) return;
-      
-      // Lấy ảnh đã cắt, chuyển thành chuỗi chuẩn base64 thu nhỏ để lưu DB (tối đa độ phân giải 200x200 cho nhẹ)
-      const canvas = cropper.getCroppedCanvas({ width: 200, height: 200 });
-      const base64Str = canvas.toDataURL('image/jpeg', 0.8);
-
-      if (isEditingCrop) {
-        editBase64Image = base64Str;
-        alert("Đã cắt ảnh cho phần Chỉnh sửa thành công!");
-      } else {
-        finalBase64Image = base64Str;
-        const preview = document.getElementById('icon-preview');
-        preview.src = finalBase64Image;
-        preview.style.display = 'block';
-      }
-      
-      document.getElementById('cropper-modal').classList.add('hidden');
-      cropper.destroy();
-      cropper = null;
+      const base64Str = cropper.getCroppedCanvas({ width: 200, height: 200 }).toDataURL('image/jpeg', 0.8);
+      if (isEditingCrop) { editBase64Image = base64Str; alert("Đã cắt ảnh cho Sửa!"); } 
+      else { finalBase64Image = base64Str; document.getElementById('icon-preview').src = finalBase64Image; document.getElementById('icon-preview').style.display = 'block'; }
+      document.getElementById('cropper-modal').classList.add('hidden'); cropper.destroy(); cropper = null;
     });
+    document.getElementById('crop-cancel-btn').addEventListener('click', function() { document.getElementById('cropper-modal').classList.add('hidden'); if (cropper) { cropper.destroy(); cropper = null; } });
 
-    // 3. KHI BẤM HUỶ TRÊN KHUNG CẮT ẢNH
-    document.getElementById('crop-cancel-btn').addEventListener('click', function() {
-      document.getElementById('cropper-modal').classList.add('hidden');
-      if (cropper) { cropper.destroy(); cropper = null; }
-    });
-
-    // 4. LƯU APP MỚI LÊN FIREBASE (LƯU TRỰC TIẾP CHUỖI ẢNH VÀO DB)
     document.getElementById('upload-btn').addEventListener('click', async () => {
       const btn = document.getElementById('upload-btn');
-      const name = document.getElementById('app-name').value.trim();
-      const link = document.getElementById('app-link').value.trim();
-      const size = document.getElementById('app-size').value.trim();
-      const version = document.getElementById('app-version').value.trim();
-      const desc = document.getElementById('app-desc').value.trim();
-
-      if (!name || !link) return alert('Vui lòng nhập tên và link tải ứng dụng!');
-
-      btn.disabled = true;
-      btn.textContent = '⏳ Đang xử lý dữ liệu...';
-
+      const name = document.getElementById('app-name').value.trim(); const link = document.getElementById('app-link').value.trim();
+      const type = document.getElementById('app-type').value; // Lấy loại app
+      if (!name || !link) return alert('Vui lòng nhập tên và link!');
+      btn.disabled = true; btn.textContent = '⏳...';
       try {
-        // Dùng ảnh đã cắt (nếu có), không có thì dùng ảnh mặc định, bỏ qua Firebase Storage
-        const iconToSave = finalBase64Image || 'https://via.placeholder.com/100';
-
-        const newAppRef = db.ref('apps').push();
-        await newAppRef.set({
-          name,
-          downloadLink: link,
-          icon: iconToSave, // LƯU THẲNG BASE64 VÀO DATABASE
-          size: size || 'N/A',
-          version: version || '1.0.0',
-          description: desc || 'Chưa có mô tả cho ứng dụng này.',
+        await db.ref('apps').push().set({
+          name, downloadLink: link, type: type,
+          icon: finalBase64Image || 'https://via.placeholder.com/100',
+          size: document.getElementById('app-size').value.trim() || 'N/A',
+          version: document.getElementById('app-version').value.trim() || '1.0',
+          description: document.getElementById('app-desc').value.trim() || 'Chưa có mô tả.',
           downloads: 0
         });
-
-        alert('🎉 Đã thêm ứng dụng thành công!');
-        // Reset form
-        document.getElementById('app-name').value = '';
-        document.getElementById('app-link').value = '';
-        document.getElementById('app-size').value = '';
-        document.getElementById('app-version').value = '';
-        document.getElementById('app-desc').value = '';
-        document.getElementById('icon-preview').style.display = 'none';
-        finalBase64Image = null; // Reset biến ảnh
-
-      } catch (error) {
-        console.error(error);
-        alert('❌ LỖI UPLOAD: ' + error.message);
-      } finally {
-        btn.disabled = false;
-        btn.textContent = '📤 Đăng tải ứng dụng';
-      }
+        alert('🎉 Đã thêm thành công!');
+        document.getElementById('app-name').value=''; document.getElementById('app-link').value=''; document.getElementById('icon-preview').style.display='none'; finalBase64Image=null;
+      } catch (e) { alert('❌ LỖI: ' + e.message); } finally { btn.disabled = false; btn.textContent = '📤 Đăng tải ứng dụng'; }
     });
 
-    // 5. TẢI DANH SÁCH APP
     function loadAppList() {
       db.ref('apps').on('value', snap => {
-        const apps = snap.val() || {};
-        const container = document.getElementById('app-list-admin');
-        container.innerHTML = '';
-        
-        let totalApps = 0;
-        let totalDownloads = 0;
-
+        const apps = snap.val() || {}; const container = document.getElementById('app-list-admin'); container.innerHTML = '';
+        let tApps = 0; let tDl = 0;
         Object.entries(apps).forEach(([id, app]) => {
-          totalApps++;
-          totalDownloads += (app.downloads || 0);
-
-          const row = document.createElement('div');
-          row.className = 'app-row';
+          tApps++; tDl += (app.downloads || 0);
+          const badgeHtml = app.type === 'vip' ? '<span class="badge badge-vip">👑 VIP</span>' : '<span class="badge badge-free">FREE</span>';
+          
+          const row = document.createElement('div'); row.className = 'app-row';
           row.innerHTML = `
             <div class="flex" style="flex:1; overflow:hidden;">
               <img src="${app.icon}" alt="icon">
               <div style="overflow:hidden;">
-                <p style="font-weight:600; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">${app.name} <span style="font-size:12px;color:#ff3b30;">(${app.version || '1.0.0'})</span></p>
-                <p style="font-size:12px; color:rgba(255,255,255,0.6);">Dung lượng: ${app.size} | 📥 Lượt tải: ${app.downloads || 0}</p>
+                <p style="font-weight:600; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">${app.name} ${badgeHtml}</p>
+                <p style="font-size:12px; color:rgba(255,255,255,0.6);">📥 Tải: ${app.downloads || 0}</p>
               </div>
             </div>
             <div class="flex gap-1" style="flex-shrink:0;">
@@ -381,64 +177,38 @@
           `;
           container.appendChild(row);
         });
+        document.getElementById('stat-total-apps').textContent = tApps; document.getElementById('stat-total-downloads').textContent = tDl;
 
-        document.getElementById('stat-total-apps').textContent = totalApps;
-        document.getElementById('stat-total-downloads').textContent = totalDownloads;
-
-        // Sự kiện xóa và sửa
         container.querySelectorAll('[data-edit]').forEach(btn => {
           btn.addEventListener('click', (e) => {
-            const id = e.currentTarget.dataset.edit;
-            const app = apps[id];
-            currentEditId = id;
-            editBase64Image = null; // Reset ảnh edit cũ
-            document.getElementById('edit-name').value = app.name;
-            document.getElementById('edit-link').value = app.downloadLink;
-            document.getElementById('edit-size').value = app.size || '';
-            document.getElementById('edit-version').value = app.version || '';
+            const id = e.currentTarget.dataset.edit; const app = apps[id]; currentEditId = id; editBase64Image = null;
+            document.getElementById('edit-name').value = app.name; document.getElementById('edit-link').value = app.downloadLink;
+            document.getElementById('edit-size').value = app.size || ''; document.getElementById('edit-version').value = app.version || '';
             document.getElementById('edit-desc').value = app.description || '';
+            document.getElementById('edit-type').value = app.type || 'free';
             document.getElementById('edit-modal').classList.remove('hidden');
           });
         });
-
         container.querySelectorAll('[data-delete]').forEach(btn => {
-          btn.addEventListener('click', async (e) => {
-            if (confirm('Bạn chắc chắn có muốn xoá ứng dụng này không?')) {
-              await db.ref('apps/' + e.currentTarget.dataset.delete).remove();
-            }
-          });
+          btn.addEventListener('click', async (e) => { if (confirm('Xoá?')) await db.ref('apps/' + e.currentTarget.dataset.delete).remove(); });
         });
       });
     }
-
-    document.getElementById('cancel-edit-btn').addEventListener('click', () => {
-      document.getElementById('edit-modal').classList.add('hidden');
-    });
-
+    document.getElementById('cancel-edit-btn').addEventListener('click', () => { document.getElementById('edit-modal').classList.add('hidden'); });
     document.getElementById('save-edit-btn').addEventListener('click', async () => {
       if (!currentEditId) return;
-      const name = document.getElementById('edit-name').value.trim();
-      const link = document.getElementById('edit-link').value.trim();
-      const size = document.getElementById('edit-size').value.trim();
-      const version = document.getElementById('edit-version').value.trim();
-      const desc = document.getElementById('edit-desc').value.trim();
-
-      try {
-        const updateData = { name, downloadLink: link, size, version, description: desc };
-        
-        // Nếu người dùng đã chọn và cắt ảnh mới trong lúc edit
-        if (editBase64Image) {
-          updateData.icon = editBase64Image; 
-        }
-        
-        await db.ref('apps/' + currentEditId).update(updateData);
-        document.getElementById('edit-modal').classList.add('hidden');
-        alert('Đã cập nhật thông tin thành công!');
-      } catch(e) {
-        alert('Lỗi khi cập nhật dữ liệu!');
-      }
+      const updateData = {
+        name: document.getElementById('edit-name').value.trim(),
+        downloadLink: document.getElementById('edit-link').value.trim(),
+        size: document.getElementById('edit-size').value.trim(),
+        version: document.getElementById('edit-version').value.trim(),
+        description: document.getElementById('edit-desc').value.trim(),
+        type: document.getElementById('edit-type').value
+      };
+      if (editBase64Image) updateData.icon = editBase64Image; 
+      await db.ref('apps/' + currentEditId).update(updateData);
+      document.getElementById('edit-modal').classList.add('hidden'); alert('Đã cập nhật!');
     });
-
     loadAppList();
   </script>
 </body>
