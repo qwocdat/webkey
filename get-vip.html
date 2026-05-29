@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Nhận mã VIP - AppHub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: 'Inter', sans-serif; background: #000; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+    .glass { background: rgba(20, 0, 0, 0.7); backdrop-filter: blur(24px); border: 1px solid rgba(255, 59, 48, 0.4); border-radius: 24px; padding: 30px; max-width: 400px; width: 100%; text-align: center; box-shadow: 0 0 40px rgba(255, 0, 0, 0.2); }
+    h2 { font-weight: 700; text-shadow: 0 0 10px rgba(255,59,48,0.5); margin-bottom: 10px; }
+    .code-box { background: rgba(255, 59, 48, 0.1); border: 2px dashed #ff3b30; padding: 15px; border-radius: 12px; font-size: 18px; font-weight: bold; color: #ff3b30; letter-spacing: 1px; margin: 20px 0; word-break: break-all; }
+    .btn { background: #ff3b30; color: white; border: none; border-radius: 14px; padding: 14px; font-weight: 600; cursor: pointer; width: 100%; font-size: 16px; transition: 0.3s; }
+    .btn:hover { background: #ff453a; box-shadow: 0 0 20px rgba(255, 59, 48, 0.5); }
+    .btn:active { transform: scale(0.95); }
+  </style>
+</head>
+<body>
+  <div class="glass">
+    <h2>🎉 Chúc mừng!</h2>
+    <p style="color: rgba(255,255,255,0.7); font-size: 14px;">Bạn đã vượt link thành công. Dưới đây là mã kích hoạt VIP của bạn. Hãy copy và dán vào ứng dụng nhé!</p>
+    
+    <div id="code-display" class="code-box">⏳ Đang tạo mã...</div>
+    
+    <button class="btn" id="copy-btn">📋 Copy Mã VIP</button>
+  </div>
+
+  <script>
+    // CẤU HÌNH FIREBASE CỦA BẠN VÀO ĐÂY
+    const firebaseConfig = {
+      apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE",
+      databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "keyquocdat"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // Hàm tạo mã ngẫu nhiên dạng vipuseractive-xxxxxxx
+    function generateCode() {
+      const randomStr = Math.random().toString(36).substring(2, 9).toLowerCase();
+      return `vipuseractive-${randomStr}`;
+    }
+
+    const newCode = generateCode();
+    const codeBox = document.getElementById('code-display');
+
+    // Lưu mã lên Firebase Database
+    db.ref('vip_codes/' + newCode).set({
+      valid: true,
+      createdAt: Date.now()
+    }).then(() => {
+      codeBox.textContent = newCode;
+    }).catch(err => {
+      codeBox.textContent = "Lỗi tạo mã!";
+      console.error(err);
+    });
+
+    // Chức năng Copy
+    document.getElementById('copy-btn').addEventListener('click', function() {
+      if(codeBox.textContent === '⏳ Đang tạo mã...' || codeBox.textContent === 'Lỗi tạo mã!') return;
+      navigator.clipboard.writeText(codeBox.textContent).then(() => {
+        this.textContent = "✅ Đã Copy";
+        setTimeout(() => this.textContent = "📋 Copy Mã VIP", 2000);
+      });
+    });
+  </script>
+</body>
+</html>
