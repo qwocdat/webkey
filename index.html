@@ -3,12 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>AppHub - Tải ứng dụng</title>
+  <title>AppHub - Kho Ứng Dụng Cao Cấp</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     :root {
@@ -16,7 +15,7 @@
       --surface: rgba(28,28,30,0.65);
       --border: rgba(255,255,255,0.08);
       --text: #fff;
-      --radius: 28px;
+      --radius: 24px;
     }
     body {
       font-family: 'Inter', sans-serif;
@@ -27,100 +26,165 @@
       justify-content: center;
       padding: 16px;
     }
-    .container { max-width: 480px; width: 100%; }
+    .container { max-width: 480px; width: 100%; animation: fadeIn 0.4s ease-out; }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     .glass {
       background: var(--surface);
       backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 20px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+    .intro-banner {
+      background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.01) 100%);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 18px;
+      margin-bottom: 16px;
     }
     .btn {
       background: rgba(255,255,255,0.08);
       border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 18px;
-      padding: 14px 20px;
+      border-radius: 14px;
+      padding: 12px 20px;
       color: white;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.2s ease;
       width: 100%;
       margin-top: 8px;
       text-align: center;
+      text-decoration: none;
+      display: inline-block;
     }
     .btn-primary { background: white; color: black; border: none; }
+    .btn-primary:hover { background: #e5e5e5; box-shadow: 0 4px 12px rgba(255,255,255,0.2); }
     .btn:active { transform: scale(0.96); }
+    
     input {
       background: rgba(255,255,255,0.05);
       border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 14px;
-      padding: 14px;
+      border-radius: 12px;
+      padding: 12px 14px;
       color: white;
       width: 100%;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       outline: none;
+      transition: 0.2s;
     }
+    input:focus { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.08); }
+
     .app-card {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 12px;
+      gap: 14px;
+      padding: 14px;
       background: rgba(255,255,255,0.02);
-      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.03);
+      border-radius: 18px;
       margin-bottom: 12px;
       cursor: pointer;
-      transition: 0.2s;
+      transition: all 0.2s ease;
     }
-    .app-card:hover { background: rgba(255,255,255,0.05); }
-    .app-icon { width: 60px; height: 60px; border-radius: 16px; object-fit: cover; }
+    .app-card:hover { 
+      background: rgba(255,255,255,0.06); 
+      transform: translateY(-2px);
+      border-color: rgba(255,255,255,0.1);
+    }
+    .app-icon { width: 56px; height: 56px; border-radius: 14px; object-fit: cover; }
+    
+    /* MODAL ĐĂNG NHẬP POPUP */
+    .modal-overlay {
+      position: fixed; top:0; left:0; right:0; bottom:0;
+      background: rgba(0,0,0,0.75); backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1000; padding: 20px;
+      animation: fadeIn 0.2s ease-out;
+    }
+
     .hidden { display: none !important; }
-    .flex { display: flex; } .flex-col { flex-direction: column; } .items-center { align-items: center; }
+    .flex { display: flex; } 
+    .flex-col { flex-direction: column; } 
+    .items-center { align-items: center; }
+    .justify-between { justify-content: space-between; }
     .gap-2 { gap: 8px; } .mt-4 { margin-top: 16px; }
-    .text-secondary { color: rgba(255,255,255,0.6); font-size: 14px; }
+    .text-secondary { color: rgba(255,255,255,0.5); font-size: 13px; }
+    .text-center { text-align: center; }
   </style>
 </head>
 <body>
   <div class="container" id="app"></div>
 
-  <template id="auth-template">
-    <div class="glass" style="margin-top:20vh;">
-      <h2 style="font-weight:700; margin-bottom:16px;">📱 AppHub</h2>
-      <div id="login-form">
-        <input type="email" id="email-login" placeholder="Email" autocomplete="email">
-        <input type="password" id="password-login" placeholder="Mật khẩu">
-        <button class="btn btn-primary" id="login-btn">Đăng nhập</button>
-        <p class="text-secondary text-center mt-4" style="cursor:pointer;" id="go-register">Chưa có tài khoản? <b>Đăng ký</b></p>
-      </div>
-      <div id="register-form" class="hidden">
-        <input type="email" id="email-reg" placeholder="Email">
-        <input type="password" id="password-reg" placeholder="Mật khẩu">
-        <input type="password" id="password-confirm" placeholder="Xác nhận mật khẩu">
-        <button class="btn btn-primary" id="register-btn">Đăng ký</button>
-        <p class="text-secondary text-center mt-4" style="cursor:pointer;" id="go-login">Đã có tài khoản? <b>Đăng nhập</b></p>
-      </div>
-    </div>
-  </template>
-
   <template id="main-template">
     <div class="glass flex items-center justify-between">
-      <h3 style="font-weight:700;">📥 Ứng dụng của bạn</h3>
-      <button class="btn" style="width:auto; padding:8px 16px;" id="logout-btn">Đăng xuất</button>
+      <div>
+        <h3 style="font-weight:700; font-size:18px;">📱 AppHub Store</h3>
+        <p id="user-status-text" class="text-secondary" style="font-size:11px; margin-top:2px;">Chế độ khách</p>
+      </div>
+      <button class="btn" style="width:auto; padding:8px 16px; margin:0; font-size:13px;" id="auth-action-btn">Đăng nhập</button>
     </div>
+
+    <div class="intro-banner">
+      <h4 style="font-weight:600; font-size:15px; margin-bottom:4px;">✨ Chào mừng bạn đến với AppHub</h4>
+      <p class="text-secondary" style="font-size:13px; line-height:1.4;">Khám phá bộ sưu tập ứng dụng cao cấp đã qua kiểm duyệt bảo mật. Đăng ký tài khoản miễn phí để mở khoá tính năng tải xuống trực tiếp tốc độ cao.</p>
+    </div>
+
     <div id="app-list"></div>
   </template>
 
   <template id="app-detail-template">
-    <div class="glass">
-      <button class="btn" style="width:auto;" id="back-btn">← Quay lại</button>
-      <div class="flex flex-col items-center gap-4 mt-4">
-        <img id="detail-icon" class="app-icon" style="width:100px;height:100px;border-radius:24px;">
-        <h2 id="detail-name"></h2>
-        <a id="detail-link" class="btn btn-primary" target="_blank">📥 Tải xuống</a>
+    <div class="glass" style="animation: fadeIn 0.2s ease-out;">
+      <button class="btn" style="width:auto; margin:0; padding:6px 12px; font-size:13px;" id="back-btn">← Quay lại cửa hàng</button>
+      <div class="flex flex-col items-center gap-2 mt-4 text-center">
+        <img id="detail-icon" class="app-icon" style="width:90px; height:90px; border-radius:20px; box-shadow:0 8px 24px rgba(0,0,0,0.5);">
+        <h2 id="detail-name" style="font-weight:700; font-size:22px; margin-top:6px;"></h2>
+        
+        <div class="flex gap-2 text-secondary" style="margin-bottom:10px;">
+          <span id="detail-version"></span> • <span id="detail-size"></span> • <span id="detail-downloads"></span>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); padding:14px; border-radius:14px; width:100%; text-align:left; margin-bottom:10px;">
+          <p style="font-size:12px; color:rgba(255,255,255,0.4); text-transform:uppercase; font-weight:600; margin-bottom:4px;">Giới thiệu ứng dụng</p>
+          <p id="detail-desc" style="font-size:14px; line-height:1.5; color:rgba(255,255,255,0.85); white-space:pre-line;"></p>
+        </div>
+
+        <button id="download-trigger-btn" class="btn btn-primary" style="font-size:16px;">📥 Tải xuống ngay</button>
       </div>
     </div>
   </template>
+
+  <div id="auth-modal" class="modal-overlay hidden">
+    <div class="glass" style="width:100%; max-width:380px; margin:0; position:relative;">
+      <button id="close-auth-btn" style="position:absolute; top:16px; right:16px; background:none; border:none; color:white; font-size:18px; cursor:pointer; opacity:0.6;">✕</button>
+      
+      <div id="login-form">
+        <h3 style="font-weight:700; margin-bottom:4px; font-size:18px;">Yêu cầu Đăng nhập</h3>
+        <p class="text-secondary" style="margin-bottom:16px;">Bạn cần tài khoản để có thể tải ứng dụng mới.</p>
+        <input type="email" id="email-login" placeholder="Địa chỉ Email" autocomplete="email">
+        <input type="password" id="password-login" placeholder="Mật khẩu của bạn">
+        <button class="btn btn-primary" id="login-btn">Đăng nhập tài khoản</button>
+        <p class="text-secondary text-center mt-4" style="cursor:pointer;" id="go-register">Chưa có tài khoản? <b style="color:white;">Đăng ký miễn phí</b></p>
+      </div>
+
+      <div id="register-form" class="hidden">
+        <h3 style="font-weight:700; margin-bottom:4px; font-size:18px;">Đăng ký thành viên</h3>
+        <p class="text-secondary" style="margin-bottom:16px;">Tạo tài khoản nhanh chóng trong 30 giây.</p>
+        <input type="email" id="email-reg" placeholder="Địa chỉ Email mới">
+        <input type="password" id="password-reg" placeholder="Tạo mật khẩu an toàn">
+        <input type="password" id="password-confirm" placeholder="Xác nhận lại mật khẩu">
+        <button class="btn btn-primary" id="register-btn">Kích hoạt tài khoản</button>
+        <p class="text-secondary text-center mt-4" style="cursor:pointer;" id="go-login">Đã có tài khoản? <b style="color:white;">Đăng nhập ngay</b></p>
+      </div>
+    </div>
+  </div>
 
   <script>
     const firebaseConfig = {
@@ -135,29 +199,22 @@
     const db = firebase.database();
 
     const appEl = document.getElementById('app');
+    let currentUser = null;
 
+    // Định tuyến giao diện SPA đơn giản
     function render(templateId) {
       const template = document.getElementById(templateId);
       appEl.innerHTML = '';
       appEl.appendChild(template.content.cloneNode(true));
-      if (templateId === 'auth-template') initAuth();
-      else if (templateId === 'main-template') initMain();
+      
+      if (templateId === 'main-template') initMain();
       else if (templateId === 'app-detail-template') window._appDetailInit();
     }
 
-    // AUTH
-    function initAuth() {
-      document.getElementById('login-btn').addEventListener('click', () => {
-        const email = document.getElementById('email-login').value.trim();
-        const pass = document.getElementById('password-login').value;
-        auth.signInWithEmailAndPassword(email, pass).catch(e => alert(e.message));
-      });
-      document.getElementById('register-btn').addEventListener('click', () => {
-        const email = document.getElementById('email-reg').value.trim();
-        const pass = document.getElementById('password-reg').value;
-        const confirm = document.getElementById('password-confirm').value;
-        if (pass !== confirm) return alert('Mật khẩu không khớp');
-        auth.createUserWithEmailAndPassword(email, pass).catch(e => alert(e.message));
+    // Xử lý logic Popup Auth độc lập toàn cục
+    function initAuthPopupEvents() {
+      document.getElementById('close-auth-btn').addEventListener('click', () => {
+        document.getElementById('auth-modal').classList.add('hidden');
       });
       document.getElementById('go-register').addEventListener('click', () => {
         document.getElementById('login-form').classList.add('hidden');
@@ -167,30 +224,80 @@
         document.getElementById('register-form').classList.add('hidden');
         document.getElementById('login-form').classList.remove('hidden');
       });
+
+      // Hành động Click nút Đăng nhập
+      document.getElementById('login-btn').addEventListener('click', () => {
+        const email = document.getElementById('email-login').value.trim();
+        const pass = document.getElementById('password-login').value;
+        auth.signInWithEmailAndPassword(email, pass)
+          .then(() => document.getElementById('auth-modal').classList.add('hidden'))
+          .catch(e => alert('Sai thông tin: ' + e.message));
+      });
+
+      // Hành động Đăng ký
+      document.getElementById('register-btn').addEventListener('click', () => {
+        const email = document.getElementById('email-reg').value.trim();
+        const pass = document.getElementById('password-reg').value;
+        const confirm = document.getElementById('password-confirm').value;
+        if (pass !== confirm) return alert('Xác nhận mật khẩu chưa khớp chính xác!');
+        auth.createUserWithEmailAndPassword(email, pass)
+          .then(() => document.getElementById('auth-modal').classList.add('hidden'))
+          .catch(e => alert('Lỗi: ' + e.message));
+      });
     }
 
+    // Theo dõi trạng thái tài khoản liên tục mà không chặn UI
     auth.onAuthStateChanged(user => {
-      if (user) render('main-template');
-      else render('auth-template');
+      currentUser = user;
+      const statusText = document.getElementById('user-status-text');
+      const authBtn = document.getElementById('auth-action-btn');
+      
+      if (statusText && authBtn) {
+        if (user) {
+          statusText.textContent = `Tài khoản: ${user.email}`;
+          authBtn.textContent = 'Đăng xuất';
+        } else {
+          statusText.textContent = 'Chế độ khách';
+          authBtn.textContent = 'Đăng nhập';
+        }
+      }
     });
 
-    // MAIN APP LIST
+    // KHỞI TẠO MÀN HÌNH CHÍNH (CỬA HÀNG)
     function initMain() {
-      document.getElementById('logout-btn').addEventListener('click', () => auth.signOut());
+      const authBtn = document.getElementById('auth-action-btn');
+      const statusText = document.getElementById('user-status-text');
+      
+      if (currentUser) {
+        statusText.textContent = `Tài khoản: ${currentUser.email}`;
+        authBtn.textContent = 'Đăng xuất';
+      }
+
+      authBtn.addEventListener('click', () => {
+        if (currentUser) {
+          auth.signOut().then(() => alert('Đã đăng xuất tài khoản!'));
+        } else {
+          document.getElementById('auth-modal').classList.remove('hidden');
+        }
+      });
+
       const listEl = document.getElementById('app-list');
+      
+      // Đọc Realtime danh sách hiển thị với hiệu ứng
       db.ref('apps').on('value', snap => {
         const apps = snap.val() || {};
         listEl.innerHTML = '';
+        
         Object.entries(apps).forEach(([id, app]) => {
           const card = document.createElement('div');
           card.className = 'app-card';
           card.innerHTML = `
-            <img class="app-icon" src="${app.icon || ''}" alt="icon">
-            <div style="flex:1;">
-              <p style="font-weight:600;">${app.name}</p>
-              <p class="text-secondary">${app.size || 'N/A'}</p>
+            <img class="app-icon" src="${app.icon || 'https://via.placeholder.com/100'}" alt="icon">
+            <div style="flex:1; min-width: 0;">
+              <p style="font-weight:600; font-size:15px; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">${app.name}</p>
+              <p class="text-secondary" style="font-size:12px; margin-top:2px;">Dung lượng: ${app.size || 'N/A'} • 📥 Tải: ${app.downloads || 0}</p>
             </div>
-            <span style="font-size:20px;">→</span>
+            <span style="font-size:18px; color:rgba(255,255,255,0.3); font-weight:700; margin-left:6px;">→</span>
           `;
           card.addEventListener('click', () => {
             window._appDetail = { id, ...app };
@@ -201,16 +308,41 @@
       });
     }
 
-    // APP DETAIL
+    // KHỞI TẠO XEM CHI TIẾT SẢN PHẨM & XỬ LÝ LƯỢT TẢI
     window._appDetailInit = function() {
       const app = window._appDetail;
       document.getElementById('back-btn').addEventListener('click', () => render('main-template'));
-      document.getElementById('detail-icon').src = app.icon || '';
+      document.getElementById('detail-icon').src = app.icon || 'https://via.placeholder.com/100';
       document.getElementById('detail-name').textContent = app.name;
-      const link = document.getElementById('detail-link');
-      link.href = app.downloadLink || '#';
-      link.textContent = '📥 Tải ' + app.name;
+      document.getElementById('detail-version').textContent = `Phiên bản: ${app.version || '1.0.0'}`;
+      document.getElementById('detail-size').textContent = app.size || 'N/A';
+      document.getElementById('detail-downloads').textContent = `📥 ${app.downloads || 0} lượt tải`;
+      document.getElementById('detail-desc').textContent = app.description || 'Chưa có thông tin mô tả giới thiệu thêm cho phần ứng dụng này.';
+
+      const dlBtn = document.getElementById('download-trigger-btn');
+      dlBtn.textContent = '📥 Tải ' + app.name;
+
+      // Xử lý ràng buộc sự kiện tải hàng mới bắt buộc Login
+      dlBtn.addEventListener('click', () => {
+        if (!currentUser) {
+          // Bắt buộc khách hàng phải đăng nhập mới cho tải
+          alert('🔒 Bạn cần đăng nhập thành viên để thực hiện tải xuống sản phẩm mới này!');
+          document.getElementById('auth-modal').classList.remove('hidden');
+        } else {
+          // Khách hàng đã login thành công -> Cho phép tải & Tăng thống kê lượt tải tự động
+          db.ref('apps/' + app.id + '/downloads').transaction(currentValue => {
+            return (currentValue || 0) + 1;
+          });
+          
+          // Mở link tải sản phẩm ở tab mới siêu tốc
+          window.open(app.downloadLink || '#', '_blank');
+        }
+      });
     };
+
+    // Điểm khởi chạy ứng dụng mặc định
+    render('main-template');
+    initAuthPopupEvents(); // Gắn lắng nghe sự kiện của Form Popup cố định ẩn phía dưới nền
   </script>
 </body>
 </html>
