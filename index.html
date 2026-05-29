@@ -11,11 +11,12 @@
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     :root {
-      --bg: #0a0a0a;
-      --surface: rgba(28,28,30,0.65);
-      --border: rgba(255,255,255,0.08);
+      --bg: #000000;
+      --surface: rgba(20, 0, 0, 0.65);
+      --border: rgba(255, 59, 48, 0.3);
       --text: #fff;
       --radius: 24px;
+      --primary: #ff3b30;
     }
     body {
       font-family: 'Inter', sans-serif;
@@ -41,15 +42,18 @@
       border-radius: var(--radius);
       padding: 20px;
       margin-bottom: 14px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      box-shadow: 0 8px 32px rgba(255, 0, 0, 0.15);
     }
+    
     .intro-banner {
-      background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.01) 100%);
-      border: 1px solid rgba(255,255,255,0.1);
+      background: linear-gradient(135deg, rgba(255, 59, 48, 0.15) 0%, rgba(20, 0, 0, 0.5) 100%);
+      border: 1px solid rgba(255, 59, 48, 0.2);
       border-radius: 20px;
       padding: 18px;
       margin-bottom: 16px;
+      box-shadow: inset 0 0 20px rgba(255, 59, 48, 0.05);
     }
+    
     .btn {
       background: rgba(255,255,255,0.08);
       border: 1px solid rgba(255,255,255,0.1);
@@ -58,15 +62,23 @@
       color: white;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.3s ease;
       width: 100%;
       margin-top: 8px;
       text-align: center;
       text-decoration: none;
       display: inline-block;
     }
-    .btn-primary { background: white; color: black; border: none; }
-    .btn-primary:hover { background: #e5e5e5; box-shadow: 0 4px 12px rgba(255,255,255,0.2); }
+    .btn-primary { 
+      background: var(--primary); 
+      color: white; 
+      border: none; 
+      box-shadow: 0 0 15px rgba(255, 59, 48, 0.4);
+    }
+    .btn-primary:hover { 
+      background: #ff453a; 
+      box-shadow: 0 0 25px rgba(255, 59, 48, 0.6); 
+    }
     .btn:active { transform: scale(0.96); }
     
     input {
@@ -78,33 +90,37 @@
       width: 100%;
       margin-bottom: 10px;
       outline: none;
-      transition: 0.2s;
+      transition: 0.3s;
     }
-    input:focus { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.08); }
+    input:focus { 
+      border-color: var(--primary); 
+      background: rgba(255, 59, 48, 0.05); 
+      box-shadow: 0 0 10px rgba(255, 59, 48, 0.4);
+    }
 
     .app-card {
       display: flex;
       align-items: center;
       gap: 14px;
       padding: 14px;
-      background: rgba(255,255,255,0.02);
-      border: 1px solid rgba(255,255,255,0.03);
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 59, 48, 0.15);
       border-radius: 18px;
       margin-bottom: 12px;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.3s ease;
     }
     .app-card:hover { 
-      background: rgba(255,255,255,0.06); 
+      background: rgba(255, 59, 48, 0.1); 
       transform: translateY(-2px);
-      border-color: rgba(255,255,255,0.1);
+      border-color: rgba(255, 59, 48, 0.4);
+      box-shadow: 0 4px 15px rgba(255, 59, 48, 0.15);
     }
-    .app-icon { width: 56px; height: 56px; border-radius: 14px; object-fit: cover; }
+    .app-icon { width: 56px; height: 56px; border-radius: 14px; object-fit: cover; border: 1px solid rgba(255,59,48,0.2); }
     
-    /* MODAL ĐĂNG NHẬP POPUP */
     .modal-overlay {
       position: fixed; top:0; left:0; right:0; bottom:0;
-      background: rgba(0,0,0,0.75); backdrop-filter: blur(8px);
+      background: rgba(0,0,0,0.85); backdrop-filter: blur(12px);
       display: flex; align-items: center; justify-content: center;
       z-index: 1000; padding: 20px;
       animation: fadeIn 0.2s ease-out;
@@ -116,7 +132,7 @@
     .items-center { align-items: center; }
     .justify-between { justify-content: space-between; }
     .gap-2 { gap: 8px; } .mt-4 { margin-top: 16px; }
-    .text-secondary { color: rgba(255,255,255,0.5); font-size: 13px; }
+    .text-secondary { color: rgba(255,255,255,0.6); font-size: 13px; }
     .text-center { text-align: center; }
   </style>
 </head>
@@ -126,14 +142,14 @@
   <template id="main-template">
     <div class="glass flex items-center justify-between">
       <div>
-        <h3 style="font-weight:700; font-size:18px;">📱 AppHub Store</h3>
+        <h3 style="font-weight:700; font-size:18px; text-shadow: 0 0 10px rgba(255,59,48,0.5);">📱 AppHub Store</h3>
         <p id="user-status-text" class="text-secondary" style="font-size:11px; margin-top:2px;">Chế độ khách</p>
       </div>
-      <button class="btn" style="width:auto; padding:8px 16px; margin:0; font-size:13px;" id="auth-action-btn">Đăng nhập</button>
+      <button class="btn" style="width:auto; padding:8px 16px; margin:0; font-size:13px; border-color: rgba(255,59,48,0.4);" id="auth-action-btn">Đăng nhập</button>
     </div>
 
     <div class="intro-banner">
-      <h4 style="font-weight:600; font-size:15px; margin-bottom:4px;">✨ Chào mừng bạn đến với AppHub</h4>
+      <h4 style="font-weight:600; font-size:15px; margin-bottom:4px; color: #ff3b30;">✨ Chào mừng bạn đến với AppHub</h4>
       <p class="text-secondary" style="font-size:13px; line-height:1.4;">Khám phá bộ sưu tập ứng dụng cao cấp đã qua kiểm duyệt bảo mật. Đăng ký tài khoản miễn phí để mở khoá tính năng tải xuống trực tiếp tốc độ cao.</p>
     </div>
 
@@ -142,17 +158,17 @@
 
   <template id="app-detail-template">
     <div class="glass" style="animation: fadeIn 0.2s ease-out;">
-      <button class="btn" style="width:auto; margin:0; padding:6px 12px; font-size:13px;" id="back-btn">← Quay lại cửa hàng</button>
+      <button class="btn" style="width:auto; margin:0; padding:6px 12px; font-size:13px; border-color: rgba(255,59,48,0.3);" id="back-btn">← Quay lại cửa hàng</button>
       <div class="flex flex-col items-center gap-2 mt-4 text-center">
-        <img id="detail-icon" class="app-icon" style="width:90px; height:90px; border-radius:20px; box-shadow:0 8px 24px rgba(0,0,0,0.5);">
-        <h2 id="detail-name" style="font-weight:700; font-size:22px; margin-top:6px;"></h2>
+        <img id="detail-icon" class="app-icon" style="width:90px; height:90px; border-radius:20px; box-shadow:0 0 25px rgba(255,59,48,0.4); border: 2px solid #ff3b30;">
+        <h2 id="detail-name" style="font-weight:700; font-size:22px; margin-top:6px; text-shadow: 0 0 10px rgba(255,255,255,0.3);"></h2>
         
         <div class="flex gap-2 text-secondary" style="margin-bottom:10px;">
           <span id="detail-version"></span> • <span id="detail-size"></span> • <span id="detail-downloads"></span>
         </div>
 
-        <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); padding:14px; border-radius:14px; width:100%; text-align:left; margin-bottom:10px;">
-          <p style="font-size:12px; color:rgba(255,255,255,0.4); text-transform:uppercase; font-weight:600; margin-bottom:4px;">Giới thiệu ứng dụng</p>
+        <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,59,48,0.2); padding:14px; border-radius:14px; width:100%; text-align:left; margin-bottom:10px;">
+          <p style="font-size:12px; color:#ff3b30; text-transform:uppercase; font-weight:600; margin-bottom:4px;">Giới thiệu ứng dụng</p>
           <p id="detail-desc" style="font-size:14px; line-height:1.5; color:rgba(255,255,255,0.85); white-space:pre-line;"></p>
         </div>
 
@@ -162,26 +178,26 @@
   </template>
 
   <div id="auth-modal" class="modal-overlay hidden">
-    <div class="glass" style="width:100%; max-width:380px; margin:0; position:relative;">
+    <div class="glass" style="width:100%; max-width:380px; margin:0; position:relative; border-color: #ff3b30; box-shadow: 0 0 40px rgba(255,0,0,0.3);">
       <button id="close-auth-btn" style="position:absolute; top:16px; right:16px; background:none; border:none; color:white; font-size:18px; cursor:pointer; opacity:0.6;">✕</button>
       
       <div id="login-form">
-        <h3 style="font-weight:700; margin-bottom:4px; font-size:18px;">Yêu cầu Đăng nhập</h3>
+        <h3 style="font-weight:700; margin-bottom:4px; font-size:18px; text-shadow: 0 0 10px rgba(255,59,48,0.5);">Yêu cầu Đăng nhập</h3>
         <p class="text-secondary" style="margin-bottom:16px;">Bạn cần tài khoản để có thể tải ứng dụng mới.</p>
         <input type="email" id="email-login" placeholder="Địa chỉ Email" autocomplete="email">
         <input type="password" id="password-login" placeholder="Mật khẩu của bạn">
         <button class="btn btn-primary" id="login-btn">Đăng nhập tài khoản</button>
-        <p class="text-secondary text-center mt-4" style="cursor:pointer;" id="go-register">Chưa có tài khoản? <b style="color:white;">Đăng ký miễn phí</b></p>
+        <p class="text-secondary text-center mt-4" style="cursor:pointer;" id="go-register">Chưa có tài khoản? <b style="color:#ff3b30; text-shadow: 0 0 5px rgba(255,59,48,0.5);">Đăng ký miễn phí</b></p>
       </div>
 
       <div id="register-form" class="hidden">
-        <h3 style="font-weight:700; margin-bottom:4px; font-size:18px;">Đăng ký thành viên</h3>
+        <h3 style="font-weight:700; margin-bottom:4px; font-size:18px; text-shadow: 0 0 10px rgba(255,59,48,0.5);">Đăng ký thành viên</h3>
         <p class="text-secondary" style="margin-bottom:16px;">Tạo tài khoản nhanh chóng trong 30 giây.</p>
         <input type="email" id="email-reg" placeholder="Địa chỉ Email mới">
         <input type="password" id="password-reg" placeholder="Tạo mật khẩu an toàn">
         <input type="password" id="password-confirm" placeholder="Xác nhận lại mật khẩu">
         <button class="btn btn-primary" id="register-btn">Kích hoạt tài khoản</button>
-        <p class="text-secondary text-center mt-4" style="cursor:pointer;" id="go-login">Đã có tài khoản? <b style="color:white;">Đăng nhập ngay</b></p>
+        <p class="text-secondary text-center mt-4" style="cursor:pointer;" id="go-login">Đã có tài khoản? <b style="color:#ff3b30; text-shadow: 0 0 5px rgba(255,59,48,0.5);">Đăng nhập ngay</b></p>
       </div>
     </div>
   </div>
@@ -201,7 +217,6 @@
     const appEl = document.getElementById('app');
     let currentUser = null;
 
-    // Định tuyến giao diện SPA đơn giản
     function render(templateId) {
       const template = document.getElementById(templateId);
       appEl.innerHTML = '';
@@ -211,7 +226,6 @@
       else if (templateId === 'app-detail-template') window._appDetailInit();
     }
 
-    // Xử lý logic Popup Auth độc lập toàn cục
     function initAuthPopupEvents() {
       document.getElementById('close-auth-btn').addEventListener('click', () => {
         document.getElementById('auth-modal').classList.add('hidden');
@@ -225,7 +239,6 @@
         document.getElementById('login-form').classList.remove('hidden');
       });
 
-      // Hành động Click nút Đăng nhập
       document.getElementById('login-btn').addEventListener('click', () => {
         const email = document.getElementById('email-login').value.trim();
         const pass = document.getElementById('password-login').value;
@@ -234,7 +247,6 @@
           .catch(e => alert('Sai thông tin: ' + e.message));
       });
 
-      // Hành động Đăng ký
       document.getElementById('register-btn').addEventListener('click', () => {
         const email = document.getElementById('email-reg').value.trim();
         const pass = document.getElementById('password-reg').value;
@@ -246,7 +258,6 @@
       });
     }
 
-    // Theo dõi trạng thái tài khoản liên tục mà không chặn UI
     auth.onAuthStateChanged(user => {
       currentUser = user;
       const statusText = document.getElementById('user-status-text');
@@ -263,7 +274,6 @@
       }
     });
 
-    // KHỞI TẠO MÀN HÌNH CHÍNH (CỬA HÀNG)
     function initMain() {
       const authBtn = document.getElementById('auth-action-btn');
       const statusText = document.getElementById('user-status-text');
@@ -283,7 +293,6 @@
 
       const listEl = document.getElementById('app-list');
       
-      // Đọc Realtime danh sách hiển thị với hiệu ứng
       db.ref('apps').on('value', snap => {
         const apps = snap.val() || {};
         listEl.innerHTML = '';
@@ -297,7 +306,7 @@
               <p style="font-weight:600; font-size:15px; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">${app.name}</p>
               <p class="text-secondary" style="font-size:12px; margin-top:2px;">Dung lượng: ${app.size || 'N/A'} • 📥 Tải: ${app.downloads || 0}</p>
             </div>
-            <span style="font-size:18px; color:rgba(255,255,255,0.3); font-weight:700; margin-left:6px;">→</span>
+            <span style="font-size:18px; color:#ff3b30; font-weight:700; margin-left:6px; text-shadow: 0 0 10px rgba(255,59,48,0.5);">→</span>
           `;
           card.addEventListener('click', () => {
             window._appDetail = { id, ...app };
@@ -308,7 +317,6 @@
       });
     }
 
-    // KHỞI TẠO XEM CHI TIẾT SẢN PHẨM & XỬ LÝ LƯỢT TẢI
     window._appDetailInit = function() {
       const app = window._appDetail;
       document.getElementById('back-btn').addEventListener('click', () => render('main-template'));
@@ -322,27 +330,21 @@
       const dlBtn = document.getElementById('download-trigger-btn');
       dlBtn.textContent = '📥 Tải ' + app.name;
 
-      // Xử lý ràng buộc sự kiện tải hàng mới bắt buộc Login
       dlBtn.addEventListener('click', () => {
         if (!currentUser) {
-          // Bắt buộc khách hàng phải đăng nhập mới cho tải
           alert('🔒 Bạn cần đăng nhập thành viên để thực hiện tải xuống sản phẩm mới này!');
           document.getElementById('auth-modal').classList.remove('hidden');
         } else {
-          // Khách hàng đã login thành công -> Cho phép tải & Tăng thống kê lượt tải tự động
           db.ref('apps/' + app.id + '/downloads').transaction(currentValue => {
             return (currentValue || 0) + 1;
           });
-          
-          // Mở link tải sản phẩm ở tab mới siêu tốc
           window.open(app.downloadLink || '#', '_blank');
         }
       });
     };
 
-    // Điểm khởi chạy ứng dụng mặc định
     render('main-template');
-    initAuthPopupEvents(); // Gắn lắng nghe sự kiện của Form Popup cố định ẩn phía dưới nền
+    initAuthPopupEvents();
   </script>
 </body>
 </html>
