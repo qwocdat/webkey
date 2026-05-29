@@ -1,290 +1,501 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultimate Opt Panel • QuocDat</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        :root {
-            --primary-glow: #8a4bf3;
-            --matrix-green: #00ff41;
-            --matrix-red: #ff0044;
-            --matrix-yellow: #ffff00;
-            --glass-bg: rgba(255, 245, 255, 0.65);
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'SF Pro Display', -apple-system, sans-serif; }
-
-        body {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: radial-gradient(circle at 30% 30%, #f0eaff, #d9c9ff);
-            background-image: repeating-linear-gradient(0deg, rgba(138, 43, 226, 0.03) 0px, rgba(138, 43, 226, 0.03) 2px, transparent 2px, transparent 8px), radial-gradient(circle at 30% 30%, #f0eaff, #d9c9ff);
-            padding: 16px;
-        }
-
-        /* --- Panel Chính --- */
-        .panel {
-            width: 100%;
-            max-width: 760px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 1.5px solid rgba(180, 130, 255, 0.35);
-            border-radius: 42px;
-            box-shadow: 0 25px 50px rgba(105, 50, 180, 0.25), inset 0 1px 2px rgba(255, 255, 255, 0.8);
-            padding: 32px;
-            animation: appear 0.6s cubic-bezier(0.2, 0.9, 0.3, 1);
-        }
-
-        .header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 25px;
-            border-bottom: 1px dashed #a07ae0;
-            padding-bottom: 15px;
-        }
-
-        .header h1 {
-            font-size: 1.8rem;
-            background: linear-gradient(130deg, #481f77, #b46ef3);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .prompt {
-            margin-left: auto;
-            font-family: 'Menlo', monospace;
-            font-size: 0.85rem;
-            color: #a33df0;
-            background: rgba(200, 165, 255, 0.25);
-            padding: 6px 15px;
-            border-radius: 50px;
-            border: 1px solid #c7a2ff;
-        }
-
-        /* --- Grid Chức Năng --- */
-        .optimize-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
-        .opt-card {
-            background: rgba(255, 255, 255, 0.4);
-            border: 1.5px solid rgba(190, 130, 250, 0.4);
-            border-radius: 28px;
-            padding: 20px 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .opt-card:hover {
-            transform: translateY(-5px);
-            background: white;
-            border-color: #b27afe;
-            box-shadow: 0 10px 20px rgba(139, 80, 255, 0.2);
-        }
-
-        .opt-card i { font-size: 35px; color: #7d3acb; margin-bottom: 10px; }
-        .opt-card h3 { font-size: 1.1rem; color: #2d1b4e; }
-
-        /* --- Terminal Matrix --- */
-        .terminal-container {
-            background: #0d0216;
-            border-radius: 24px;
-            border: 1px solid #7d3acb;
-            padding: 15px;
-            margin-top: 20px;
-            box-shadow: inset 0 0 15px #2a0e4a;
-        }
-
-        .log-console {
-            height: 220px;
-            overflow-y: auto;
-            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
-            font-size: 13px;
-            line-height: 1.6;
-            padding-right: 5px;
-        }
-
-        /* Tùy chỉnh thanh cuộn terminal */
-        .log-console::-webkit-scrollbar { width: 4px; }
-        .log-console::-webkit-scrollbar-thumb { background: #4b2382; border-radius: 10px; }
-
-        .log-line { display: flex; gap: 10px; margin-bottom: 4px; border-bottom: 0.1px solid rgba(125, 58, 203, 0.2); }
-        .ts { color: #888; min-width: 65px; }
-        .msg { flex: 1; word-break: break-all; }
-        .stt { font-weight: bold; color: var(--matrix-green); }
-
-        /* --- Progress Bar --- */
-        .progress-container {
-            height: 10px;
-            background: rgba(125, 58, 203, 0.1);
-            border-radius: 10px;
-            margin: 15px 0;
-            overflow: hidden;
-            display: none;
-        }
-        .progress-bar {
-            width: 0%; height: 100%;
-            background: linear-gradient(90deg, #b57aff, #00ff41);
-            transition: width 0.1s linear;
-        }
-
-        /* --- Footer & Popups --- */
-        .footer { display: flex; justify-content: space-between; align-items: center; margin-top: 25px; padding-top: 20px; border-top: 1px solid #dabcff; }
-        .owner { display: flex; align-items: center; gap: 10px; }
-        .avatar { width: 40px; height: 40px; border-radius: 50%; background: #7d3acb; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-        
-        /* Overlay confirm */
-        .confirm-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(10px);
-            display: flex; align-items: center; justify-content: center; z-index: 100;
-            visibility: hidden; opacity: 0; transition: 0.3s;
-        }
-        .confirm-overlay.show { visibility: visible; opacity: 1; }
-        .confirm-card { background: white; padding: 30px; border-radius: 35px; width: 320px; text-align: center; transform: scale(0.8); transition: 0.3s; }
-        .confirm-overlay.show .confirm-card { transform: scale(1); }
-        .c-btns { display: flex; gap: 10px; margin-top: 20px; }
-        .btn { flex: 1; padding: 12px; border-radius: 15px; border: none; cursor: pointer; font-weight: bold; }
-        .btn-ok { background: #7d3acb; color: white; }
-
-        @keyframes appear { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>QuocDat Drive</title>
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+  <!-- QR Code -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0a0a0a;
+      --surface: rgba(28, 28, 30, 0.65);
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #fff;
+      --text-secondary: rgba(255,255,255,0.6);
+      --accent: #fff;
+      --glow: rgba(255,255,255,0.2);
+      --radius: 28px;
+      --blur: 24px;
+    }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 20px;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-font-smoothing: antialiased;
+    }
+    .app-container {
+      width: 100%;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+    /* Glass card */
+    .glass {
+      background: var(--surface);
+      backdrop-filter: blur(var(--blur));
+      -webkit-backdrop-filter: blur(var(--blur));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.05);
+    }
+    .glow-border {
+      box-shadow: 0 0 20px var(--glow), 0 8px 32px rgba(0,0,0,0.4);
+    }
+    /* Buttons */
+    .btn {
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 14px 24px;
+      color: white;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    .btn:active { transform: scale(0.96); background: rgba(255,255,255,0.15); }
+    .btn-primary { background: white; color: black; border: none; font-weight: 650; }
+    .btn-primary:active { background: #e5e5e5; }
+    .btn-icon { width: 44px; height: 44px; border-radius: 18px; padding: 0; }
+    /* Inputs */
+    input, textarea, select {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 18px;
+      padding: 14px 18px;
+      color: white;
+      font-size: 16px;
+      width: 100%;
+      outline: none;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    input:focus, textarea:focus { border-color: rgba(255,255,255,0.4); box-shadow: 0 0 12px rgba(255,255,255,0.1); }
+    /* Progress */
+    .progress-bar {
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 20px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: white;
+      border-radius: 20px;
+      transition: width 0.1s linear;
+    }
+    /* Skeleton loading */
+    .skeleton {
+      background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 16px;
+    }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .file-item {
+      padding: 16px;
+      margin: 10px 0;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .file-item:hover { transform: translateY(-2px); background: rgba(255,255,255,0.03); }
+    /* Tilt effect */
+    .tilt {
+      transition: transform 0.1s ease-out;
+      transform-style: preserve-3d;
+    }
+    /* Modal overlay */
+    .modal-overlay {
+      position: fixed; top:0; left:0; right:0; bottom:0;
+      background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1000; padding: 20px;
+    }
+    /* Animations */
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fadeIn 0.3s ease-out; }
+    .hidden { display: none !important; }
+    .flex { display: flex; }
+    .flex-col { flex-direction: column; }
+    .items-center { align-items: center; }
+    .justify-between { justify-content: space-between; }
+    .gap-2 { gap: 8px; } .gap-3 { gap: 12px; } .gap-4 { gap: 16px; }
+    .mt-2 { margin-top: 8px; } .mt-4 { margin-top: 16px; } .mb-4 { margin-bottom: 16px; }
+    .text-sm { font-size: 14px; } .text-xs { font-size: 12px; }
+    .text-secondary { color: var(--text-secondary); }
+    .font-semibold { font-weight: 600; }
+    .truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .w-full { width: 100%; }
+    .p-4 { padding: 16px; }
+    .rounded-full { border-radius: 999px; }
+    .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+    /* Mobile responsive */
+    @media (max-width: 480px) {
+      body { padding: 12px; }
+      .btn { padding: 12px 20px; font-size: 15px; }
+    }
+  </style>
 </head>
 <body>
-
-    <div class="panel">
-        <div class="header">
-            <i class="fa-solid fa-microchip" style="color: #7d3acb; font-size: 24px;"></i>
-            <h1>QuocDat Opt</h1>
-            <div class="prompt">root@system:~#</div>
+  <div id="app" class="app-container"></div>
+  
+  <!-- Templates -->
+  <template id="login-template">
+    <div class="fade-in p-4 flex flex-col gap-4" style="margin-top: 25vh;">
+      <h1 style="font-size: 36px; font-weight: 700; letter-spacing: -0.5px;">QuocDat Drive</h1>
+      <p class="text-secondary">Lưu trữ & chia sẻ file an toàn</p>
+      <div class="glass p-4 flex flex-col gap-3 mt-4">
+        <input type="text" id="key-input" placeholder="Nhập key kích hoạt..." autocomplete="off">
+        <button class="btn btn-primary w-full" id="verify-key-btn">Xác minh Key</button>
+        <div class="flex items-center gap-2">
+          <div style="height:1px;background:rgba(255,255,255,0.1);flex:1"></div>
+          <span class="text-xs text-secondary">hoặc</span>
+          <div style="height:1px;background:rgba(255,255,255,0.1);flex:1"></div>
         </div>
-
-        <div class="optimize-grid">
-            <div class="opt-card" data-task="CLEAN">
-                <i class="fa-solid fa-broom"></i>
-                <h3>Dọn rác</h3>
-            </div>
-            <div class="opt-card" data-task="BOOST">
-                <i class="fa-solid fa-bolt"></i>
-                <h3>Tối ưu Game</h3>
-            </div>
-            <div class="opt-card" data-task="SECURITY">
-                <i class="fa-solid fa-shield-virus"></i>
-                <h3>Bảo mật</h3>
-            </div>
-        </div>
-
-        <div class="progress-container" id="pContainer">
-            <div class="progress-bar" id="pBar"></div>
-        </div>
-
-        <div class="terminal-container">
-            <div class="log-console" id="console">
-                <div class="log-line">
-                    <span class="ts">[INFO]</span>
-                    <span class="msg" style="color: #aaa;">Hệ thống sẵn sàng. Vui lòng chọn chức năng...</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="footer">
-            <div class="owner">
-                <div class="avatar">QD</div>
-                <div><strong>Quoc Dat</strong><br><small>Developer</small></div>
-            </div>
-            <button class="btn btn-ok" style="max-width: 120px;">Liên hệ</button>
-        </div>
+        <button class="btn w-full" id="google-login-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#fff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#fff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#fff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#fff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Đăng nhập Google
+        </button>
+        <button class="btn w-full" id="email-login-btn">Đăng nhập Email</button>
+      </div>
     </div>
+  </template>
 
-    <div class="confirm-overlay" id="confirmOverlay">
-        <div class="confirm-card">
-            <h2 id="confirmTitle">Xác nhận</h2>
-            <p id="confirmDesc" style="margin-top: 10px; color: #666;">Bạn có chắc chắn muốn thực hiện hành động này?</p>
-            <div class="c-btns">
-                <button class="btn" onclick="closeConfirm()">Hủy</button>
-                <button class="btn btn-ok" id="btnGo">Thực thi</button>
-            </div>
+  <template id="main-template">
+    <div class="fade-in flex flex-col gap-4">
+      <!-- Header -->
+      <div class="glass p-4 flex items-center justify-between">
+        <h2 style="font-weight:700;font-size:22px;">📁 File của tôi</h2>
+        <div class="flex gap-2">
+          <button class="btn btn-icon" id="profile-btn">
+            <img id="user-avatar" class="avatar" src="" alt="avatar" style="display:none;">
+            <span id="avatar-placeholder">👤</span>
+          </button>
         </div>
+      </div>
+      <!-- Upload zone -->
+      <div class="glass p-6 flex flex-col items-center gap-3 glow-border" id="drop-zone">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <p class="text-secondary">Kéo thả file hoặc nhấn để chọn</p>
+        <input type="file" id="file-input" multiple hidden>
+        <div id="preview-container" class="flex flex-wrap gap-2 mt-2 hidden"></div>
+      </div>
+      <!-- Upload queue -->
+      <div id="upload-queue" class="hidden flex flex-col gap-2"></div>
+      <!-- File list -->
+      <div id="file-list-container" class="flex flex-col gap-1">
+        <div class="skeleton" style="height:60px;margin:10px 0;"></div>
+        <div class="skeleton" style="height:60px;margin:10px 0;"></div>
+      </div>
     </div>
+  </template>
 
-    <script>
-        const payloads = [
-            { m: "Accessing kernel memory...", s: "EXEC", c: "#00ff41" },
-            { m: "Clearing cache at 0x884F...", s: "OK", c: "#00ff41" },
-            { m: "Warning: Low entropy detected.", s: "WARN", c: "#ffff00" },
-            { m: "Deleting temp files: 1.4GB", s: "OK", c: "#00ff41" },
-            { m: "Optimizing GPU clock...", s: "DONE", c: "#00ff41" },
-            { m: "Establishing secure link...", s: "SECURE", c: "#00ff41" },
-            { m: "Error: Sector 7 blocked.", s: "FAIL", c: "#ff0044" },
-            { m: "Retrying bypass logic...", s: "RETRY", c: "#ffff00" },
-            { m: "Process prioritized (PID: 409).", s: "OK", c: "#00ff41" },
-            { m: "Garbage collection success.", s: "OK", c: "#00ff41" },
-            { m: "Finalizing optimization...", s: "EXEC", c: "#00ff41" }
-        ];
+  <template id="file-detail-template">
+    <div class="fade-in flex flex-col gap-4 p-4">
+      <button class="btn" id="back-btn">← Quay lại</button>
+      <div class="glass p-4" id="file-preview"></div>
+      <div class="glass p-4 flex flex-col gap-3">
+        <h3 id="detail-name" class="font-semibold truncate"></h3>
+        <p class="text-sm text-secondary">Dung lượng: <span id="detail-size"></span></p>
+        <p class="text-sm text-secondary">Lượt tải: <span id="detail-downloads"></span></p>
+        <div class="flex gap-2">
+          <button class="btn btn-primary flex-1" id="download-btn">Tải xuống</button>
+          <button class="btn flex-1" id="share-btn">Chia sẻ</button>
+        </div>
+        <div id="share-options" class="hidden flex flex-col gap-3 mt-2">
+          <input type="text" id="share-link" readonly>
+          <div class="flex gap-2">
+            <input type="text" id="share-password" placeholder="Mật khẩu (tuỳ chọn)">
+            <input type="number" id="share-limit" placeholder="Giới hạn lượt">
+          </div>
+          <button class="btn" id="generate-qr-btn">Tạo QR</button>
+          <canvas id="qr-canvas" class="hidden"></canvas>
+        </div>
+      </div>
+    </div>
+  </template>
 
-        const logConsole = document.getElementById('console');
-        const overlay = document.getElementById('confirmOverlay');
-        let currentTask = "";
+  <script>
+    // Firebase config - GIỮ NGUYÊN
+    const firebaseConfig = {
+      apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE",
+      databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "keyquocdat",
+      storageBucket: "keyquocdat.appspot.com",
+      authDomain: "keyquocdat.firebaseapp.com"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+    const storage = firebase.storage();
 
-        // Mở confirm
-        document.querySelectorAll('.opt-card').forEach(card => {
-            card.onclick = () => {
-                currentTask = card.getAttribute('data-task');
-                document.getElementById('confirmTitle').innerText = card.querySelector('h3').innerText;
-                overlay.classList.add('show');
-            }
+    // App state
+    let currentUser = null;
+    let currentKey = null;
+    let filesRef = null;
+    let uploadTasks = [];
+
+    const app = document.getElementById('app');
+    
+    // Router đơn giản
+    function render(templateId, data = {}) {
+      const template = document.getElementById(templateId);
+      if (!template) return;
+      app.innerHTML = '';
+      const clone = template.content.cloneNode(true);
+      app.appendChild(clone);
+      if (templateId === 'main-template') initMain(data);
+      else if (templateId === 'file-detail-template') initFileDetail(data);
+      else if (templateId === 'login-template') initLogin();
+    }
+
+    // --- LOGIN FLOW ---
+    function initLogin() {
+      document.getElementById('verify-key-btn').addEventListener('click', verifyKey);
+      document.getElementById('google-login-btn').addEventListener('click', () => {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(provider).catch(alert);
+      });
+      document.getElementById('email-login-btn').addEventListener('click', () => {
+        const email = prompt('Email:');
+        const password = prompt('Mật khẩu:');
+        if (email && password) auth.signInWithEmailAndPassword(email, password).catch(e => {
+          if (e.code === 'auth/user-not-found') {
+            auth.createUserWithEmailAndPassword(email, password).catch(alert);
+          } else alert(e.message);
         });
+      });
+    }
 
-        function closeConfirm() { overlay.classList.remove('show'); }
-
-        // Logic chính
-        document.getElementById('btnGo').onclick = () => {
-            closeConfirm();
-            document.getElementById('pContainer').style.display = 'block';
-            logConsole.innerHTML = '';
-            
-            let lines = 0;
-            const maxLines = 15;
-            
-            const run = setInterval(() => {
-                if (lines >= maxLines) {
-                    clearInterval(run);
-                    addLog("TẤT CẢ TÁC VỤ HOÀN TẤT!", "SUCCESS", "#ffff00");
-                    return;
-                }
-
-                const data = payloads[Math.floor(Math.random() * payloads.length)];
-                addLog(data.m, data.s, data.c);
-                
-                // Cập nhật progress bar
-                document.getElementById('pBar').style.width = ((lines / maxLines) * 100) + "%";
-                lines++;
-            }, 150);
-        };
-
-        function addLog(message, status, color) {
-            const time = new Date().toLocaleTimeString('en-GB', { hour12: false });
-            const line = document.createElement('div');
-            line.className = 'log-line';
-            line.innerHTML = `
-                <span class="ts">[${time}]</span>
-                <span class="msg" style="color: ${color}">${message}</span>
-                <span class="stt" style="color: ${color}">[${status}]</span>
-            `;
-            logConsole.appendChild(line);
-            
-            // AUTO SCROLL
-            logConsole.scrollTop = logConsole.scrollHeight;
+    async function verifyKey() {
+      const key = document.getElementById('key-input').value.trim();
+      if (!key) return alert('Nhập key');
+      const keyRef = db.ref(`keys/${key}`);
+      try {
+        const result = await keyRef.transaction(keyData => {
+          if (!keyData || keyData.disabled) return;
+          if (keyData.type === 'ONCE') {
+            if (keyData.used) return;
+            keyData.used = true;
+          } else if (keyData.type === 'TIME') {
+            if (keyData.expiresAt && Date.now() > keyData.expiresAt) return;
+          }
+          // INFINITE luôn ok
+          return keyData;
+        });
+        if (result.committed && result.snapshot.val()) {
+          currentKey = key;
+          alert('Key hợp lệ! Đăng nhập để tiếp tục.');
+        } else {
+          alert('Key không hợp lệ hoặc đã hết hạn/sử dụng.');
         }
-    </script>
+      } catch (e) { alert('Lỗi: ' + e.message); }
+    }
+
+    // Auth listener
+    auth.onAuthStateChanged(user => {
+      currentUser = user;
+      if (user) {
+        if (!currentKey && !user.isAnonymous) {
+          // Nếu đã đăng nhập Google/Email, cho phép dùng không cần key (tuỳ chỉnh)
+          currentKey = 'auth';
+        }
+        filesRef = db.ref(`files/${user.uid}`);
+        render('main-template');
+      } else {
+        render('login-template');
+      }
+    });
+
+    // --- MAIN INTERFACE ---
+    function initMain() {
+      const avatar = document.getElementById('user-avatar');
+      const placeholder = document.getElementById('avatar-placeholder');
+      if (currentUser.photoURL) {
+        avatar.src = currentUser.photoURL;
+        avatar.style.display = 'block';
+        placeholder.style.display = 'none';
+      }
+      
+      document.getElementById('profile-btn').addEventListener('click', () => {
+        auth.signOut();
+      });
+
+      const dropZone = document.getElementById('drop-zone');
+      const fileInput = document.getElementById('file-input');
+      dropZone.addEventListener('click', () => fileInput.click());
+      dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.background = 'rgba(255,255,255,0.05)'; });
+      dropZone.addEventListener('dragleave', () => dropZone.style.background = '');
+      dropZone.addEventListener('drop', e => {
+        e.preventDefault();
+        dropZone.style.background = '';
+        handleFiles(e.dataTransfer.files);
+      });
+      fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+      // Realtime file list
+      filesRef.on('value', snapshot => {
+        const files = snapshot.val() || {};
+        renderFileList(files);
+      });
+    }
+
+    function handleFiles(fileList) {
+      const queue = document.getElementById('upload-queue');
+      queue.classList.remove('hidden');
+      queue.innerHTML = '';
+      Array.from(fileList).forEach(file => {
+        const task = uploadFile(file);
+        uploadTasks.push(task);
+        const item = document.createElement('div');
+        item.className = 'glass p-3 flex items-center gap-3';
+        item.innerHTML = `
+          <span class="truncate flex-1">${file.name}</span>
+          <span class="text-xs text-secondary" id="progress-${file.name}">0%</span>
+          <button class="btn btn-icon text-sm cancel-upload" data-name="${file.name}">✕</button>
+        `;
+        queue.appendChild(item);
+        task.on('state_changed', snap => {
+          const pct = Math.round(snap.bytesTransferred / snap.totalBytes * 100);
+          document.getElementById(`progress-${file.name}`).textContent = pct + '%';
+        });
+        task.then(() => {
+          item.querySelector('.cancel-upload').remove();
+          document.getElementById(`progress-${file.name}`).textContent = '✅';
+        }).catch(e => alert('Upload lỗi: ' + e.message));
+        item.querySelector('.cancel-upload').addEventListener('click', () => {
+          task.cancel();
+          item.remove();
+        });
+      });
+    }
+
+    function uploadFile(file) {
+      const storageRef = storage.ref(`${currentUser.uid}/${Date.now()}_${file.name}`);
+      const metadata = {
+        customMetadata: {
+          originalName: file.name,
+          uploadedBy: currentUser.email || currentUser.uid
+        }
+      };
+      const task = storageRef.put(file, metadata);
+      task.on('state_changed', null, null, async () => {
+        const url = await storageRef.getDownloadURL();
+        await filesRef.push({
+          name: file.name,
+          size: file.size,
+          url,
+          createdAt: firebase.database.ServerValue.TIMESTAMP,
+          downloads: 0,
+          password: null,
+          limit: null,
+          expireAt: null
+        });
+      });
+      return task;
+    }
+
+    function renderFileList(files) {
+      const container = document.getElementById('file-list-container');
+      container.innerHTML = '';
+      const entries = Object.entries(files).sort((a,b) => b[1].createdAt - a[1].createdAt);
+      if (entries.length === 0) {
+        container.innerHTML = '<p class="text-secondary text-center p-4">Chưa có file nào</p>';
+        return;
+      }
+      entries.forEach(([id, file]) => {
+        const div = document.createElement('div');
+        div.className = 'glass file-item flex items-center gap-3';
+        div.innerHTML = `
+          <div class="flex-1">
+            <p class="font-semibold truncate">${file.name}</p>
+            <p class="text-xs text-secondary">${formatSize(file.size)} • ${new Date(file.createdAt).toLocaleDateString()}</p>
+          </div>
+          <button class="btn btn-icon text-sm" data-id="${id}">→</button>
+        `;
+        div.addEventListener('click', () => render('file-detail-template', { id, file }));
+        container.appendChild(div);
+      });
+    }
+
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+      else if (bytes < 1073741824) return (bytes / 1048576).toFixed(1) + ' MB';
+      else return (bytes / 1073741824).toFixed(2) + ' GB';
+    }
+
+    // --- FILE DETAIL ---
+    function initFileDetail({id, file}) {
+      document.getElementById('back-btn').addEventListener('click', () => render('main-template'));
+      document.getElementById('detail-name').textContent = file.name;
+      document.getElementById('detail-size').textContent = formatSize(file.size);
+      document.getElementById('detail-downloads').textContent = file.downloads || 0;
+      
+      const previewDiv = document.getElementById('file-preview');
+      const ext = file.name.split('.').pop().toLowerCase();
+      if (['jpg','jpeg','png','gif','webp'].includes(ext)) {
+        previewDiv.innerHTML = `<img src="${file.url}" style="max-width:100%;border-radius:20px;" alt="preview">`;
+      } else if (['mp4','mov','mkv'].includes(ext)) {
+        previewDiv.innerHTML = `<video controls style="max-width:100%;border-radius:20px;"><source src="${file.url}"></video>`;
+      } else if (ext === 'pdf') {
+        previewDiv.innerHTML = `<iframe src="${file.url}" style="width:100%;height:400px;border-radius:20px;"></iframe>`;
+      } else if (ext === 'apk') {
+        previewDiv.innerHTML = `<div class="flex flex-col items-center"><span>📱</span><p>APK: ${file.name}</p></div>`;
+      } else {
+        previewDiv.innerHTML = `<div class="flex flex-col items-center"><span style="font-size:48px;">📄</span><p>${ext.toUpperCase()}</p></div>`;
+      }
+
+      document.getElementById('download-btn').addEventListener('click', async () => {
+        // Tăng lượt download
+        await filesRef.child(id).child('downloads').transaction(d => (d || 0) + 1);
+        window.open(file.url, '_blank');
+      });
+
+      document.getElementById('share-btn').addEventListener('click', () => {
+        document.getElementById('share-options').classList.toggle('hidden');
+        document.getElementById('share-link').value = file.url;
+      });
+
+      document.getElementById('generate-qr-btn').addEventListener('click', () => {
+        const canvas = document.getElementById('qr-canvas');
+        canvas.classList.remove('hidden');
+        QRCode.toCanvas(canvas, file.url, { width: 200 });
+      });
+
+      // Cập nhật password/limit nếu có
+      document.getElementById('share-password').addEventListener('change', e => {
+        filesRef.child(id).update({ password: e.target.value || null });
+      });
+      document.getElementById('share-limit').addEventListener('change', e => {
+        filesRef.child(id).update({ limit: parseInt(e.target.value) || null });
+      });
+    }
+
+    // Khởi tạo
+    render('login-template');
+  </script>
 </body>
 </html>
