@@ -3,25 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Admin Dashboard - QuocDat Drive</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <title>Admin - Quản lý App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
       font-family: 'Inter', sans-serif;
       background: #0a0a0a;
       color: white;
-      padding: 16px;
       display: flex;
       justify-content: center;
+      padding: 20px;
     }
-    .dash-container {
-      max-width: 1000px;
-      width: 100%;
-    }
+    .admin-container { max-width: 700px; width: 100%; }
     .glass {
       background: rgba(28,28,30,0.65);
       backdrop-filter: blur(24px);
@@ -39,48 +36,66 @@
       font-weight: 600;
       cursor: pointer;
       transition: 0.2s;
+      width: 100%;
+      margin-top: 8px;
     }
+    .btn-primary { background: white; color: black; border: none; }
+    .btn-danger { background: rgba(255,69,58,0.15); border-color: rgba(255,69,58,0.3); }
     .btn:active { transform: scale(0.96); }
-    .btn-danger { background: rgba(255,69,58,0.2); border-color: rgba(255,69,58,0.3); }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 16px; }
-    .stat { font-size: 28px; font-weight: 700; }
-    .text-secondary { color: rgba(255,255,255,0.6); }
-    .flex { display: flex; } .items-center { align-items: center; } .justify-between { justify-content: space-between; }
-    .gap-2 { gap: 8px; } .mt-4 { margin-top: 16px; }
-    .hidden { display: none; }
-    input, select {
+    input {
       background: rgba(255,255,255,0.05);
       border: 1px solid rgba(255,255,255,0.1);
       border-radius: 14px;
-      padding: 12px;
+      padding: 14px;
       color: white;
       width: 100%;
-      margin: 8px 0;
+      margin-bottom: 8px;
+      outline: none;
     }
+    .app-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px;
+      background: rgba(255,255,255,0.02);
+      border-radius: 18px;
+      margin-bottom: 8px;
+    }
+    .app-row img { width: 40px; height: 40px; border-radius: 12px; margin-right: 12px; }
+    .flex { display: flex; align-items: center; }
+    .gap-1 { gap: 8px; }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
-  <div class="dash-container" id="dash-app">
-    <div class="glass flex items-center justify-between">
-      <h2 style="font-weight:700;">🛡️ Admin Panel</h2>
-      <button class="btn" id="logout-btn">Đăng xuất</button>
+  <div class="admin-container" id="admin-app">
+    <div class="glass">
+      <h2 style="font-weight:700;">🛠️ Admin - Thêm ứng dụng</h2>
+      <input type="file" id="icon-file" accept="image/*">
+      <img id="icon-preview" style="width:80px;height:80px;border-radius:20px;margin:10px 0;display:none;">
+      <input type="text" id="app-name" placeholder="Tên ứng dụng">
+      <input type="text" id="app-link" placeholder="Link tải về (URL)">
+      <input type="text" id="app-size" placeholder="Dung lượng (VD: 45 MB)">
+      <button class="btn btn-primary" id="upload-btn">📤 Đăng tải</button>
     </div>
-    <!-- Stats -->
-    <div class="grid" id="stats-grid">
-      <div class="glass"><p class="text-secondary">Tổng file</p><p class="stat" id="total-files">0</p></div>
-      <div class="glass"><p class="text-secondary">Dung lượng</p><p class="stat" id="total-size">0 GB</p></div>
-      <div class="glass"><p class="text-secondary">Người dùng</p><p class="stat" id="total-users">0</p></div>
-      <div class="glass"><p class="text-secondary">Lượt tải</p><p class="stat" id="total-downloads">0</p></div>
+
+    <div class="glass">
+      <h3>📋 Danh sách ứng dụng</h3>
+      <div id="app-list-admin"></div>
     </div>
-    <!-- Tabs -->
-    <div class="flex gap-2 mt-4">
-      <button class="btn tab-btn active" data-tab="users">Người dùng</button>
-      <button class="btn tab-btn" data-tab="files">File</button>
-      <button class="btn tab-btn" data-tab="keys">Quản lý Key</button>
-      <button class="btn tab-btn" data-tab="logs">Log</button>
+
+    <div id="edit-modal" class="glass hidden" style="position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:10; width:90%; max-width:500px;">
+      <h4>Chỉnh sửa</h4>
+      <input type="text" id="edit-name" placeholder="Tên">
+      <input type="text" id="edit-link" placeholder="Link">
+      <input type="text" id="edit-size" placeholder="Dung lượng">
+      <input type="file" id="edit-icon-file" accept="image/*">
+      <img id="edit-icon-preview" style="width:60px;height:60px;border-radius:16px;margin:8px 0;display:none;">
+      <div class="flex gap-1">
+        <button class="btn btn-primary" id="save-edit-btn">Lưu</button>
+        <button class="btn" id="cancel-edit-btn">Huỷ</button>
+      </div>
     </div>
-    <!-- Tab content -->
-    <div id="tab-content" class="glass mt-4"></div>
   </div>
 
   <script>
@@ -92,152 +107,127 @@
       authDomain: "keyquocdat.firebaseapp.com"
     };
     firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
     const db = firebase.database();
-    
-    let currentTab = 'users';
+    const storage = firebase.storage();
 
-    auth.onAuthStateChanged(async user => {
-      if (!user) {
-        // Yêu cầu admin đăng nhập
-        const email = prompt('Admin email:');
-        const pass = prompt('Admin password:');
-        if (email && pass) {
-          try {
-            await auth.signInWithEmailAndPassword(email, pass);
-            // Kiểm tra quyền admin (bạn cần set trong database: admins/{uid}: true)
-            const adminSnap = await db.ref(`admins/${auth.currentUser.uid}`).once('value');
-            if (!adminSnap.val()) { alert('Không phải admin!'); auth.signOut(); }
-          } catch(e) { alert(e.message); }
-        }
-      } else {
-        loadDashboard();
+    let currentEditId = null;
+
+    // Upload icon + tạo app
+    document.getElementById('upload-btn').addEventListener('click', async () => {
+      const iconFile = document.getElementById('icon-file').files[0];
+      const name = document.getElementById('app-name').value.trim();
+      const link = document.getElementById('app-link').value.trim();
+      const size = document.getElementById('app-size').value.trim();
+      if (!name || !link) return alert('Nhập tên và link tải!');
+
+      let iconUrl = '';
+      if (iconFile) {
+        const ref = storage.ref('app-icons/' + Date.now() + '_' + iconFile.name);
+        await ref.put(iconFile);
+        iconUrl = await ref.getDownloadURL();
+      }
+
+      const newAppRef = db.ref('apps').push();
+      await newAppRef.set({
+        name,
+        downloadLink: link,
+        icon: iconUrl,
+        size: size || ''
+      });
+
+      alert('Đã thêm!');
+      document.getElementById('app-name').value = '';
+      document.getElementById('app-link').value = '';
+      document.getElementById('app-size').value = '';
+      document.getElementById('icon-file').value = '';
+      document.getElementById('icon-preview').style.display = 'none';
+    });
+
+    // Preview icon khi chọn file
+    document.getElementById('icon-file').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = ev => {
+          document.getElementById('icon-preview').src = ev.target.result;
+          document.getElementById('icon-preview').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
       }
     });
 
-    document.getElementById('logout-btn').addEventListener('click', () => auth.signOut());
-
-    function loadDashboard() {
-      // Stats realtime
-      db.ref('files').on('value', snap => {
-        const allFiles = snap.val() || {};
-        let totalFiles = 0, totalSize = 0, totalDownloads = 0;
-        Object.values(allFiles).forEach(userFiles => {
-          Object.values(userFiles).forEach(file => {
-            totalFiles++;
-            totalSize += file.size || 0;
-            totalDownloads += file.downloads || 0;
-          });
-        });
-        document.getElementById('total-files').textContent = totalFiles;
-        document.getElementById('total-size').textContent = (totalSize / 1e9).toFixed(2) + ' GB';
-        document.getElementById('total-downloads').textContent = totalDownloads;
-      });
-      // Users count (có thể lưu ở /users)
-      db.ref('users').on('value', snap => {
-        document.getElementById('total-users').textContent = snap.numChildren();
-      });
-
-      // Tabs
-      document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          currentTab = btn.dataset.tab;
-          renderTab(currentTab);
-        });
-      });
-      renderTab('users');
-    }
-
-    function renderTab(tab) {
-      const container = document.getElementById('tab-content');
-      switch(tab) {
-        case 'users': renderUsers(container); break;
-        case 'files': renderFiles(container); break;
-        case 'keys': renderKeys(container); break;
-        case 'logs': container.innerHTML = '<p>Log hệ thống...</p>'; break;
-      }
-    }
-
-    function renderUsers(container) {
-      container.innerHTML = '<h3 class="mb-4">Danh sách người dùng</h3><div id="user-list"></div>';
-      db.ref('users').on('value', snap => {
-        const users = snap.val() || {};
-        const list = document.getElementById('user-list');
-        list.innerHTML = '';
-        Object.entries(users).forEach(([uid, data]) => {
-          const div = document.createElement('div');
-          div.className = 'flex items-center justify-between p-3';
-          div.innerHTML = `
-            <span>${data.email || uid}</span>
-            <button class="btn btn-danger" data-uid="${uid}">Ban</button>
+    // Danh sách app realtime
+    function loadAppList() {
+      db.ref('apps').on('value', snap => {
+        const apps = snap.val() || {};
+        const container = document.getElementById('app-list-admin');
+        container.innerHTML = '';
+        Object.entries(apps).forEach(([id, app]) => {
+          const row = document.createElement('div');
+          row.className = 'app-row';
+          row.innerHTML = `
+            <div class="flex" style="flex:1;">
+              <img src="${app.icon || ''}" alt="icon">
+              <div>
+                <p style="font-weight:600;">${app.name}</p>
+                <p style="font-size:13px; color:rgba(255,255,255,0.5);">${app.size || 'N/A'}</p>
+              </div>
+            </div>
+            <div class="flex gap-1">
+              <button class="btn" style="width:auto; padding:8px 12px;" data-edit="${id}">✏️</button>
+              <button class="btn btn-danger" style="width:auto; padding:8px 12px;" data-delete="${id}">🗑</button>
+            </div>
           `;
-          div.querySelector('button').addEventListener('click', async () => {
-            await db.ref(`users/${uid}`).update({ banned: true });
-            alert('Đã ban user ' + uid);
-          });
-          list.appendChild(div);
+          container.appendChild(row);
         });
-      });
-    }
 
-    function renderFiles(container) {
-      container.innerHTML = '<h3>Quản lý file</h3><div id="files-admin-list"></div>';
-      db.ref('files').on('value', snap => {
-        const all = snap.val() || {};
-        const list = document.getElementById('files-admin-list');
-        list.innerHTML = '';
-        Object.entries(all).forEach(([uid, files]) => {
-          Object.entries(files).forEach(([fileId, file]) => {
-            const div = document.createElement('div');
-            div.className = 'flex items-center justify-between p-3';
-            div.innerHTML = `
-              <span class="truncate">${file.name} (${uid})</span>
-              <button class="btn btn-danger" data-uid="${uid}" data-fileid="${fileId}">Xoá</button>
-            `;
-            div.querySelector('button').addEventListener('click', async () => {
-              await db.ref(`files/${uid}/${fileId}`).remove();
-              // Xoá storage
-              firebase.storage().refFromURL(file.url).delete().catch(()=>{});
-            });
-            list.appendChild(div);
+        // Gắn sự kiện edit/delete
+        container.querySelectorAll('[data-edit]').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const id = e.target.dataset.edit;
+            const app = apps[id];
+            currentEditId = id;
+            document.getElementById('edit-name').value = app.name;
+            document.getElementById('edit-link').value = app.downloadLink;
+            document.getElementById('edit-size').value = app.size || '';
+            document.getElementById('edit-icon-preview').style.display = 'none';
+            document.getElementById('edit-modal').classList.remove('hidden');
+          });
+        });
+        container.querySelectorAll('[data-delete]').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            if (confirm('Xoá ứng dụng này?')) {
+              await db.ref('apps/' + e.target.dataset.delete).remove();
+            }
           });
         });
       });
     }
 
-    function renderKeys(container) {
-      container.innerHTML = `
-        <h3>Tạo key mới</h3>
-        <input id="new-key" placeholder="Key string">
-        <select id="key-type"><option value="ONCE">ONCE</option><option value="TIME">TIME</option><option value="INFINITE">INFINITE</option></select>
-        <input id="key-expire" type="datetime-local" placeholder="Hết hạn (nếu TIME)">
-        <button class="btn mt-4" id="create-key-btn">Tạo Key</button>
-        <div id="key-list" class="mt-4"></div>
-      `;
-      document.getElementById('create-key-btn').addEventListener('click', async () => {
-        const key = document.getElementById('new-key').value.trim();
-        const type = document.getElementById('key-type').value;
-        const expire = document.getElementById('key-expire').value;
-        if (!key) return alert('Nhập key');
-        const data = { type, used: false, disabled: false };
-        if (type === 'TIME' && expire) data.expiresAt = new Date(expire).getTime();
-        await db.ref(`keys/${key}`).set(data);
-        alert('Đã tạo key!');
-      });
-      // Danh sách key
-      db.ref('keys').on('value', snap => {
-        const keys = snap.val() || {};
-        const list = document.getElementById('key-list');
-        list.innerHTML = Object.entries(keys).map(([k, v]) => 
-          `<div class="flex justify-between p-2"><span>${k} (${v.type})</span><button class="btn btn-danger" data-key="${k}">Xoá</button></div>`
-        ).join('');
-        list.querySelectorAll('button').forEach(btn => {
-          btn.addEventListener('click', () => db.ref(`keys/${btn.dataset.key}`).remove());
-        });
-      });
-    }
+    loadAppList();
+
+    // Edit modal
+    document.getElementById('cancel-edit-btn').addEventListener('click', () => {
+      document.getElementById('edit-modal').classList.add('hidden');
+    });
+    document.getElementById('save-edit-btn').addEventListener('click', async () => {
+      if (!currentEditId) return;
+      const name = document.getElementById('edit-name').value.trim();
+      const link = document.getElementById('edit-link').value.trim();
+      const size = document.getElementById('edit-size').value.trim();
+      const iconFile = document.getElementById('edit-icon-file').files[0];
+      let iconUrl = undefined;
+      if (iconFile) {
+        const ref = storage.ref('app-icons/' + Date.now() + '_' + iconFile.name);
+        await ref.put(iconFile);
+        iconUrl = await ref.getDownloadURL();
+      }
+      const updateData = { name, downloadLink: link, size };
+      if (iconUrl) updateData.icon = iconUrl;
+      await db.ref('apps/' + currentEditId).update(updateData);
+      document.getElementById('edit-modal').classList.add('hidden');
+      alert('Đã cập nhật!');
+    });
   </script>
 </body>
 </html>
