@@ -3,137 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>AppHub - Kho Ứng Dụng Cao Cấp</title>
+  <title>AppHub - Kho Ứng Dụng</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <style>
+    /* CSS CŨ GIỮ NGUYÊN */
     * { margin:0; padding:0; box-sizing:border-box; }
-    :root {
-      --bg: #000000;
-      --surface: rgba(20, 0, 0, 0.65);
-      --border: rgba(255, 59, 48, 0.3);
-      --text: #fff;
-      --radius: 24px;
-      --primary: #ff3b30;
-    }
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      padding: 16px;
-    }
+    :root { --bg: #000000; --surface: rgba(20, 0, 0, 0.65); --border: rgba(255, 59, 48, 0.3); --text: #fff; --radius: 24px; --primary: #ff3b30; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; justify-content: center; padding: 16px; }
     .container { max-width: 480px; width: 100%; animation: fadeIn 0.4s ease-out; }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .glass {
-      background: var(--surface);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
-      margin-bottom: 14px;
-      box-shadow: 0 8px 32px rgba(255, 0, 0, 0.15);
-    }
-    
-    .intro-banner {
-      background: linear-gradient(135deg, rgba(255, 59, 48, 0.15) 0%, rgba(20, 0, 0, 0.5) 100%);
-      border: 1px solid rgba(255, 59, 48, 0.2);
-      border-radius: 20px;
-      padding: 18px;
-      margin-bottom: 16px;
-      box-shadow: inset 0 0 20px rgba(255, 59, 48, 0.05);
-    }
-    
-    .btn {
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 14px;
-      padding: 12px 20px;
-      color: white;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      width: 100%;
-      margin-top: 8px;
-      text-align: center;
-      text-decoration: none;
-      display: inline-block;
-    }
-    .btn-primary { 
-      background: var(--primary); 
-      color: white; 
-      border: none; 
-      box-shadow: 0 0 15px rgba(255, 59, 48, 0.4);
-    }
-    .btn-primary:hover { 
-      background: #ff453a; 
-      box-shadow: 0 0 25px rgba(255, 59, 48, 0.6); 
-    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .glass { background: var(--surface); backdrop-filter: blur(24px); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 14px; box-shadow: 0 8px 32px rgba(255, 0, 0, 0.15); }
+    .intro-banner { background: linear-gradient(135deg, rgba(255, 59, 48, 0.15) 0%, rgba(20, 0, 0, 0.5) 100%); border: 1px solid rgba(255, 59, 48, 0.2); border-radius: 20px; padding: 18px; margin-bottom: 16px; }
+    .btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 12px 20px; color: white; font-weight: 600; cursor: pointer; transition: 0.3s; width: 100%; margin-top: 8px; text-align: center; }
+    .btn-primary { background: var(--primary); color: white; border: none; box-shadow: 0 0 15px rgba(255, 59, 48, 0.4); }
+    .btn-primary:hover { background: #ff453a; box-shadow: 0 0 25px rgba(255, 59, 48, 0.6); }
     .btn:active { transform: scale(0.96); }
-    
-    input {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 12px;
-      padding: 12px 14px;
-      color: white;
-      width: 100%;
-      margin-bottom: 10px;
-      outline: none;
-      transition: 0.3s;
-    }
-    input:focus { 
-      border-color: var(--primary); 
-      background: rgba(255, 59, 48, 0.05); 
-      box-shadow: 0 0 10px rgba(255, 59, 48, 0.4);
-    }
-
-    .app-card {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 14px;
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(255, 59, 48, 0.15);
-      border-radius: 18px;
-      margin-bottom: 12px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    .app-card:hover { 
-      background: rgba(255, 59, 48, 0.1); 
-      transform: translateY(-2px);
-      border-color: rgba(255, 59, 48, 0.4);
-      box-shadow: 0 4px 15px rgba(255, 59, 48, 0.15);
-    }
+    input { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px 14px; color: white; width: 100%; margin-bottom: 10px; outline: none; transition: 0.3s; }
+    input:focus { border-color: var(--primary); background: rgba(255, 59, 48, 0.05); box-shadow: 0 0 10px rgba(255, 59, 48, 0.4); }
+    .app-card { display: flex; align-items: center; gap: 14px; padding: 14px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 59, 48, 0.15); border-radius: 18px; margin-bottom: 12px; cursor: pointer; transition: 0.3s; }
+    .app-card:hover { background: rgba(255, 59, 48, 0.1); transform: translateY(-2px); border-color: rgba(255, 59, 48, 0.4); }
     .app-icon { width: 56px; height: 56px; border-radius: 14px; object-fit: cover; border: 1px solid rgba(255,59,48,0.2); }
+    .modal-overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+    .hidden { display: none !important; } .flex { display: flex; } .flex-col { flex-direction: column; } .items-center { align-items: center; } .justify-between { justify-content: space-between; } .gap-2 { gap: 8px; } .mt-4 { margin-top: 16px; } .text-secondary { color: rgba(255,255,255,0.6); font-size: 13px; } .text-center { text-align: center; }
     
-    .modal-overlay {
-      position: fixed; top:0; left:0; right:0; bottom:0;
-      background: rgba(0,0,0,0.85); backdrop-filter: blur(12px);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 1000; padding: 20px;
-      animation: fadeIn 0.2s ease-out;
-    }
-
-    .hidden { display: none !important; }
-    .flex { display: flex; } 
-    .flex-col { flex-direction: column; } 
-    .items-center { align-items: center; }
-    .justify-between { justify-content: space-between; }
-    .gap-2 { gap: 8px; } .mt-4 { margin-top: 16px; }
-    .text-secondary { color: rgba(255,255,255,0.6); font-size: 13px; }
-    .text-center { text-align: center; }
+    /* Tag VIP & Free */
+    .tag { font-size: 10px; padding: 3px 6px; border-radius: 6px; font-weight: bold; margin-bottom: 4px; display: inline-block;}
+    .tag-vip { background: linear-gradient(45deg, #ffc107, #ff9800); color: black; box-shadow: 0 0 10px rgba(255, 193, 7, 0.5); }
+    .tag-free { background: rgba(255,255,255,0.1); color: #ccc; border: 1px solid rgba(255,255,255,0.2); }
   </style>
 </head>
 <body>
@@ -145,12 +44,15 @@
         <h3 style="font-weight:700; font-size:18px; text-shadow: 0 0 10px rgba(255,59,48,0.5);">📱 AppHub Store</h3>
         <p id="user-status-text" class="text-secondary" style="font-size:11px; margin-top:2px;">Chế độ khách</p>
       </div>
-      <button class="btn" style="width:auto; padding:8px 16px; margin:0; font-size:13px; border-color: rgba(255,59,48,0.4);" id="auth-action-btn">Đăng nhập</button>
+      <div class="flex gap-1">
+        <button class="btn hidden" style="width:auto; padding:8px 12px; margin:0; font-size:13px; border-color: #ffc107; color: #ffc107;" id="vip-action-btn">👑 VIP</button>
+        <button class="btn" style="width:auto; padding:8px 16px; margin:0; font-size:13px; border-color: rgba(255,59,48,0.4);" id="auth-action-btn">Đăng nhập</button>
+      </div>
     </div>
 
     <div class="intro-banner">
       <h4 style="font-weight:600; font-size:15px; margin-bottom:4px; color: #ff3b30;">✨ Chào mừng bạn đến với AppHub</h4>
-      <p class="text-secondary" style="font-size:13px; line-height:1.4;">Khám phá bộ sưu tập ứng dụng cao cấp đã qua kiểm duyệt bảo mật. Đăng ký tài khoản miễn phí để mở khoá tính năng tải xuống trực tiếp tốc độ cao.</p>
+      <p class="text-secondary" style="font-size:13px; line-height:1.4;">Tải ứng dụng miễn phí, hoặc vượt link để nâng cấp tài khoản VIP mở khoá tính năng cao cấp.</p>
     </div>
 
     <div id="app-list"></div>
@@ -160,18 +62,13 @@
     <div class="glass" style="animation: fadeIn 0.2s ease-out;">
       <button class="btn" style="width:auto; margin:0; padding:6px 12px; font-size:13px; border-color: rgba(255,59,48,0.3);" id="back-btn">← Quay lại cửa hàng</button>
       <div class="flex flex-col items-center gap-2 mt-4 text-center">
-        <img id="detail-icon" class="app-icon" style="width:90px; height:90px; border-radius:20px; box-shadow:0 0 25px rgba(255,59,48,0.4); border: 2px solid #ff3b30;">
-        <h2 id="detail-name" style="font-weight:700; font-size:22px; margin-top:6px; text-shadow: 0 0 10px rgba(255,255,255,0.3);"></h2>
-        
-        <div class="flex gap-2 text-secondary" style="margin-bottom:10px;">
-          <span id="detail-version"></span> • <span id="detail-size"></span> • <span id="detail-downloads"></span>
-        </div>
-
+        <div id="detail-tag"></div>
+        <img id="detail-icon" class="app-icon" style="width:90px; height:90px; border-radius:20px; box-shadow:0 0 25px rgba(255,59,48,0.4);">
+        <h2 id="detail-name" style="font-weight:700; font-size:22px; margin-top:6px;"></h2>
+        <div class="flex gap-2 text-secondary" style="margin-bottom:10px;"><span id="detail-version"></span> • <span id="detail-size"></span> • <span id="detail-downloads"></span></div>
         <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,59,48,0.2); padding:14px; border-radius:14px; width:100%; text-align:left; margin-bottom:10px;">
-          <p style="font-size:12px; color:#ff3b30; text-transform:uppercase; font-weight:600; margin-bottom:4px;">Giới thiệu ứng dụng</p>
           <p id="detail-desc" style="font-size:14px; line-height:1.5; color:rgba(255,255,255,0.85); white-space:pre-line;"></p>
         </div>
-
         <button id="download-trigger-btn" class="btn btn-primary" style="font-size:16px;">📥 Tải xuống ngay</button>
       </div>
     </div>
@@ -179,139 +76,156 @@
 
   <div id="auth-modal" class="modal-overlay hidden">
     <div class="glass" style="width:100%; max-width:380px; margin:0; position:relative; border-color: #ff3b30; box-shadow: 0 0 40px rgba(255,0,0,0.3);">
-      <button id="close-auth-btn" style="position:absolute; top:16px; right:16px; background:none; border:none; color:white; font-size:18px; cursor:pointer; opacity:0.6;">✕</button>
-      
+      <button id="close-auth-btn" style="position:absolute; top:16px; right:16px; background:none; border:none; color:white; font-size:18px; cursor:pointer;">✕</button>
       <div id="login-form">
-        <h3 style="font-weight:700; margin-bottom:4px; font-size:18px; text-shadow: 0 0 10px rgba(255,59,48,0.5);">Yêu cầu Đăng nhập</h3>
-        <p class="text-secondary" style="margin-bottom:16px;">Bạn cần tài khoản để có thể tải ứng dụng mới.</p>
-        <input type="email" id="email-login" placeholder="Địa chỉ Email" autocomplete="email">
-        <input type="password" id="password-login" placeholder="Mật khẩu của bạn">
-        <button class="btn btn-primary" id="login-btn">Đăng nhập tài khoản</button>
-        <p class="text-secondary text-center mt-4" style="cursor:pointer;" id="go-register">Chưa có tài khoản? <b style="color:#ff3b30; text-shadow: 0 0 5px rgba(255,59,48,0.5);">Đăng ký miễn phí</b></p>
+        <h3 style="font-weight:700; margin-bottom:4px;">Đăng nhập</h3>
+        <p class="text-secondary" style="margin-bottom:16px;">Đăng nhập để tải app và nâng cấp VIP.</p>
+        <input type="email" id="email-login" placeholder="Email">
+        <input type="password" id="password-login" placeholder="Mật khẩu">
+        <button class="btn btn-primary" id="login-btn">Đăng nhập</button>
+        <p class="text-secondary text-center mt-4" style="cursor:pointer;" id="go-register">Chưa có tài khoản? <b style="color:#ff3b30;">Đăng ký</b></p>
       </div>
-
       <div id="register-form" class="hidden">
-        <h3 style="font-weight:700; margin-bottom:4px; font-size:18px; text-shadow: 0 0 10px rgba(255,59,48,0.5);">Đăng ký thành viên</h3>
-        <p class="text-secondary" style="margin-bottom:16px;">Tạo tài khoản nhanh chóng trong 30 giây.</p>
-        <input type="email" id="email-reg" placeholder="Địa chỉ Email mới">
-        <input type="password" id="password-reg" placeholder="Tạo mật khẩu an toàn">
-        <input type="password" id="password-confirm" placeholder="Xác nhận lại mật khẩu">
-        <button class="btn btn-primary" id="register-btn">Kích hoạt tài khoản</button>
-        <p class="text-secondary text-center mt-4" style="cursor:pointer;" id="go-login">Đã có tài khoản? <b style="color:#ff3b30; text-shadow: 0 0 5px rgba(255,59,48,0.5);">Đăng nhập ngay</b></p>
+        <h3 style="font-weight:700; margin-bottom:4px;">Đăng ký</h3>
+        <input type="email" id="email-reg" placeholder="Email">
+        <input type="password" id="password-reg" placeholder="Mật khẩu">
+        <button class="btn btn-primary" id="register-btn">Đăng ký</button>
+        <p class="text-secondary text-center mt-4" style="cursor:pointer;" id="go-login">Đã có tài khoản? <b style="color:#ff3b30;">Đăng nhập</b></p>
       </div>
     </div>
   </div>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE",
-      databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "keyquocdat",
-      storageBucket: "keyquocdat.appspot.com",
-      authDomain: "keyquocdat.firebaseapp.com"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.database();
+  <div id="vip-modal" class="modal-overlay hidden">
+    <div class="glass" style="width:100%; max-width:380px; margin:0; position:relative; border-color: #ffc107; box-shadow: 0 0 40px rgba(255,193,7,0.3);">
+      <button id="close-vip-btn" style="position:absolute; top:16px; right:16px; background:none; border:none; color:white; font-size:18px; cursor:pointer;">✕</button>
+      <h3 style="font-weight:700; margin-bottom:4px; color:#ffc107; text-shadow: 0 0 10px rgba(255,193,7,0.5);">👑 Nâng cấp VIP</h3>
+      <p class="text-secondary" style="margin-bottom:16px;">Vượt link để lấy mã kích hoạt quyền tải các ứng dụng VIP.</p>
+      
+      <a href="URL_RUT_GON_CUA_BAN_DEN_TRANG_GET_VIP_HTML" target="_blank" class="btn" style="background: rgba(255,193,7,0.1); border-color:#ffc107; color:#ffc107; margin-bottom:15px; display:block;">🔗 Bấm vào đây để Vượt link lấy Mã</a>
+      
+      <input type="text" id="vip-code-input" placeholder="Nhập mã (vd: vipuseractive-...)" style="border-color:#ffc107;">
+      <button class="btn btn-primary" style="background:#ffc107; color:black; box-shadow: 0 0 15px rgba(255,193,7,0.4);" id="verify-vip-btn">✅ Xác nhận Mã</button>
+    </div>
+  </div>
 
-    const appEl = document.getElementById('app');
-    let currentUser = null;
+  <script>
+    const firebaseConfig = { apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE", databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "keyquocdat" };
+    firebase.initializeApp(firebaseConfig); const auth = firebase.auth(); const db = firebase.database();
+    
+    const appEl = document.getElementById('app'); let currentUser = null; let isUserVip = false;
 
     function render(templateId) {
-      const template = document.getElementById(templateId);
-      appEl.innerHTML = '';
-      appEl.appendChild(template.content.cloneNode(true));
+      appEl.innerHTML = ''; appEl.appendChild(document.getElementById(templateId).content.cloneNode(true));
+      if (templateId === 'main-template') initMain(); else if (templateId === 'app-detail-template') window._appDetailInit();
+    }
+
+    // Modal Events Auth
+    document.getElementById('close-auth-btn').addEventListener('click', () => document.getElementById('auth-modal').classList.add('hidden'));
+    document.getElementById('go-register').addEventListener('click', () => { document.getElementById('login-form').classList.add('hidden'); document.getElementById('register-form').classList.remove('hidden'); });
+    document.getElementById('go-login').addEventListener('click', () => { document.getElementById('register-form').classList.add('hidden'); document.getElementById('login-form').classList.remove('hidden'); });
+    document.getElementById('login-btn').addEventListener('click', () => {
+      auth.signInWithEmailAndPassword(document.getElementById('email-login').value, document.getElementById('password-login').value)
+        .then(() => document.getElementById('auth-modal').classList.add('hidden')).catch(e => alert('Lỗi: ' + e.message));
+    });
+    document.getElementById('register-btn').addEventListener('click', () => {
+      auth.createUserWithEmailAndPassword(document.getElementById('email-reg').value, document.getElementById('password-reg').value)
+        .then(cred => {
+          // Khởi tạo data user
+          db.ref('users/' + cred.user.uid).set({ email: cred.user.email, isVip: false });
+          document.getElementById('auth-modal').classList.add('hidden');
+        }).catch(e => alert('Lỗi: ' + e.message));
+    });
+
+    // Modal Events VIP
+    document.getElementById('close-vip-btn').addEventListener('click', () => document.getElementById('vip-modal').classList.add('hidden'));
+    document.getElementById('verify-vip-btn').addEventListener('click', () => {
+      const code = document.getElementById('vip-code-input').value.trim();
+      if(!code) return alert('Vui lòng nhập mã!');
+      if(!currentUser) return alert('Bạn cần đăng nhập trước!');
       
-      if (templateId === 'main-template') initMain();
-      else if (templateId === 'app-detail-template') window._appDetailInit();
-    }
+      const btn = document.getElementById('verify-vip-btn'); btn.textContent = '⏳ Đang kiểm tra...'; btn.disabled = true;
 
-    function initAuthPopupEvents() {
-      document.getElementById('close-auth-btn').addEventListener('click', () => {
-        document.getElementById('auth-modal').classList.add('hidden');
+      // Kiểm tra mã trên Database
+      db.ref('vip_codes/' + code).once('value', snap => {
+        if(snap.exists() && snap.val().valid === true) {
+          // Đánh dấu mã đã sử dụng
+          db.ref('vip_codes/' + code).update({ valid: false });
+          // Nâng cấp user
+          db.ref('users/' + currentUser.uid).update({ isVip: true }).then(() => {
+            alert('🎉 Kích hoạt VIP thành công!');
+            document.getElementById('vip-modal').classList.add('hidden');
+            isUserVip = true; initMain(); // Reload UI
+          });
+        } else {
+          alert('❌ Mã kích hoạt không hợp lệ hoặc đã được sử dụng!');
+        }
+        btn.textContent = '✅ Xác nhận Mã'; btn.disabled = false;
       });
-      document.getElementById('go-register').addEventListener('click', () => {
-        document.getElementById('login-form').classList.add('hidden');
-        document.getElementById('register-form').classList.remove('hidden');
-      });
-      document.getElementById('go-login').addEventListener('click', () => {
-        document.getElementById('register-form').classList.add('hidden');
-        document.getElementById('login-form').classList.remove('hidden');
-      });
+    });
 
-      document.getElementById('login-btn').addEventListener('click', () => {
-        const email = document.getElementById('email-login').value.trim();
-        const pass = document.getElementById('password-login').value;
-        auth.signInWithEmailAndPassword(email, pass)
-          .then(() => document.getElementById('auth-modal').classList.add('hidden'))
-          .catch(e => alert('Sai thông tin: ' + e.message));
-      });
-
-      document.getElementById('register-btn').addEventListener('click', () => {
-        const email = document.getElementById('email-reg').value.trim();
-        const pass = document.getElementById('password-reg').value;
-        const confirm = document.getElementById('password-confirm').value;
-        if (pass !== confirm) return alert('Xác nhận mật khẩu chưa khớp chính xác!');
-        auth.createUserWithEmailAndPassword(email, pass)
-          .then(() => document.getElementById('auth-modal').classList.add('hidden'))
-          .catch(e => alert('Lỗi: ' + e.message));
-      });
-    }
-
+    // Theo dõi tài khoản
     auth.onAuthStateChanged(user => {
       currentUser = user;
-      const statusText = document.getElementById('user-status-text');
-      const authBtn = document.getElementById('auth-action-btn');
-      
-      if (statusText && authBtn) {
-        if (user) {
-          statusText.textContent = `Tài khoản: ${user.email}`;
-          authBtn.textContent = 'Đăng xuất';
-        } else {
-          statusText.textContent = 'Chế độ khách';
-          authBtn.textContent = 'Đăng nhập';
-        }
+      if (user) {
+        // Lấy thông tin VIP từ Database
+        db.ref('users/' + user.uid).on('value', snap => {
+          isUserVip = snap.val() ? snap.val().isVip : false;
+          updateHeaderUI();
+        });
+      } else {
+        isUserVip = false; updateHeaderUI();
       }
     });
 
-    function initMain() {
-      const authBtn = document.getElementById('auth-action-btn');
+    function updateHeaderUI() {
       const statusText = document.getElementById('user-status-text');
-      
-      if (currentUser) {
-        statusText.textContent = `Tài khoản: ${currentUser.email}`;
-        authBtn.textContent = 'Đăng xuất';
-      }
+      const authBtn = document.getElementById('auth-action-btn');
+      const vipBtn = document.getElementById('vip-action-btn');
+      if (!statusText) return; // Nếu đang ở trang detail thì bỏ qua
 
-      authBtn.addEventListener('click', () => {
-        if (currentUser) {
-          auth.signOut().then(() => alert('Đã đăng xuất tài khoản!'));
+      if (currentUser) {
+        statusText.innerHTML = isUserVip ? `<span style="color:#ffc107;">👑 Thành viên VIP</span>` : `Thành viên Thường`;
+        authBtn.textContent = 'Đăng xuất';
+        if(!isUserVip) {
+          vipBtn.classList.remove('hidden'); // Hiện nút nâng VIP nếu chưa có
         } else {
-          document.getElementById('auth-modal').classList.remove('hidden');
+          vipBtn.classList.add('hidden');
         }
+      } else {
+        statusText.textContent = 'Chế độ khách';
+        authBtn.textContent = 'Đăng nhập';
+        vipBtn.classList.add('hidden');
+      }
+    }
+
+    function initMain() {
+      updateHeaderUI();
+      document.getElementById('auth-action-btn').addEventListener('click', () => {
+        if (currentUser) auth.signOut().then(() => alert('Đã đăng xuất!'));
+        else document.getElementById('auth-modal').classList.remove('hidden');
+      });
+
+      document.getElementById('vip-action-btn').addEventListener('click', () => {
+        document.getElementById('vip-modal').classList.remove('hidden');
       });
 
       const listEl = document.getElementById('app-list');
-      
       db.ref('apps').on('value', snap => {
-        const apps = snap.val() || {};
-        listEl.innerHTML = '';
-        
+        const apps = snap.val() || {}; listEl.innerHTML = '';
         Object.entries(apps).forEach(([id, app]) => {
-          const card = document.createElement('div');
-          card.className = 'app-card';
+          const isVipApp = app.type === 'vip';
+          const tagHtml = isVipApp ? '<span class="tag tag-vip">👑 App VIP</span>' : '<span class="tag tag-free">Miễn phí</span>';
+
+          const card = document.createElement('div'); card.className = 'app-card';
           card.innerHTML = `
-            <img class="app-icon" src="${app.icon || 'https://via.placeholder.com/100'}" alt="icon">
+            <img class="app-icon" src="${app.icon}">
             <div style="flex:1; min-width: 0;">
+              ${tagHtml}
               <p style="font-weight:600; font-size:15px; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">${app.name}</p>
-              <p class="text-secondary" style="font-size:12px; margin-top:2px;">Dung lượng: ${app.size || 'N/A'} • 📥 Tải: ${app.downloads || 0}</p>
             </div>
-            <span style="font-size:18px; color:#ff3b30; font-weight:700; margin-left:6px; text-shadow: 0 0 10px rgba(255,59,48,0.5);">→</span>
+            <span style="font-size:18px; color:#ff3b30; font-weight:700;">→</span>
           `;
-          card.addEventListener('click', () => {
-            window._appDetail = { id, ...app };
-            render('app-detail-template');
-          });
+          card.addEventListener('click', () => { window._appDetail = { id, ...app }; render('app-detail-template'); });
           listEl.appendChild(card);
         });
       });
@@ -320,31 +234,39 @@
     window._appDetailInit = function() {
       const app = window._appDetail;
       document.getElementById('back-btn').addEventListener('click', () => render('main-template'));
-      document.getElementById('detail-icon').src = app.icon || 'https://via.placeholder.com/100';
+      document.getElementById('detail-icon').src = app.icon;
       document.getElementById('detail-name').textContent = app.name;
-      document.getElementById('detail-version').textContent = `Phiên bản: ${app.version || '1.0.0'}`;
+      document.getElementById('detail-version').textContent = app.version || '1.0.0';
       document.getElementById('detail-size').textContent = app.size || 'N/A';
-      document.getElementById('detail-downloads').textContent = `📥 ${app.downloads || 0} lượt tải`;
-      document.getElementById('detail-desc').textContent = app.description || 'Chưa có thông tin mô tả giới thiệu thêm cho phần ứng dụng này.';
+      document.getElementById('detail-downloads').textContent = `📥 ${app.downloads || 0}`;
+      document.getElementById('detail-desc').textContent = app.description || 'Chưa có thông tin.';
+      
+      const isVipApp = app.type === 'vip';
+      document.getElementById('detail-tag').innerHTML = isVipApp ? '<span class="tag tag-vip">👑 Yêu Cầu Tài Khoản VIP</span>' : '<span class="tag tag-free">Tải Miễn Phí</span>';
 
       const dlBtn = document.getElementById('download-trigger-btn');
-      dlBtn.textContent = '📥 Tải ' + app.name;
-
+      
       dlBtn.addEventListener('click', () => {
         if (!currentUser) {
-          alert('🔒 Bạn cần đăng nhập thành viên để thực hiện tải xuống sản phẩm mới này!');
+          alert('🔒 Bạn cần đăng nhập để tải ứng dụng!');
           document.getElementById('auth-modal').classList.remove('hidden');
-        } else {
-          db.ref('apps/' + app.id + '/downloads').transaction(currentValue => {
-            return (currentValue || 0) + 1;
-          });
-          window.open(app.downloadLink || '#', '_blank');
+          return;
         }
+
+        // BẮT LỖI TẢI APP VIP KHI CHƯA NÂNG CẤP
+        if (isVipApp && !isUserVip) {
+          alert('👑 Đây là ứng dụng VIP. Bạn cần vượt link để lấy mã kích hoạt trước khi tải!');
+          document.getElementById('vip-modal').classList.remove('hidden');
+          return;
+        }
+
+        // Tải thành công
+        db.ref('apps/' + app.id + '/downloads').transaction(currentValue => (currentValue || 0) + 1);
+        window.open(app.downloadLink || '#', '_blank');
       });
     };
 
     render('main-template');
-    initAuthPopupEvents();
   </script>
 </body>
 </html>
