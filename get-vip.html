@@ -13,23 +13,32 @@
     .glass { background: rgba(20, 0, 0, 0.7); backdrop-filter: blur(24px); border: 1px solid rgba(255, 59, 48, 0.4); border-radius: 24px; padding: 30px; max-width: 400px; width: 100%; text-align: center; box-shadow: 0 0 40px rgba(255, 0, 0, 0.2); }
     h2 { font-weight: 700; text-shadow: 0 0 10px rgba(255,59,48,0.5); margin-bottom: 10px; }
     .code-box { background: rgba(255, 59, 48, 0.1); border: 2px dashed #ff3b30; padding: 15px; border-radius: 12px; font-size: 18px; font-weight: bold; color: #ff3b30; letter-spacing: 1px; margin: 20px 0; word-break: break-all; }
-    .btn { background: #ff3b30; color: white; border: none; border-radius: 14px; padding: 14px; font-weight: 600; cursor: pointer; width: 100%; font-size: 16px; transition: 0.3s; }
+    .btn { background: #ff3b30; color: white; border: none; border-radius: 14px; padding: 14px; font-weight: 600; cursor: pointer; width: 100%; font-size: 16px; transition: 0.3s; text-decoration: none; display: inline-block; }
     .btn:hover { background: #ff453a; box-shadow: 0 0 20px rgba(255, 59, 48, 0.5); }
     .btn:active { transform: scale(0.95); }
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
   <div class="glass">
-    <h2>🎉 Chúc mừng!</h2>
-    <p style="color: rgba(255,255,255,0.7); font-size: 14px;">Bạn đã vượt link thành công. Dưới đây là mã kích hoạt VIP của bạn. Hãy copy và dán vào ứng dụng nhé!</p>
     
-    <div id="code-display" class="code-box">⏳ Đang tạo mã...</div>
-    
-    <button class="btn" id="copy-btn">📋 Copy Mã VIP</button>
+    <div id="unlock-section">
+      <h2>🔒 Khóa VIP</h2>
+      <p style="color: rgba(255,255,255,0.7); font-size: 14px; margin-bottom: 20px;">Bạn cần vượt qua một liên kết rút gọn để hệ thống tự động sinh mã kích hoạt Tài khoản VIP.</p>
+      <a href="#" id="taplayma-btn" class="btn">🔗 Bấm vào đây để Vượt link</a>
+    </div>
+
+    <div id="result-section" class="hidden">
+      <h2>🎉 Chúc mừng!</h2>
+      <p style="color: rgba(255,255,255,0.7); font-size: 14px;">Bạn đã vượt link thành công. Dưới đây là mã kích hoạt VIP của bạn. Hãy copy và dán vào ứng dụng nhé!</p>
+      <div id="code-display" class="code-box">⏳ Đang tạo mã...</div>
+      <button class="btn" id="copy-btn">📋 Copy Mã VIP</button>
+    </div>
+
   </div>
 
   <script>
-    // CẤU HÌNH FIREBASE CỦA BẠN VÀO ĐÂY
+    // 1. CẤU HÌNH FIREBASE
     const firebaseConfig = {
       apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE",
       databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -38,27 +47,51 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Hàm tạo mã ngẫu nhiên dạng vipuseractive-xxxxxxx
-    function generateCode() {
-      const randomStr = Math.random().toString(36).substring(2, 9).toLowerCase();
-      return `vipuseractive-${randomStr}`;
-    }
+    // 2. CẤU HÌNH TAPLAYMA
+    const taplaymaToken = "b5c38921-be67-4200-aa50-b136641033c2";
+    
+    // Đọc URL hiện tại xem có tham số ?step=success không
+    const urlParams = new URLSearchParams(window.location.search);
+    const step = urlParams.get('step');
 
-    const newCode = generateCode();
+    const unlockSection = document.getElementById('unlock-section');
+    const resultSection = document.getElementById('result-section');
+    const taplaymaBtn = document.getElementById('taplayma-btn');
     const codeBox = document.getElementById('code-display');
 
-    // Lưu mã lên Firebase Database
-    db.ref('vip_codes/' + newCode).set({
-      valid: true,
-      createdAt: Date.now()
-    }).then(() => {
-      codeBox.textContent = newCode;
-    }).catch(err => {
-      codeBox.textContent = "Lỗi tạo mã!";
-      console.error(err);
-    });
+    if (step === 'success') {
+      // ===== TRẠNG THÁI 2: NGƯỜI DÙNG ĐÃ VƯỢT LINK XONG =====
+      unlockSection.classList.add('hidden');
+      resultSection.classList.remove('hidden');
 
-    // Chức năng Copy
+      // Tạo mã ngẫu nhiên dạng vipuseractive-xxxxxxx
+      const randomStr = Math.random().toString(36).substring(2, 9).toLowerCase();
+      const newCode = `vipuseractive-${randomStr}`;
+
+      // Lưu mã lên Firebase Database
+      db.ref('vip_codes/' + newCode).set({
+        valid: true,
+        createdAt: Date.now()
+      }).then(() => {
+        codeBox.textContent = newCode;
+      }).catch(err => {
+        codeBox.textContent = "Lỗi tạo mã!";
+        console.error(err);
+      });
+
+    } else {
+      // ===== TRẠNG THÁI 1: CHƯA VƯỢT LINK =====
+      unlockSection.classList.remove('hidden');
+      resultSection.classList.add('hidden');
+
+      // Tự động tạo link Taplayma và trỏ về chính trang này kèm tham số ?step=success
+      let currentUrl = window.location.href.split('?')[0]; // Lấy link sạch hiện tại
+      let destUrl = currentUrl + "?step=success";          // Ghép tham số thành công
+      
+      taplaymaBtn.href = `https://api.taplayma.com/st?token=${taplaymaToken}&url=${encodeURIComponent(destUrl)}`;
+    }
+
+    // Chức năng Copy Mã
     document.getElementById('copy-btn').addEventListener('click', function() {
       if(codeBox.textContent === '⏳ Đang tạo mã...' || codeBox.textContent === 'Lỗi tạo mã!') return;
       navigator.clipboard.writeText(codeBox.textContent).then(() => {
