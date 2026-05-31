@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Tải xuống tệp tin - AppHub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    :root { --bg: #000000; --surface: rgba(20, 0, 0, 0.7); --primary: #ff3b30; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: #fff; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 16px; }
+    
+    .glass { background: var(--surface); backdrop-filter: blur(24px); border: 1px solid rgba(255, 59, 48, 0.3); border-radius: 24px; padding: 30px; max-width: 450px; width: 100%; box-shadow: 0 8px 32px rgba(255, 0, 0, 0.15); text-align: center; }
+    
+    .app-icon { width: 110px; height: 110px; border-radius: 22px; object-fit: cover; border: 2px solid var(--primary); box-shadow: 0 0 25px rgba(255, 59, 48, 0.5); margin-bottom: 16px; }
+    .app-name { font-size: 26px; font-weight: 800; text-shadow: 0 0 10px rgba(255,255,255,0.3); margin-bottom: 6px; }
+    .app-info-text { color: rgba(255,255,255,0.6); font-size: 14px; margin-bottom: 25px; }
+    
+    .file-box { background: rgba(0,0,0,0.5); border: 1px dashed rgba(255,255,255,0.2); padding: 18px; border-radius: 16px; margin-bottom: 20px; text-align: left; }
+    .file-box div { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; color: #ccc; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; }
+    .file-box div:last-child { margin-bottom: 0; border-bottom: none; padding-bottom: 0; }
+    .file-box b { color: white; }
+    
+    .btn-download { background: linear-gradient(135deg, #28a745, #218838); color: white; border: none; border-radius: 16px; padding: 18px 20px; font-size: 18px; font-weight: 700; width: 100%; cursor: pointer; transition: 0.3s; box-shadow: 0 0 20px rgba(40, 167, 69, 0.4); display: flex; align-items: center; justify-content: center; gap: 10px; letter-spacing: 0.5px; }
+    .btn-download:hover { box-shadow: 0 0 30px rgba(40, 167, 69, 0.7); transform: translateY(-3px); }
+    .btn-download:active { transform: scale(0.96); }
+    
+    .btn-back { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: white; padding: 12px 20px; border-radius: 12px; margin-top: 15px; cursor: pointer; transition: 0.3s; width: 100%; font-weight: 600; }
+    .btn-back:hover { background: rgba(255,255,255,0.1); }
+    
+    .loader { border: 4px solid rgba(255,59,48,0.2); border-top: 4px solid #ff3b30; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px auto; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="glass" id="main-card">
+    
+    <div id="loading-state">
+      <div class="loader"></div>
+      <p style="color: #ccc; font-weight: 600;">Đang tải thông tin tệp tin...</p>
+    </div>
+
+    <div id="file-state" style="display: none;">
+      <img id="dl-icon" src="" class="app-icon" alt="Icon">
+      <h2 id="dl-name" class="app-name">Tên Ứng Dụng</h2>
+      <p class="app-info-text">Tệp tin đã sẵn sàng để tải xuống thiết bị của bạn.</p>
+
+      <div class="file-box">
+        <div><span>Tên tệp:</span> <b id="dl-filename">...</b></div>
+        <div><span>Dung lượng:</span> <b id="dl-size">...</b></div>
+        <div><span>Phiên bản:</span> <b id="dl-version">...</b></div>
+        <div><span>Lượt tải:</span> <b id="dl-count">...</b></div>
+      </div>
+
+      <button id="btn-download" class="btn-download">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        TẢI XUỐNG (<span id="dl-size-btn"></span>)
+      </button>
+      
+      <button id="btn-back" class="btn-back">← Quay lại Cửa Hàng</button>
+    </div>
+    
+    <div id="error-state" style="display: none;">
+      <h2 style="color: #ff3b30; margin-bottom: 10px; font-size: 24px;">Lỗi Tệp Tin!</h2>
+      <p style="color: #ccc; margin-bottom: 20px;">Không tìm thấy tệp tin hoặc tệp tin đã bị xóa bởi quản trị viên.</p>
+      <button id="btn-back-err" class="btn-back">← Quay lại Cửa Hàng</button>
+    </div>
+
+  </div>
+
+  <script>
+    const firebaseConfig = { apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE", databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "keyquocdat" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const appId = urlParams.get('id');
+
+    const loadingState = document.getElementById('loading-state');
+    const fileState = document.getElementById('file-state');
+    const errorState = document.getElementById('error-state');
+
+    document.getElementById('btn-back').addEventListener('click', () => window.location.href = 'index.html');
+    document.getElementById('btn-back-err').addEventListener('click', () => window.location.href = 'index.html');
+
+    if (!appId) {
+      loadingState.style.display = 'none'; errorState.style.display = 'block';
+    } else {
+      db.ref('apps/' + appId).once('value', snap => {
+        if (snap.exists()) {
+          const app = snap.val();
+          
+          document.getElementById('dl-icon').src = app.icon || 'https://via.placeholder.com/100';
+          document.getElementById('dl-name').textContent = app.name;
+          
+          let fileName = app.name.replace(/\s+/g, '_') + '.apk';
+          document.getElementById('dl-filename').textContent = fileName;
+          
+          document.getElementById('dl-size').textContent = app.size || 'Không rõ';
+          document.getElementById('dl-size-btn').textContent = app.size || 'Không rõ';
+          document.getElementById('dl-version').textContent = app.version || '1.0.0';
+          document.getElementById('dl-count').textContent = (app.downloads || 0) + ' lượt';
+
+          loadingState.style.display = 'none';
+          fileState.style.display = 'block';
+
+          document.getElementById('btn-download').addEventListener('click', () => {
+            // Tăng số lượt tải bên file down.html để thống kê chính xác nhất
+            db.ref('apps/' + appId + '/downloads').transaction(currentValue => (currentValue || 0) + 1);
+            // Kích hoạt link (Hoạt động cho cả Link ngoài và Link Firebase Storage)
+            window.location.href = app.downloadLink;
+          });
+        } else {
+          loadingState.style.display = 'none'; errorState.style.display = 'block';
+        }
+      });
+    }
+  </script>
+</body>
+</html>
