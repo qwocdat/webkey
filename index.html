@@ -33,28 +33,23 @@
     
     .hidden { display: none !important; } .flex { display: flex; } .flex-col { flex-direction: column; } .items-center { align-items: center; } .justify-between { justify-content: space-between; } .gap-2 { gap: 8px; } .mt-4 { margin-top: 16px; } .text-secondary { color: rgba(255,255,255,0.6); font-size: 13px; } .text-center { text-align: center; }
     
-    /* Các thẻ phân loại */
     .tag { font-size: 10px; padding: 3px 6px; border-radius: 6px; font-weight: bold; margin-bottom: 4px; display: inline-block;}
     .tag-vip { background: linear-gradient(45deg, #ffc107, #ff9800); color: black; box-shadow: 0 0 10px rgba(255, 193, 7, 0.5); }
     .tag-free { background: rgba(255,255,255,0.1); color: #ccc; border: 1px solid rgba(255,255,255,0.2); }
     .tag-soon { background: linear-gradient(45deg, #007aff, #00d4ff); color: white; box-shadow: 0 0 10px rgba(0, 122, 255, 0.5); }
 
-    /* --- CÁC CLASS CHO TRẠNG THÁI HOẠT ĐỘNG --- */
     @keyframes blinkDot { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
     @keyframes blinkDotSlow { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
     
     .app-status { font-size: 11px; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
     .status-dot { width: 8px; height: 8px; border-radius: 50%; }
     
-    /* Online */
     .status-online { background: rgba(0, 255, 0, 0.1); color: #00ff00; border: 1px solid rgba(0, 255, 0, 0.3); }
     .status-online .status-dot { background: #00ff00; box-shadow: 0 0 8px #00ff00; animation: blinkDot 1s infinite; }
     
-    /* Offline */
     .status-offline { background: rgba(255, 59, 48, 0.1); color: #ff3b30; border: 1px solid rgba(255, 59, 48, 0.3); }
     .status-offline .status-dot { background: #ff3b30; box-shadow: 0 0 5px #ff3b30; }
 
-    /* Sắp ra mắt */
     .status-soon { background: rgba(0, 122, 255, 0.1); color: #00d4ff; border: 1px solid rgba(0, 122, 255, 0.3); }
     .status-soon .status-dot { background: #00d4ff; box-shadow: 0 0 8px #00d4ff; animation: blinkDotSlow 2s infinite; }
   </style>
@@ -75,8 +70,8 @@
     </div>
 
     <div class="intro-banner">
-      <h4 style="font-weight:600; font-size:15px; margin-bottom:4px; color: #ff3b30;">✨ Chào mừng bạn đến với AppHub-Nova</h4>
-      <p class="text-secondary" style="font-size:13px; line-height:1.4;">Tải ứng dụng miễn phí không cần vượt, hoặc vượt link để nâng cấp tài khoản VIP mở khoá tính năng cao cấp.</p>
+      <h4 style="font-weight:600; font-size:15px; margin-bottom:4px; color: #ff3b30;">✨ Chào mừng bạn đến với AppHub</h4>
+      <p class="text-secondary" style="font-size:13px; line-height:1.4;">Tải ứng dụng miễn phí, hoặc vượt link để nâng cấp tài khoản VIP mở khoá tính năng cao cấp.</p>
     </div>
 
     <div id="app-list"></div>
@@ -88,7 +83,6 @@
       
       <div class="flex flex-col items-center gap-2 mt-4 text-center">
         <div id="detail-tag"></div>
-        
         <img id="detail-icon" class="app-icon" style="width:120px; height:120px; border-radius:24px; box-shadow:0 0 30px rgba(255,59,48,0.5); border: 2px solid #ff3b30; margin-top: 10px;">
         
         <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-top:12px; flex-wrap: wrap;">
@@ -137,9 +131,7 @@
       <button id="close-vip-btn" style="position:absolute; top:16px; right:16px; background:none; border:none; color:white; font-size:18px; cursor:pointer;">✕</button>
       <h3 style="font-weight:700; margin-bottom:4px; color:#ffc107; text-shadow: 0 0 10px rgba(255,193,7,0.5);">👑 Nâng cấp VIP</h3>
       <p class="text-secondary" style="margin-bottom:16px;">Đi tới trang lấy mã để kích hoạt quyền tải các ứng dụng VIP.</p>
-      
       <a href="get-vip.html" target="_blank" class="btn" style="background: rgba(255,193,7,0.1); border-color:#ffc107; color:#ffc107; margin-bottom:15px;">🔗 Đi tới trang lấy Mã</a>
-      
       <input type="text" id="vip-code-input" placeholder="Nhập mã (vd: vipuseractive-...)" style="border-color:#ffc107;">
       <button class="btn btn-primary" style="background:#ffc107; color:black; box-shadow: 0 0 15px rgba(255,193,7,0.4);" id="verify-vip-btn">✅ Xác nhận Mã</button>
     </div>
@@ -156,7 +148,6 @@
       if (templateId === 'main-template') initMain(); else if (templateId === 'app-detail-template') window._appDetailInit();
     }
 
-    // Modal Events Auth
     document.getElementById('close-auth-btn').addEventListener('click', () => document.getElementById('auth-modal').classList.add('hidden'));
     document.getElementById('go-register').addEventListener('click', () => { document.getElementById('login-form').classList.add('hidden'); document.getElementById('register-form').classList.remove('hidden'); });
     document.getElementById('go-login').addEventListener('click', () => { document.getElementById('register-form').classList.add('hidden'); document.getElementById('login-form').classList.remove('hidden'); });
@@ -174,7 +165,6 @@
         }).catch(e => alert('Lỗi đăng ký: Email đã tồn tại hoặc mật khẩu quá yếu (cần 6 ký tự).'));
     });
 
-    // Modal Events VIP
     document.getElementById('close-vip-btn').addEventListener('click', () => document.getElementById('vip-modal').classList.add('hidden'));
     document.getElementById('verify-vip-btn').addEventListener('click', () => {
       const code = document.getElementById('vip-code-input').value.trim();
@@ -290,67 +280,35 @@
       const statusBox = document.getElementById('detail-status');
       const statusText = document.getElementById('status-text');
 
-      // --- LOGIC TRẠNG THÁI HOẠT ĐỘNG / OFFLINE / SẮP RA MẮT ---
       if (isSoonApp) {
-        // Trạng thái Sắp ra mắt
-        statusBox.className = 'app-status status-soon';
-        statusText.textContent = 'Đang phát triển';
-        dlBtn.disabled = true;
-        dlBtn.textContent = '⏳ Đang hoàn thiện...';
-        dlBtn.style.background = 'rgba(0, 122, 255, 0.1)';
-        dlBtn.style.color = '#00d4ff';
-        dlBtn.style.boxShadow = 'none';
-        dlBtn.style.borderColor = 'rgba(0, 122, 255, 0.3)';
-        dlBtn.style.borderWidth = '1px';
-        dlBtn.style.borderStyle = 'solid';
+        statusBox.className = 'app-status status-soon'; statusText.textContent = 'Đang phát triển';
+        dlBtn.disabled = true; dlBtn.textContent = '⏳ Đang hoàn thiện...';
+        dlBtn.style.background = 'rgba(0, 122, 255, 0.1)'; dlBtn.style.color = '#00d4ff'; dlBtn.style.boxShadow = 'none'; dlBtn.style.borderColor = 'rgba(0, 122, 255, 0.3)'; dlBtn.style.borderWidth = '1px'; dlBtn.style.borderStyle = 'solid';
       }
       else if (app.downloadLink && app.downloadLink.trim() !== '' && app.downloadLink.trim() !== '#') {
-        // Trạng thái Online
-        statusBox.className = 'app-status status-online';
-        statusText.textContent = 'Hoạt động';
-        dlBtn.disabled = false;
-        dlBtn.textContent = '📥 Tải xuống ngay';
-        dlBtn.style.background = 'var(--primary)';
-        dlBtn.style.color = 'white';
-        dlBtn.style.boxShadow = '0 0 15px rgba(255, 59, 48, 0.4)';
-        dlBtn.style.border = 'none';
+        statusBox.className = 'app-status status-online'; statusText.textContent = 'Hoạt động';
+        dlBtn.disabled = false; dlBtn.textContent = '📥 Tải xuống ngay';
+        dlBtn.style.background = 'var(--primary)'; dlBtn.style.color = 'white'; dlBtn.style.boxShadow = '0 0 15px rgba(255, 59, 48, 0.4)'; dlBtn.style.border = 'none';
       } 
       else {
-        // Trạng thái Offline (Bị lỗi link hoặc bị thay thành '#')
-        statusBox.className = 'app-status status-offline';
-        statusText.textContent = 'Offline';
-        dlBtn.disabled = true;
-        dlBtn.textContent = '🚫 Ứng dụng đang bảo trì';
-        dlBtn.style.background = 'rgba(255,255,255,0.1)';
-        dlBtn.style.color = 'rgba(255,255,255,0.5)';
-        dlBtn.style.boxShadow = 'none';
-        dlBtn.style.border = 'none';
+        statusBox.className = 'app-status status-offline'; statusText.textContent = 'Offline';
+        dlBtn.disabled = true; dlBtn.textContent = '🚫 Ứng dụng đang bảo trì';
+        dlBtn.style.background = 'rgba(255,255,255,0.1)'; dlBtn.style.color = 'rgba(255,255,255,0.5)'; dlBtn.style.boxShadow = 'none'; dlBtn.style.border = 'none';
       }
       
       dlBtn.addEventListener('click', () => {
         if (dlBtn.disabled) return;
+        if (!currentUser) { alert('🔒 Bạn cần đăng nhập để tải ứng dụng!'); document.getElementById('auth-modal').classList.remove('hidden'); return; }
+        if (isVipApp && !isUserVip) { alert('👑 Đây là ứng dụng VIP. Bạn cần vượt link để lấy mã kích hoạt trước khi tải!'); document.getElementById('vip-modal').classList.remove('hidden'); return; }
 
-        if (!currentUser) {
-          alert('🔒 Bạn cần đăng nhập để tải ứng dụng!');
-          document.getElementById('auth-modal').classList.remove('hidden');
-          return;
-        }
-
-        if (isVipApp && !isUserVip) {
-          alert('👑 Đây là ứng dụng VIP. Bạn cần vượt link để lấy mã kích hoạt trước khi tải!');
-          document.getElementById('vip-modal').classList.remove('hidden');
-          return;
-        }
-
-        db.ref('apps/' + app.id + '/downloads').transaction(currentValue => (currentValue || 0) + 1);
-        window.open(app.downloadLink || '#', '_blank');
+        // --- ĐÃ ĐỔI: TRỎ SANG TRANG DOWN.HTML ---
+        window.location.href = 'down.html?id=' + app.id;
       });
     };
 
     render('main-template');
 
-    // TỰ ĐỘNG ĐẾM LƯỢT TRUY CẬP (PAGE VIEWS)
-    // Cứ mỗi lần ai đó F5 hoặc mở trang, số Mắt Xem bên Admin sẽ tự tăng
+    // Mắt Xem
     db.ref('stats/pageViews').transaction(currentViews => (currentViews || 0) + 1);
 
   </script>
