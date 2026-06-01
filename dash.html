@@ -52,7 +52,6 @@
     .img-container { width: 100%; max-height: 350px; margin-bottom: 15px; overflow: hidden; }
     .img-container img { max-width: 100%; }
 
-    /* Thẻ trạng thái VIP/Free/Soon */
     .badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-left: 6px; }
     .badge-free { background: #28a745; color: white; }
     .badge-vip { background: #ffc107; color: black; }
@@ -207,7 +206,7 @@
       }
     });
 
-    // --- Logic Cắt Ảnh Giữ Nguyên ---
+    // --- Logic Cắt Ảnh ---
     function openCropper(file, isEdit) {
       isEditingCrop = isEdit; const reader = new FileReader();
       reader.onload = function (e) {
@@ -223,6 +222,7 @@
     
     document.getElementById('crop-ok-btn').addEventListener('click', function() {
       if (!cropper) return;
+      // Dùng Base64 siêu nhẹ lưu thẳng vào Database, chặn đứng lỗi mạng cho Icon
       const base64Str = cropper.getCroppedCanvas({ width: 200, height: 200 }).toDataURL('image/jpeg', 0.8);
       if (isEditingCrop) { editBase64Image = base64Str; alert("Đã cắt ảnh cho phần Chỉnh sửa!"); } 
       else { finalBase64Image = base64Str; document.getElementById('icon-preview').src = finalBase64Image; document.getElementById('icon-preview').style.display = 'block'; }
@@ -231,30 +231,47 @@
     
     document.getElementById('crop-cancel-btn').addEventListener('click', function() { document.getElementById('cropper-modal').classList.add('hidden'); if (cropper) { cropper.destroy(); cropper = null; } });
 
-    // --- Hàm Tải File bằng Catbox API (Fix kẹt 0%) ---
-    const uploadToCatbox = (file, btnElement) => {
-      return new Promise((resolve, reject) => {
-        const formData = new FormData();
-        formData.append('reqtype', 'fileupload');
-        formData.append('fileToUpload', file);
+    // =========================================================================================
+    // HỆ THỐNG TẢI FILE APP MỚI: SỬ DỤNG GOFILE API (Cực kỳ mạnh mẽ chống CORS trên Điện Thoại)
+    // =========================================================================================
+    const uploadFileToCloud = async (file, btnElement) => {
+      try {
+        btnElement.textContent = '⏳ Đang tìm Server trống...';
+        // Bước 1: Lấy địa chỉ máy chủ tốt nhất của GoFile
+        const serverRes = await fetch('https://api.gofile.io/servers');
+        const serverData = await serverRes.json();
+        if(serverData.status !== 'ok') throw new Error('Không tìm thấy Server tải file');
+        const serverName = serverData.data.servers[0].name;
 
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', 'https://catbox.moe/user/api.php', true);
-        
-        xhr.upload.onprogress = (e) => {
-          if (e.lengthComputable) {
-            const pct = Math.round((e.loaded / e.total) * 100);
-            btnElement.textContent = '⏳ Đang tải file lên... ' + pct + '%';
-          }
-        };
-        
-        xhr.onload = () => {
-          if (xhr.status === 200) resolve(xhr.responseText.trim());
-          else reject(new Error('Lỗi máy chủ tải file'));
-        };
-        xhr.onerror = () => reject(new Error('Lỗi kết nối tải file'));
-        xhr.send(formData);
-      });
+        // Bước 2: Bắt đầu tải file lên máy chủ đó
+        return new Promise((resolve, reject) => {
+          const formData = new FormData();
+          formData.append('file', file);
+
+          const xhr = new XMLHttpRequest();
+          xhr.open('POST', `https://${serverName}.gofile.io/contents/uploadfile`, true);
+          
+          xhr.upload.onprogress = (e) => {
+            if (e.lengthComputable) {
+              const pct = Math.round((e.loaded / e.total) * 100);
+              btnElement.textContent = '⏳ Đang đẩy dữ liệu lên Server... ' + pct + '%';
+            }
+          };
+          
+          xhr.onload = () => {
+            if (xhr.status === 200) {
+              const res = JSON.parse(xhr.responseText);
+              if(res.status === 'ok') resolve(res.data.downloadPage); // Trả về link trang tải
+              else reject(new Error('Lỗi phản hồi từ máy chủ GoFile'));
+            } else reject(new Error('Máy chủ từ chối file'));
+          };
+          
+          xhr.onerror = () => reject(new Error('Kết nối bị chặn bởi trình duyệt'));
+          xhr.send(formData);
+        });
+      } catch (err) {
+        throw new Error(err.message);
+      }
     };
 
     // --- Đăng tải ứng dụng ---
@@ -275,20 +292,15 @@
 
       try {
         if (appFile) {
-          if (appFile.size > 200 * 1024 * 1024) {
-             alert('File quá nặng! Hỗ trợ tối đa 200MB. File nặng bạn chịu khó dùng link dán tay nhé!');
-             btn.disabled = false; btn.textContent = '📤 Đăng tải ứng dụng';
-             return;
-          }
-          link = await uploadToCatbox(appFile, btn);
+          link = await uploadFileToCloud(appFile, btn);
         }
 
         const iconToSave = finalBase64Image || 'https://via.placeholder.com/100';
         await db.ref('apps').push().set({
           name,
           downloadLink: type === 'coming_soon' ? '#' : link,
-          type: type, // LƯU QUYỀN TẢI
-          icon: iconToSave,
+          type: type, 
+          icon: iconToSave, // Bỏ hoàn toàn API tải icon, dùng Base64 tĩnh chống nghẽn
           size: size || 'N/A',
           version: version || '1.0.0',
           description: desc || 'Chưa có mô tả cho ứng dụng này.',
@@ -304,7 +316,7 @@
         finalBase64Image = null;
       } catch (error) { 
         console.error(error);
-        alert('❌ LỖI UPLOAD: ' + error.message); 
+        alert('❌ LỖI UPLOAD: ' + error.message + '\n\nMạng di động chặn tải file. Vui lòng dùng link MediaFire để nhập tay!'); 
       } 
       finally { btn.disabled = false; btn.textContent = '📤 Đăng tải ứng dụng'; }
     });
@@ -319,7 +331,6 @@
         Object.entries(apps).forEach(([id, app]) => {
           totalApps++; totalDownloads += (app.downloads || 0);
 
-          // TẠO BADGE DỰA VÀO TYPE
           let badgeHtml = '';
           if (app.type === 'vip') badgeHtml = '<span class="badge badge-vip">👑 VIP</span>';
           else if (app.type === 'coming_soon') badgeHtml = '<span class="badge badge-soon">⏳ SẮP RA MẮT</span>';
@@ -358,7 +369,7 @@
             document.getElementById('edit-size').value = app.size || '';
             document.getElementById('edit-version').value = app.version || '';
             document.getElementById('edit-desc').value = app.description || '';
-            document.getElementById('edit-type').value = app.type || 'free'; // Load lại quyền
+            document.getElementById('edit-type').value = app.type || 'free';
             document.getElementById('edit-modal').classList.remove('hidden');
           });
         });
@@ -387,12 +398,7 @@
 
       try {
         if (editFile) {
-          if (editFile.size > 200 * 1024 * 1024) {
-             alert('File quá nặng! Hỗ trợ tối đa 200MB.');
-             btn.disabled = false; btn.textContent = 'Lưu cập nhật';
-             return;
-          }
-          link = await uploadToCatbox(editFile, btn);
+          link = await uploadFileToCloud(editFile, btn);
         }
 
         const updateData = { 
@@ -401,15 +407,17 @@
           size: document.getElementById('edit-size').value.trim(), 
           version: document.getElementById('edit-version').value.trim(), 
           description: document.getElementById('edit-desc').value.trim(),
-          type: type // UPDATE QUYỀN
+          type: type 
         };
+        
+        // Cập nhật Base64 Icon nếu có đổi
         if (editBase64Image) updateData.icon = editBase64Image; 
         
         await db.ref('apps/' + currentEditId).update(updateData);
         document.getElementById('edit-modal').classList.add('hidden'); alert('Đã cập nhật!');
       } catch(e) { 
         console.error(e);
-        alert('Lỗi cập nhật: ' + e.message); 
+        alert('Lỗi cập nhật: ' + e.message + '\n\nNếu bị văng ra, hãy xoá file tải lên và dán link tay nhé!'); 
       } 
       finally { btn.disabled = false; btn.textContent = 'Lưu cập nhật'; }
     });
