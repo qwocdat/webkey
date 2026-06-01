@@ -58,20 +58,21 @@
   <div class="container" id="app"></div>
 
   <template id="main-template">
-    <div class="glass flex items-center justify-between">
-      <div>
+    <div class="glass flex items-center justify-between" style="flex-wrap: wrap; gap: 10px;">
+      <div style="flex-grow: 1;">
         <h3 style="font-weight:700; font-size:18px; text-shadow: 0 0 10px rgba(255,59,48,0.5);">📱 AppHub Store</h3>
-        <p id="user-status-text" class="text-secondary" style="font-size:11px; margin-top:2px;">Chế độ khách</p>
+        <p id="user-status-text" class="text-secondary" style="font-size:11px; margin-top:4px;">Chế độ khách</p>
       </div>
-      <div class="flex gap-1">
-        <button class="btn hidden" style="width:auto; padding:8px 12px; margin:0; font-size:13px; border-color: #ffc107; color: #ffc107;" id="vip-action-btn">👑 VIP</button>
+      <div class="flex gap-1" style="flex-wrap: wrap;">
+        <button class="btn hidden" style="width:auto; padding:8px 12px; margin:0; font-size:13px; border-color: #ff3b30; color: #ff3b30;" id="cancel-vip-action-btn">❌ Hủy VIP</button>
+        <button class="btn hidden" style="width:auto; padding:8px 12px; margin:0; font-size:13px; border-color: #ffc107; color: #ffc107;" id="vip-action-btn">👑 Nâng VIP</button>
         <button class="btn" style="width:auto; padding:8px 16px; margin:0; font-size:13px; border-color: rgba(255,59,48,0.4);" id="auth-action-btn">Đăng nhập</button>
       </div>
     </div>
 
     <div class="intro-banner">
       <h4 style="font-weight:600; font-size:15px; margin-bottom:4px; color: #ff3b30;">✨ Chào mừng bạn đến với AppHub</h4>
-      <p class="text-secondary" style="font-size:13px; line-height:1.4;">Tải ứng dụng miễn phí, hoặc vượt link để nâng cấp tài khoản VIP mở khoá tính năng cao cấp.</p>
+      <p class="text-secondary" style="font-size:13px; line-height:1.4;">Tải ứng dụng miễn phí, hoặc vượt link để nhận thẻ VIP (Có 1 lượt tải VIP & Hạn sử dụng trong 24 giờ).</p>
     </div>
 
     <div id="app-list"></div>
@@ -110,7 +111,7 @@
       <button id="close-auth-btn" style="position:absolute; top:16px; right:16px; background:none; border:none; color:white; font-size:18px; cursor:pointer;">✕</button>
       <div id="login-form">
         <h3 style="font-weight:700; margin-bottom:4px;">Đăng nhập</h3>
-        <p class="text-secondary" style="margin-bottom:16px;">Đăng nhập để tải app và nâng cấp VIP.</p>
+        <p class="text-secondary" style="margin-bottom:16px;">Đăng nhập để tải app và nhận Key VIP.</p>
         <input type="email" id="email-login" placeholder="Email">
         <input type="password" id="password-login" placeholder="Mật khẩu">
         <button class="btn btn-primary" id="login-btn">Đăng nhập</button>
@@ -130,7 +131,7 @@
     <div class="glass" style="width:100%; max-width:380px; margin:0; position:relative; border-color: #ffc107; box-shadow: 0 0 40px rgba(255,193,7,0.3);">
       <button id="close-vip-btn" style="position:absolute; top:16px; right:16px; background:none; border:none; color:white; font-size:18px; cursor:pointer;">✕</button>
       <h3 style="font-weight:700; margin-bottom:4px; color:#ffc107; text-shadow: 0 0 10px rgba(255,193,7,0.5);">👑 Nâng cấp VIP</h3>
-      <p class="text-secondary" style="margin-bottom:16px;">Đi tới trang lấy mã để kích hoạt quyền tải các ứng dụng VIP.</p>
+      <p class="text-secondary" style="margin-bottom:16px;">Đi tới trang lấy mã để nhận <b style="color:white;">1 lượt tải VIP</b> (HSD: 24 Giờ).</p>
       <a href="get-vip.html" target="_blank" class="btn" style="background: rgba(255,193,7,0.1); border-color:#ffc107; color:#ffc107; margin-bottom:15px;">🔗 Đi tới trang lấy Mã</a>
       <input type="text" id="vip-code-input" placeholder="Nhập mã (vd: vipuseractive-...)" style="border-color:#ffc107;">
       <button class="btn btn-primary" style="background:#ffc107; color:black; box-shadow: 0 0 15px rgba(255,193,7,0.4);" id="verify-vip-btn">✅ Xác nhận Mã</button>
@@ -141,13 +142,17 @@
     const firebaseConfig = { apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE", databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "keyquocdat" };
     firebase.initializeApp(firebaseConfig); const auth = firebase.auth(); const db = firebase.database();
     
-    const appEl = document.getElementById('app'); let currentUser = null; let isUserVip = false;
+    const appEl = document.getElementById('app'); 
+    let currentUser = null; 
+    let currentUserData = null; // Biến lưu toàn bộ thông tin user
+    let vipTimerInterval = null; // Bộ đếm thời gian
 
     function render(templateId) {
       appEl.innerHTML = ''; appEl.appendChild(document.getElementById(templateId).content.cloneNode(true));
       if (templateId === 'main-template') initMain(); else if (templateId === 'app-detail-template') window._appDetailInit();
     }
 
+    // Modal Events Auth
     document.getElementById('close-auth-btn').addEventListener('click', () => document.getElementById('auth-modal').classList.add('hidden'));
     document.getElementById('go-register').addEventListener('click', () => { document.getElementById('login-form').classList.add('hidden'); document.getElementById('register-form').classList.remove('hidden'); });
     document.getElementById('go-login').addEventListener('click', () => { document.getElementById('register-form').classList.add('hidden'); document.getElementById('login-form').classList.remove('hidden'); });
@@ -165,6 +170,7 @@
         }).catch(e => alert('Lỗi đăng ký: Email đã tồn tại hoặc mật khẩu quá yếu (cần 6 ký tự).'));
     });
 
+    // Kích hoạt VIP
     document.getElementById('close-vip-btn').addEventListener('click', () => document.getElementById('vip-modal').classList.add('hidden'));
     document.getElementById('verify-vip-btn').addEventListener('click', () => {
       const code = document.getElementById('vip-code-input').value.trim();
@@ -175,11 +181,17 @@
 
       db.ref('vip_codes/' + code).once('value', snap => {
         if(snap.exists() && snap.val().valid === true) {
-          db.ref('vip_codes/' + code).update({ valid: false });
-          db.ref('users/' + currentUser.uid).update({ isVip: true }).then(() => {
-            alert('🎉 Kích hoạt VIP thành công!');
+          db.ref('vip_codes/' + code).update({ valid: false }); // Đốt mã
+
+          // Cấp VIP 1 lượt tải, có hạn 24 giờ
+          const expiresAt = Date.now() + (24 * 60 * 60 * 1000); 
+          db.ref('users/' + currentUser.uid).update({ 
+              isVip: true,
+              vipDownloadsLeft: 1,
+              vipExpiresAt: expiresAt
+          }).then(() => {
+            alert('🎉 Kích hoạt VIP thành công! Bạn có 1 Lượt tải VIP và hạn sử dụng trong vòng 24 Giờ.');
             document.getElementById('vip-modal').classList.add('hidden');
-            isUserVip = true; initMain();
           });
         } else {
           alert('❌ Mã kích hoạt không hợp lệ hoặc đã được sử dụng!');
@@ -188,38 +200,81 @@
       });
     });
 
+    // Theo dõi User thay đổi
     auth.onAuthStateChanged(user => {
       currentUser = user;
       if (user) {
         db.ref('users/' + user.uid).on('value', snap => {
-          isUserVip = snap.val() ? snap.val().isVip : false;
+          currentUserData = snap.val();
           updateHeaderUI();
         });
       } else {
-        isUserVip = false; updateHeaderUI();
+        currentUserData = null;
+        updateHeaderUI();
       }
     });
 
+    // Xử lý bộ đếm và giao diện Header
     function updateHeaderUI() {
       const statusText = document.getElementById('user-status-text');
       const authBtn = document.getElementById('auth-action-btn');
       const vipBtn = document.getElementById('vip-action-btn');
+      const cancelVipBtn = document.getElementById('cancel-vip-action-btn');
+      
       if (!statusText) return;
+      if (vipTimerInterval) clearInterval(vipTimerInterval); // Xóa đồng hồ cũ
 
       if (currentUser) {
-        statusText.innerHTML = isUserVip ? `<span style="color:#ffc107;">👑 Thành viên VIP</span>` : `Thành viên Thường`;
-        authBtn.textContent = 'Đăng xuất';
-        if(!isUserVip) vipBtn.classList.remove('hidden');
-        else vipBtn.classList.add('hidden');
+        if (currentUserData && currentUserData.isVip) {
+            const now = Date.now();
+            const expiresAt = currentUserData.vipExpiresAt || 0;
+            const left = currentUserData.vipDownloadsLeft || 0;
+
+            // Kiểm tra ngay: Hết lượt tải HOẶC hết thời gian -> Hủy VIP tự động
+            if (left <= 0 || now > expiresAt) {
+                db.ref('users/' + currentUser.uid).update({ isVip: false, vipDownloadsLeft: 0, vipExpiresAt: null });
+                return; // Firebase sẽ kích hoạt lại updateHeaderUI
+            }
+
+            // Còn VIP hợp lệ -> Mở đồng hồ đếm ngược
+            vipBtn.classList.add('hidden');
+            cancelVipBtn.classList.remove('hidden');
+
+            const tickTimer = () => {
+                const currentNow = Date.now();
+                const diff = expiresAt - currentNow;
+                
+                if (diff <= 0) {
+                    clearInterval(vipTimerInterval);
+                    db.ref('users/' + currentUser.uid).update({ isVip: false, vipDownloadsLeft: 0, vipExpiresAt: null });
+                } else {
+                    const h = Math.floor(diff / (1000 * 60 * 60)).toString().padStart(2, '0');
+                    const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+                    const s = Math.floor((diff % (1000 * 60)) / 1000).toString().padStart(2, '0');
+                    statusText.innerHTML = `<span style="color:#ffc107; font-weight: bold;">👑 VIP (Còn ${left} lượt) - Hết hạn: ${h}:${m}:${s}</span>`;
+                }
+            };
+            tickTimer();
+            vipTimerInterval = setInterval(tickTimer, 1000);
+            authBtn.textContent = 'Đăng xuất';
+
+        } else {
+            statusText.textContent = `Tài khoản: ${currentUser.email}`;
+            vipBtn.classList.remove('hidden');
+            cancelVipBtn.classList.add('hidden');
+            authBtn.textContent = 'Đăng xuất';
+        }
       } else {
         statusText.textContent = 'Chế độ khách';
         authBtn.textContent = 'Đăng nhập';
         vipBtn.classList.add('hidden');
+        cancelVipBtn.classList.add('hidden');
       }
     }
 
     function initMain() {
       updateHeaderUI();
+      
       document.getElementById('auth-action-btn').addEventListener('click', () => {
         if (currentUser) auth.signOut().then(() => alert('Đã đăng xuất!'));
         else document.getElementById('auth-modal').classList.remove('hidden');
@@ -228,6 +283,17 @@
       document.getElementById('vip-action-btn').addEventListener('click', () => {
         document.getElementById('vip-modal').classList.remove('hidden');
       });
+
+      // Bắt sự kiện người dùng tự hủy VIP
+      const cancelBtn = document.getElementById('cancel-vip-action-btn');
+      if(cancelBtn) {
+        cancelBtn.addEventListener('click', () => {
+            if(confirm('Bạn có chắc chắn muốn hủy gói VIP hiện tại không? Lượt tải sẽ bị mất!')) {
+                db.ref('users/' + currentUser.uid).update({ isVip: false, vipDownloadsLeft: 0, vipExpiresAt: null });
+                alert('Đã hủy gói VIP thành công.');
+            }
+        });
+      }
 
       const listEl = document.getElementById('app-list');
       db.ref('apps').on('value', snap => {
@@ -296,19 +362,37 @@
         dlBtn.style.background = 'rgba(255,255,255,0.1)'; dlBtn.style.color = 'rgba(255,255,255,0.5)'; dlBtn.style.boxShadow = 'none'; dlBtn.style.border = 'none';
       }
       
+      // XỬ LÝ CLICK TẢI XUỐNG VỚI LOGIC TRỪ LƯỢT VIP
       dlBtn.addEventListener('click', () => {
         if (dlBtn.disabled) return;
-        if (!currentUser) { alert('🔒 Bạn cần đăng nhập để tải ứng dụng!'); document.getElementById('auth-modal').classList.remove('hidden'); return; }
-        if (isVipApp && !isUserVip) { alert('👑 Đây là ứng dụng VIP. Bạn cần vượt link để lấy mã kích hoạt trước khi tải!'); document.getElementById('vip-modal').classList.remove('hidden'); return; }
+        
+        if (!currentUser) { 
+            alert('🔒 Bạn cần đăng nhập để tải ứng dụng!'); 
+            document.getElementById('auth-modal').classList.remove('hidden'); 
+            return; 
+        }
 
-        // --- ĐÃ ĐỔI: TRỎ SANG TRANG DOWN.HTML ---
+        if (isVipApp) {
+            // Check nếu chưa VIP
+            if (!currentUserData || !currentUserData.isVip || currentUserData.vipDownloadsLeft <= 0) { 
+                alert('👑 Đây là ứng dụng VIP. Bạn đã hết lượt tải hoặc chưa kích hoạt, vui lòng lấy Mã mới!'); 
+                document.getElementById('vip-modal').classList.remove('hidden'); 
+                return; 
+            }
+            
+            // Trừ 1 lượt tải VIP
+            db.ref('users/' + currentUser.uid).update({
+                vipDownloadsLeft: currentUserData.vipDownloadsLeft - 1
+            });
+            // Thông báo nhỏ
+            alert('Bạn đã sử dụng 1 lượt tải VIP thành công!');
+        }
+
         window.location.href = 'down.html?id=' + app.id;
       });
     };
 
     render('main-template');
-
-    // Mắt Xem
     db.ref('stats/pageViews').transaction(currentViews => (currentViews || 0) + 1);
 
   </script>
