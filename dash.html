@@ -56,6 +56,14 @@
     .badge-free { background: #28a745; color: white; }
     .badge-vip { background: #ffc107; color: black; }
     .badge-soon { background: linear-gradient(45deg, #007aff, #00d4ff); color: white; box-shadow: 0 0 10px rgba(0, 122, 255, 0.5); }
+
+    /* CSS cho Bảng Quản lý User/Key */
+    .admin-list-container { max-height: 250px; overflow-y: auto; background: rgba(0,0,0,0.4); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); }
+    .admin-list-item { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; line-height: 1.5; }
+    .admin-list-item:last-child { border-bottom: none; }
+    /* Thanh cuộn gọn gàng */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,59,48,0.5); border-radius: 10px; }
   </style>
 </head>
 <body>
@@ -65,6 +73,25 @@
       <div class="stat-box"><p>📦 Tổng ứng dụng</p><h2 id="stat-total-apps">0</h2></div>
       <div class="stat-box"><p>📥 Tổng lượt tải về</p><h2 id="stat-total-downloads">0</h2></div>
       <div class="stat-box"><p>👁️ Mắt xem web</p><h2 id="stat-page-views">0</h2></div>
+    </div>
+
+    <div class="glass">
+      <h3 style="margin-bottom:16px; text-shadow: 0 0 8px rgba(255,255,255,0.3);">👥 Quản lý Người dùng & Key VIP</h3>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        
+        <div>
+          <h4 style="color:#00d4ff; margin-bottom: 10px; font-size: 14px;">👤 Tài khoản đã đăng ký</h4>
+          <div id="admin-user-list" class="admin-list-container">
+             </div>
+        </div>
+
+        <div>
+          <h4 style="color:#ffc107; margin-bottom: 10px; font-size: 14px;">🔑 Key VIP vượt link</h4>
+          <div id="admin-key-list" class="admin-list-container">
+             </div>
+        </div>
+
+      </div>
     </div>
 
     <div class="glass">
@@ -165,32 +192,63 @@
     const firebaseConfig = {
       apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE",
       databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "keyquocdat",
-      storageBucket: "keyquocdat.appspot.com",
-      authDomain: "keyquocdat.firebaseapp.com"
+      projectId: "keyquocdat"
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
     let currentEditId = null; let cropper = null; let finalBase64Image = null; let editBase64Image = null; let isEditingCrop = false;
 
-    // --- Thống Kê Mắt Xem Web ---
+    // --- Load User và Key Lên Bảng ---
+    function loadUsersAndKeys() {
+      // 1. Load danh sách User
+      db.ref('users').on('value', snap => {
+        const users = snap.val() || {};
+        const container = document.getElementById('admin-user-list');
+        container.innerHTML = '';
+        Object.entries(users).forEach(([uid, user]) => {
+          let statusText = '';
+          if (user.isVip && user.vipDownloadsLeft > 0) {
+              statusText = `<span style="color:#ffc107; font-weight:bold;">👑 VIP (Còn ${user.vipDownloadsLeft} Lượt)</span>`;
+          } else {
+              statusText = `<span style="color:#888;">Free</span>`;
+          }
+          container.innerHTML += `<div class="admin-list-item">📧 ${user.email}<br>Quyền: ${statusText}</div>`;
+        });
+      });
+
+      // 2. Load danh sách Key VIP (Sắp xếp mới nhất lên đầu)
+      db.ref('vip_codes').on('value', snap => {
+        const codes = snap.val() || {};
+        const container = document.getElementById('admin-key-list');
+        container.innerHTML = '';
+        
+        // Convert object to array and sort by createdAt descending
+        const sortedCodes = Object.entries(codes).sort((a, b) => b[1].createdAt - a[1].createdAt);
+        
+        sortedCodes.forEach(([code, data]) => {
+          let status = data.valid ? `<span style="color:#00ff00; font-weight:bold;">Chưa dùng</span>` : `<span style="color:#ff3b30;">Đã dùng</span>`;
+          let dateStr = new Date(data.createdAt).toLocaleString('vi-VN');
+          container.innerHTML += `<div class="admin-list-item">
+             🔑 <b style="color:#ffc107; user-select:all;">${code}</b><br>
+             Trạng thái: ${status} <br>
+             🕒 Tạo lúc: ${dateStr}
+          </div>`;
+        });
+      });
+    }
+
     db.ref('stats/pageViews').on('value', snap => {
       document.getElementById('stat-page-views').textContent = snap.val() || 0;
     });
 
-    // --- Sự kiện hiển thị tên file ---
     document.getElementById('app-upload-file').addEventListener('change', function(e) {
       const fileDisplay = document.getElementById('file-name-display');
       const linkInput = document.getElementById('app-link');
       if(e.target.files[0]) {
         fileDisplay.textContent = 'Đã chọn File: ' + e.target.files[0].name;
-        linkInput.value = ''; 
-        linkInput.disabled = true;
-      } else {
-        fileDisplay.textContent = '';
-        linkInput.disabled = false;
-      }
+        linkInput.value = ''; linkInput.disabled = true;
+      } else { fileDisplay.textContent = ''; linkInput.disabled = false; }
     });
 
     document.getElementById('edit-upload-file').addEventListener('change', function(e) {
@@ -198,15 +256,11 @@
       const linkInput = document.getElementById('edit-link');
       if(e.target.files[0]) {
         fileDisplay.textContent = 'Đã chọn File mới: ' + e.target.files[0].name;
-        linkInput.value = ''; 
-        linkInput.disabled = true;
-      } else {
-        fileDisplay.textContent = '';
-        linkInput.disabled = false;
-      }
+        linkInput.value = ''; linkInput.disabled = true;
+      } else { fileDisplay.textContent = ''; linkInput.disabled = false; }
     });
 
-    // --- Logic Cắt Ảnh ---
+    // Cắt Ảnh Icon
     function openCropper(file, isEdit) {
       isEditingCrop = isEdit; const reader = new FileReader();
       reader.onload = function (e) {
@@ -222,7 +276,6 @@
     
     document.getElementById('crop-ok-btn').addEventListener('click', function() {
       if (!cropper) return;
-      // Dùng Base64 siêu nhẹ lưu thẳng vào Database, chặn đứng lỗi mạng cho Icon
       const base64Str = cropper.getCroppedCanvas({ width: 200, height: 200 }).toDataURL('image/jpeg', 0.8);
       if (isEditingCrop) { editBase64Image = base64Str; alert("Đã cắt ảnh cho phần Chỉnh sửa!"); } 
       else { finalBase64Image = base64Str; document.getElementById('icon-preview').src = finalBase64Image; document.getElementById('icon-preview').style.display = 'block'; }
@@ -231,23 +284,17 @@
     
     document.getElementById('crop-cancel-btn').addEventListener('click', function() { document.getElementById('cropper-modal').classList.add('hidden'); if (cropper) { cropper.destroy(); cropper = null; } });
 
-    // =========================================================================================
-    // HỆ THỐNG TẢI FILE APP MỚI: SỬ DỤNG GOFILE API (Cực kỳ mạnh mẽ chống CORS trên Điện Thoại)
-    // =========================================================================================
+    // Upload App File (GoFile API Chống CORS)
     const uploadFileToCloud = async (file, btnElement) => {
       try {
         btnElement.textContent = '⏳ Đang tìm Server trống...';
-        // Bước 1: Lấy địa chỉ máy chủ tốt nhất của GoFile
         const serverRes = await fetch('https://api.gofile.io/servers');
         const serverData = await serverRes.json();
         if(serverData.status !== 'ok') throw new Error('Không tìm thấy Server tải file');
         const serverName = serverData.data.servers[0].name;
 
-        // Bước 2: Bắt đầu tải file lên máy chủ đó
         return new Promise((resolve, reject) => {
-          const formData = new FormData();
-          formData.append('file', file);
-
+          const formData = new FormData(); formData.append('file', file);
           const xhr = new XMLHttpRequest();
           xhr.open('POST', `https://${serverName}.gofile.io/contents/uploadfile`, true);
           
@@ -257,24 +304,19 @@
               btnElement.textContent = '⏳ Đang đẩy dữ liệu lên Server... ' + pct + '%';
             }
           };
-          
           xhr.onload = () => {
             if (xhr.status === 200) {
               const res = JSON.parse(xhr.responseText);
-              if(res.status === 'ok') resolve(res.data.downloadPage); // Trả về link trang tải
+              if(res.status === 'ok') resolve(res.data.downloadPage); 
               else reject(new Error('Lỗi phản hồi từ máy chủ GoFile'));
             } else reject(new Error('Máy chủ từ chối file'));
           };
-          
           xhr.onerror = () => reject(new Error('Kết nối bị chặn bởi trình duyệt'));
           xhr.send(formData);
         });
-      } catch (err) {
-        throw new Error(err.message);
-      }
+      } catch (err) { throw new Error(err.message); }
     };
 
-    // --- Đăng tải ứng dụng ---
     document.getElementById('upload-btn').addEventListener('click', async () => {
       const btn = document.getElementById('upload-btn');
       const name = document.getElementById('app-name').value.trim();
@@ -291,37 +333,24 @@
       btn.disabled = true; btn.textContent = '⏳ Đang khởi tạo...';
 
       try {
-        if (appFile) {
-          link = await uploadFileToCloud(appFile, btn);
-        }
-
+        if (appFile) link = await uploadFileToCloud(appFile, btn);
         const iconToSave = finalBase64Image || 'https://via.placeholder.com/100';
+        
         await db.ref('apps').push().set({
-          name,
-          downloadLink: type === 'coming_soon' ? '#' : link,
-          type: type, 
-          icon: iconToSave, // Bỏ hoàn toàn API tải icon, dùng Base64 tĩnh chống nghẽn
-          size: size || 'N/A',
-          version: version || '1.0.0',
-          description: desc || 'Chưa có mô tả cho ứng dụng này.',
-          downloads: 0
+          name, downloadLink: type === 'coming_soon' ? '#' : link, type: type, icon: iconToSave,
+          size: size || 'N/A', version: version || '1.0.0', description: desc || 'Chưa có mô tả.', downloads: 0
         });
 
         alert('🎉 Đã thêm ứng dụng thành công!');
-        document.getElementById('app-name').value = ''; 
-        document.getElementById('app-link').value = ''; document.getElementById('app-link').disabled = false;
+        document.getElementById('app-name').value = ''; document.getElementById('app-link').value = ''; document.getElementById('app-link').disabled = false;
         document.getElementById('app-upload-file').value = ''; document.getElementById('file-name-display').textContent = '';
         document.getElementById('app-size').value = ''; document.getElementById('app-version').value = '';
-        document.getElementById('app-desc').value = ''; document.getElementById('icon-preview').style.display = 'none';
-        finalBase64Image = null;
+        document.getElementById('app-desc').value = ''; document.getElementById('icon-preview').style.display = 'none'; finalBase64Image = null;
       } catch (error) { 
-        console.error(error);
         alert('❌ LỖI UPLOAD: ' + error.message + '\n\nMạng di động chặn tải file. Vui lòng dùng link MediaFire để nhập tay!'); 
-      } 
-      finally { btn.disabled = false; btn.textContent = '📤 Đăng tải ứng dụng'; }
+      } finally { btn.disabled = false; btn.textContent = '📤 Đăng tải ứng dụng'; }
     });
 
-    // --- Load danh sách App ---
     function loadAppList() {
       db.ref('apps').on('value', snap => {
         const apps = snap.val() || {};
@@ -330,14 +359,12 @@
 
         Object.entries(apps).forEach(([id, app]) => {
           totalApps++; totalDownloads += (app.downloads || 0);
-
           let badgeHtml = '';
           if (app.type === 'vip') badgeHtml = '<span class="badge badge-vip">👑 VIP</span>';
           else if (app.type === 'coming_soon') badgeHtml = '<span class="badge badge-soon">⏳ SẮP RA MẮT</span>';
           else badgeHtml = '<span class="badge badge-free">FREE</span>';
 
-          const row = document.createElement('div');
-          row.className = 'app-row';
+          const row = document.createElement('div'); row.className = 'app-row';
           row.innerHTML = `
             <div class="flex" style="flex:1; overflow:hidden;">
               <img src="${app.icon}" alt="icon">
@@ -357,23 +384,19 @@
         document.getElementById('stat-total-apps').textContent = totalApps;
         document.getElementById('stat-total-downloads').textContent = totalDownloads;
 
-        // Bật Bảng Edit
         container.querySelectorAll('[data-edit]').forEach(btn => {
           btn.addEventListener('click', (e) => {
             const id = e.currentTarget.dataset.edit; const app = apps[id]; currentEditId = id; editBase64Image = null;
             document.getElementById('edit-name').value = app.name;
             document.getElementById('edit-link').value = app.downloadLink !== '#' ? app.downloadLink : '';
             document.getElementById('edit-link').disabled = false;
-            document.getElementById('edit-upload-file').value = '';
-            document.getElementById('edit-file-name-display').textContent = '';
-            document.getElementById('edit-size').value = app.size || '';
-            document.getElementById('edit-version').value = app.version || '';
+            document.getElementById('edit-upload-file').value = ''; document.getElementById('edit-file-name-display').textContent = '';
+            document.getElementById('edit-size').value = app.size || ''; document.getElementById('edit-version').value = app.version || '';
             document.getElementById('edit-desc').value = app.description || '';
             document.getElementById('edit-type').value = app.type || 'free';
             document.getElementById('edit-modal').classList.remove('hidden');
           });
         });
-
         container.querySelectorAll('[data-delete]').forEach(btn => {
           btn.addEventListener('click', async (e) => { if (confirm('Xoá ứng dụng này?')) await db.ref('apps/' + e.currentTarget.dataset.delete).remove(); });
         });
@@ -382,7 +405,6 @@
 
     document.getElementById('cancel-edit-btn').addEventListener('click', () => { document.getElementById('edit-modal').classList.add('hidden'); });
 
-    // --- Lưu thông tin Edit ---
     document.getElementById('save-edit-btn').addEventListener('click', async () => {
       if (!currentEditId) return;
       const btn = document.getElementById('save-edit-btn');
@@ -397,32 +419,17 @@
       btn.disabled = true;
 
       try {
-        if (editFile) {
-          link = await uploadFileToCloud(editFile, btn);
-        }
-
-        const updateData = { 
-          name, 
-          downloadLink: type === 'coming_soon' ? '#' : link,
-          size: document.getElementById('edit-size').value.trim(), 
-          version: document.getElementById('edit-version').value.trim(), 
-          description: document.getElementById('edit-desc').value.trim(),
-          type: type 
-        };
-        
-        // Cập nhật Base64 Icon nếu có đổi
+        if (editFile) link = await uploadFileToCloud(editFile, btn);
+        const updateData = { name, downloadLink: type === 'coming_soon' ? '#' : link, size: document.getElementById('edit-size').value.trim(), version: document.getElementById('edit-version').value.trim(), description: document.getElementById('edit-desc').value.trim(), type: type };
         if (editBase64Image) updateData.icon = editBase64Image; 
         
         await db.ref('apps/' + currentEditId).update(updateData);
         document.getElementById('edit-modal').classList.add('hidden'); alert('Đã cập nhật!');
-      } catch(e) { 
-        console.error(e);
-        alert('Lỗi cập nhật: ' + e.message + '\n\nNếu bị văng ra, hãy xoá file tải lên và dán link tay nhé!'); 
-      } 
-      finally { btn.disabled = false; btn.textContent = 'Lưu cập nhật'; }
+      } catch(e) { alert('Lỗi cập nhật: ' + e.message); } finally { btn.disabled = false; btn.textContent = 'Lưu cập nhật'; }
     });
 
     loadAppList();
+    loadUsersAndKeys(); // Gọi hàm load bảng User và Key khi chạy web
   </script>
 </body>
 </html>
