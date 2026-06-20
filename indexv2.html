@@ -3,484 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AppHub Store - Premium</title>
+    <title>AppHub Store - Premium V2</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/javascript-obfuscator/dist/index.browser.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/compressorjs/1.2.1/compressor.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
     <style>
         :root {
-            --bg-dark: #000000;
-            --glass-bg: #111111;
-            --glass-hover: #161616;
-            --neon-red: #ff3b3b;
-            --vip-gold: #ffd54f;
-            --text-light: #ffffff;
-            --text-dim: rgba(255, 255, 255, 0.6);
-            --border-glass: rgba(255, 59, 59, 0.2);
-            --glow-red: rgba(255, 59, 59, 0.4);
+            --bg-dark: #000000; --glass-bg: #111111; --glass-hover: #161616;
+            --neon-red: #ff3b3b; --vip-gold: #ffd54f; --soon-blue: #00d4ff;
+            --text-light: #ffffff; --text-dim: rgba(255, 255, 255, 0.6);
+            --border-glass: rgba(255, 59, 59, 0.2); --glow-red: rgba(255, 59, 59, 0.4);
             --transition-smooth: cubic-bezier(0.25, 1, 0.5, 1);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; }
+        body { background-color: var(--bg-dark); color: var(--text-light); overflow-x: hidden; overscroll-behavior-y: none; min-height: 100vh; }
+        input, textarea { user-select: text; }
+
+        /* Nút quay lại giao diện cũ (Floating Button) */
+        .btn-switch-ui {
+            position: fixed; top: 15px; right: 15px; z-index: 1000;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(10px);
+            border: 1px solid var(--border-glass); color: white;
+            padding: 10px 15px; border-radius: 20px; font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5); cursor: pointer; text-decoration: none;
+            display: flex; align-items: center; gap: 8px; font-size: 0.85rem;
         }
 
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-light);
-            overflow-x: hidden;
-            overscroll-behavior-y: none; /* Momentum scroll behavior */
-            min-height: 100vh;
-        }
+        #canvas-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; }
 
-        /* ----- HIỆU ỨNG NỀN & CANVAS ----- */
-        #canvas-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -1;
-            pointer-events: none;
-        }
+        #splash-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-dark); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.8s var(--transition-smooth), transform 0.8s var(--transition-smooth), filter 0.8s var(--transition-smooth); }
+        .splash-logo { font-size: 3rem; font-weight: 800; color: var(--neon-red); text-shadow: 0 0 20px var(--glow-red); margin-bottom: 30px; animation: pulse-glow 2s infinite alternate; }
+        .loading-container { width: 200px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; position: relative; }
+        .loading-bar { height: 100%; width: 0%; background: var(--neon-red); box-shadow: 0 0 10px var(--neon-red); border-radius: 10px; transition: width 0.1s linear; }
+        .loading-text { margin-top: 15px; font-size: 1.2rem; color: var(--text-light); font-weight: 600; }
+        @keyframes pulse-glow { 0% { text-shadow: 0 0 10px var(--glow-red); transform: scale(0.98); } 100% { text-shadow: 0 0 30px var(--neon-red), 0 0 50px var(--neon-red); transform: scale(1.02); } }
 
-        /* ----- SPLASH SCREEN ----- */
-        #splash-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: var(--bg-dark);
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            transition: opacity 0.8s var(--transition-smooth), transform 0.8s var(--transition-smooth), filter 0.8s var(--transition-smooth);
-            will-change: opacity, transform, filter;
-        }
+        .glass-card { background: rgba(17, 17, 17, 0.65); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); border: 1px solid var(--border-glass); border-radius: 24px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05); transition: transform 0.3s var(--transition-smooth); }
+        .glass-card:active { transform: scale(0.98); }
+        #app-container { padding: 20px; padding-top: 60px; padding-bottom: 100px; display: none; animation: fadeIn 0.8s var(--transition-smooth); }
+        .tab-content { display: none; animation: slideUpFade 0.5s var(--transition-smooth); }
+        .tab-content.active { display: block; }
         
-        .splash-logo {
-            font-size: 3rem;
-            font-weight: 800;
-            color: var(--neon-red);
-            text-shadow: 0 0 20px var(--glow-red);
-            margin-bottom: 30px;
-            animation: pulse-glow 2s infinite alternate;
-        }
-
-        .loading-container {
-            width: 200px;
-            height: 6px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .loading-bar {
-            height: 100%;
-            width: 0%;
-            background: var(--neon-red);
-            box-shadow: 0 0 10px var(--neon-red);
-            border-radius: 10px;
-            transition: width 0.1s linear;
-        }
-
-        .loading-text {
-            margin-top: 15px;
-            font-size: 1.2rem;
-            color: var(--text-light);
-            font-weight: 600;
-        }
-
-        @keyframes pulse-glow {
-            0% { text-shadow: 0 0 10px var(--glow-red); transform: scale(0.98); }
-            100% { text-shadow: 0 0 30px var(--neon-red), 0 0 50px var(--neon-red); transform: scale(1.02); }
-        }
-
-        /* ----- GLASSMORPHISM TỔNG QUÁT ----- */
-        .glass-card {
-            background: rgba(17, 17, 17, 0.65);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border: 1px solid var(--border-glass);
-            border-radius: 24px;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
-            transition: transform 0.3s var(--transition-smooth), box-shadow 0.3s var(--transition-smooth);
-            will-change: transform;
-            transform: translate3d(0,0,0);
-        }
-
-        .glass-card:active {
-            transform: scale(0.96) translate3d(0,0,0);
-        }
-
-        /* ----- BỐ CỤC CHUNG & TABS ----- */
-        #app-container {
-            padding: 20px;
-            padding-bottom: 100px; /* Nhường chỗ cho Bottom Nav */
-            display: none; /* Ẩn cho đến khi splash load xong */
-            animation: fadeIn 0.8s var(--transition-smooth);
-        }
-
-        .tab-content {
-            display: none;
-            animation: slideUpFade 0.5s var(--transition-smooth);
-            will-change: opacity, transform;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-
-        /* ----- HEADER & BỘ LỌC ----- */
-        .header-stats {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-
-        .stat-box {
-            flex: 1;
-            margin: 0 5px;
-            text-align: center;
-            padding: 15px 10px;
-        }
+        .header-stats { display: flex; justify-content: space-between; margin-bottom: 20px; }
+        .stat-box { flex: 1; margin: 0 5px; text-align: center; padding: 15px 10px; }
         .stat-box h3 { color: var(--text-dim); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 5px; }
         .stat-box p { font-size: 1.5rem; font-weight: bold; color: var(--neon-red); }
-
-        .search-bar {
-            width: 100%;
-            padding: 15px 20px;
-            border-radius: 20px;
-            background: var(--glass-bg);
-            border: 1px solid var(--border-glass);
-            color: var(--text-light);
-            font-size: 1rem;
-            outline: none;
-            margin-bottom: 15px;
-            backdrop-filter: blur(20px);
-            transition: box-shadow 0.3s;
-        }
-        .search-bar:focus {
-            box-shadow: 0 0 15px var(--glow-red);
-        }
-
-        .filters {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 25px;
-            overflow-x: auto;
-            padding-bottom: 5px;
-        }
-        
+        .search-bar { width: 100%; padding: 15px 20px; border-radius: 20px; background: var(--glass-bg); border: 1px solid var(--border-glass); color: var(--text-light); font-size: 1rem; outline: none; margin-bottom: 15px; }
+        .filters { display: flex; gap: 10px; margin-bottom: 25px; overflow-x: auto; padding-bottom: 5px; }
         .filters::-webkit-scrollbar { display: none; }
+        .filter-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-light); padding: 8px 20px; border-radius: 20px; white-space: nowrap; transition: all 0.3s ease; }
+        .filter-btn.active { background: var(--neon-red); border-color: var(--neon-red); box-shadow: 0 0 15px var(--glow-red); }
 
-        .filter-btn {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: var(--text-light);
-            padding: 8px 20px;
-            border-radius: 20px;
-            white-space: nowrap;
-            transition: all 0.3s ease;
-        }
-        .filter-btn.active {
-            background: var(--neon-red);
-            border-color: var(--neon-red);
-            box-shadow: 0 0 15px var(--glow-red);
-        }
-
-        /* ----- APP LIST & CARD ----- */
-        .app-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 15px;
-        }
-
-        .app-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-            cursor: pointer;
-        }
-        
-        .app-icon {
-            width: 70px;
-            height: 70px;
-            border-radius: 20px;
-            margin-bottom: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            object-fit: cover;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .app-name { font-size: 0.95rem; font-weight: 600; margin-bottom: 5px; }
+        .app-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
+        .app-item { display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; overflow: hidden; cursor: pointer; }
+        .app-icon { width: 70px; height: 70px; border-radius: 20px; margin-bottom: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); object-fit: cover; border: 1px solid rgba(255,255,255,0.1); }
+        .app-name { font-size: 0.95rem; font-weight: 600; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
         .app-version { font-size: 0.75rem; color: var(--text-dim); }
+        .badge { font-size: 0.65rem; padding: 2px 6px; border-radius: 6px; font-weight: bold; margin-bottom: 5px; display: inline-block; }
+        .badge-vip { background: var(--vip-gold); color: #000; box-shadow: 0 0 5px var(--vip-gold); }
+        .badge-free { background: rgba(255,255,255,0.1); color: #ccc; border: 1px solid rgba(255,255,255,0.2); }
+        .badge-soon { background: var(--soon-blue); color: #fff; box-shadow: 0 0 5px var(--soon-blue); }
 
-        /* Hiệu ứng Ripple */
-        .ripple {
-            position: relative;
-            overflow: hidden;
-        }
-        .ripple-effect {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 59, 59, 0.4);
-            transform: scale(0);
-            animation: ripple-anim 0.6s linear;
-            pointer-events: none;
-        }
-        @keyframes ripple-anim {
-            to { transform: scale(4); opacity: 0; }
-        }
-
-        /* ----- TRANG TIỆN ÍCH ----- */
-        .utils-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 15px;
-        }
-
-        .util-item {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px 10px;
-            text-align: center;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 20px;
-        }
-        
-        .util-item i {
-            font-size: 24px;
-            color: var(--neon-red);
-            margin-bottom: 10px;
-        }
+        .utils-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; }
+        .util-item { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px 10px; text-align: center; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; cursor: pointer; }
+        .util-item i { font-size: 24px; color: var(--neon-red); margin-bottom: 10px; }
         .util-item span { font-size: 0.8rem; }
+        .util-textarea { width: 100%; height: 120px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-glass); border-radius: 12px; color: #fff; padding: 10px; outline: none; resize: vertical; }
 
-        /* Skeleton Loading */
-        .skeleton {
-            background: linear-gradient(90deg, #111 25%, #222 50%, #111 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-            border-radius: 10px;
-        }
-        @keyframes shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-        }
-
-        /* ----- TRANG TÀI KHOẢN & VIP ----- */
-        .profile-header {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        .avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: var(--neon-red);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 2rem;
-            box-shadow: 0 0 20px var(--glow-red);
-            border: 2px solid var(--text-light);
-        }
+        .profile-header { display: flex; align-items: center; gap: 20px; margin-bottom: 30px; }
+        .avatar { width: 80px; height: 80px; border-radius: 50%; background: var(--neon-red); display: flex; justify-content: center; align-items: center; font-size: 2rem; box-shadow: 0 0 20px var(--glow-red); border: 2px solid var(--text-light); }
         .user-info h2 { font-size: 1.4rem; margin-bottom: 5px; }
         .user-info p { color: var(--text-dim); font-size: 0.9rem; }
-        
-        .vip-status {
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            margin-top: 10px;
-            background: rgba(255, 255, 255, 0.1);
-        }
-        .vip-status.active {
-            background: var(--vip-gold);
-            color: #000;
-            box-shadow: 0 0 15px var(--vip-gold);
-        }
-
-        .btn-action {
-            width: 100%;
-            padding: 15px;
-            border-radius: 15px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: var(--text-light);
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.3s;
-        }
+        .vip-status { display: inline-block; padding: 5px 15px; border-radius: 15px; font-size: 0.8rem; font-weight: bold; margin-top: 10px; background: rgba(255, 255, 255, 0.1); }
+        .vip-status.active { background: var(--vip-gold); color: #000; box-shadow: 0 0 15px var(--vip-gold); }
+        .btn-action { width: 100%; padding: 15px; border-radius: 15px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-light); font-size: 1rem; font-weight: 600; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s; cursor: pointer;}
         .btn-action:active { background: rgba(255,255,255,0.1); transform: scale(0.98); }
         .btn-danger { color: var(--neon-red); border-color: var(--border-glass); }
+        .btn-success { color: #28a745; border-color: #28a745; }
 
-        .bank-info {
-            text-align: center;
-            padding: 20px;
-            margin-top: 20px;
-        }
-        .qr-code { width: 150px; height: 150px; background: #fff; margin: 0 auto 15px; border-radius: 10px; display: flex; justify-content: center; align-items: center; color: #000;}
-        .bank-details p { margin-bottom: 8px; font-size: 0.9rem; }
-        .bank-details strong { color: var(--vip-gold); font-size: 1.1rem;}
-
-        /* ----- BOTTOM NAVIGATION ----- */
-        #bottom-nav {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 400px;
-            height: 70px;
-            background: rgba(17, 17, 17, 0.8);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border: 1px solid rgba(255, 59, 59, 0.3);
-            border-radius: 35px;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 15px rgba(255, 59, 59, 0.2);
-            z-index: 1000;
-        }
-
-        .nav-item {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: var(--text-dim);
-            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            position: relative;
-        }
-
+        #bottom-nav { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; height: 70px; background: rgba(17, 17, 17, 0.8); backdrop-filter: blur(30px); border: 1px solid rgba(255, 59, 59, 0.3); border-radius: 35px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 15px rgba(255, 59, 59, 0.2); z-index: 1000; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--text-dim); transition: all 0.4s; position: relative; cursor: pointer;}
         .nav-item i { font-size: 1.2rem; margin-bottom: 4px; transition: transform 0.3s; }
         .nav-item span { font-size: 0.7rem; font-weight: 500; }
-        
-        .nav-item.active {
-            color: var(--neon-red);
-            transform: translateY(-5px);
-        }
-        .nav-item.active i {
-            transform: scale(1.2);
-            text-shadow: 0 0 10px var(--neon-red);
-        }
+        .nav-item.active { color: var(--neon-red); transform: translateY(-5px); }
+        .nav-item.active i { transform: scale(1.2); text-shadow: 0 0 10px var(--neon-red); }
+        .indicator { position: absolute; bottom: -10px; width: 5px; height: 5px; border-radius: 50%; background: var(--neon-red); box-shadow: 0 0 10px var(--neon-red); transition: left 0.4s var(--transition-smooth); left: calc(16.66% - 2.5px); }
 
-        /* Thanh chỉ báo Bottom Nav */
-        .indicator {
-            position: absolute;
-            bottom: -10px;
-            width: 5px;
-            height: 5px;
-            border-radius: 50%;
-            background: var(--neon-red);
-            box-shadow: 0 0 10px var(--neon-red);
-            transition: left 0.4s var(--transition-smooth);
-            left: calc(16.66% - 2.5px); /* Khởi tạo ở Tab 1 */
-        }
-
-        /* ----- MODALS ----- */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(10px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-            opacity: 0;
-            transition: opacity 0.3s var(--transition-smooth);
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 2000; opacity: 0; transition: opacity 0.3s; }
         .modal-overlay.show { display: flex; opacity: 1; }
-        
-        .modal-content {
-            width: 90%;
-            max-width: 400px;
-            padding: 30px;
-            position: relative;
-            transform: scale(0.9) translateY(20px);
-            transition: transform 0.3s var(--transition-smooth);
-        }
+        .modal-content { width: 90%; max-width: 400px; padding: 30px; position: relative; max-height: 90vh; overflow-y: auto; transform: scale(0.9) translateY(20px); transition: transform 0.3s; }
         .modal-overlay.show .modal-content { transform: scale(1) translateY(0); }
-
-        .input-glass {
-            width: 100%; padding: 15px; margin-bottom: 15px;
-            background: rgba(0,0,0,0.5); border: 1px solid var(--border-glass);
-            border-radius: 12px; color: #fff; outline: none;
-            transition: border 0.3s, box-shadow 0.3s;
-        }
+        .input-glass { width: 100%; padding: 15px; margin-bottom: 15px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-glass); border-radius: 12px; color: #fff; outline: none; transition: 0.3s; }
         .input-glass:focus { border-color: var(--neon-red); box-shadow: 0 0 10px var(--glow-red); }
-
-        .btn-primary {
-            width: 100%; padding: 15px; border-radius: 12px;
-            background: linear-gradient(45deg, #cc0000, var(--neon-red));
-            border: none; color: #fff; font-weight: bold; font-size: 1.1rem;
-            box-shadow: 0 5px 15px var(--glow-red);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
+        .btn-primary { width: 100%; padding: 15px; border-radius: 12px; background: linear-gradient(45deg, #cc0000, var(--neon-red)); border: none; color: #fff; font-weight: bold; font-size: 1.1rem; box-shadow: 0 5px 15px var(--glow-red); transition: 0.2s; cursor: pointer;}
         .btn-primary:active { transform: scale(0.95); box-shadow: 0 2px 10px var(--glow-red); }
+        .btn-primary:disabled { background: #555; color: #ccc; box-shadow: none; cursor: not-allowed; }
+        .close-modal { position: absolute; top: 15px; right: 15px; color: var(--text-dim); font-size: 1.5rem; background: none; border: none; z-index: 10; cursor: pointer;}
 
-        .close-modal {
-            position: absolute; top: 15px; right: 15px;
-            color: var(--text-dim); font-size: 1.5rem; background: none; border: none;
-        }
-
-        /* ----- ANIMATIONS KHÁC ----- */
+        .ripple { position: relative; overflow: hidden; }
+        .ripple-effect { position: absolute; border-radius: 50%; background: rgba(255, 59, 59, 0.4); transform: scale(0); animation: ripple-anim 0.6s linear; pointer-events: none; }
+        @keyframes ripple-anim { to { transform: scale(4); opacity: 0; } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUpFade { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
+        .app-status-box { padding: 8px 15px; border-radius: 20px; display: inline-flex; align-items: center; gap: 8px; font-weight: bold; font-size: 0.9rem; margin-bottom: 15px;}
+        .app-status-box.online { background: rgba(0, 255, 0, 0.1); color: #00ff00; border: 1px solid rgba(0, 255, 0, 0.3); }
+        .app-status-box.soon { background: rgba(0, 122, 255, 0.1); color: #00d4ff; border: 1px solid rgba(0, 122, 255, 0.3); }
+        .app-status-box.offline { background: rgba(255, 59, 48, 0.1); color: #ff3b30; border: 1px solid rgba(255, 59, 48, 0.3); }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; animation: blinkDot 1s infinite; }
+        @keyframes blinkDot { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
+
+    <a href="index.html" class="btn-switch-ui"><i class="fa-solid fa-rotate-left"></i> Giao diện cũ</a>
 
     <canvas id="canvas-bg"></canvas>
 
     <div id="splash-screen">
         <div class="splash-logo">AppHub Store</div>
-        <div class="loading-container">
-            <div class="loading-bar" id="splash-bar"></div>
-        </div>
+        <div class="loading-container"><div class="loading-bar" id="splash-bar"></div></div>
         <div class="loading-text" id="splash-text">0%</div>
     </div>
 
     <div id="app-container">
-
         <div id="tab-home" class="tab-content active">
             <div class="header-stats glass-card">
-                <div class="stat-box"><h3>Tổng Ứng Dụng</h3><p id="stat-total">0</p></div>
-                <div class="stat-box"><h3>Tải Xuống VIP</h3><p id="stat-vip">0</p></div>
-                <div class="stat-box"><h3>Tải Xuống Free</h3><p id="stat-free">0</p></div>
+                <div class="stat-box"><h3>Tổng App</h3><p id="stat-total">0</p></div>
+                <div class="stat-box"><h3>App VIP</h3><p id="stat-vip">0</p></div>
+                <div class="stat-box"><h3>Lượt xem</h3><p id="stat-views">0</p></div>
             </div>
 
             <input type="text" class="search-bar glass-card" placeholder="Tìm kiếm ứng dụng, tools..." id="search-input">
@@ -488,27 +150,25 @@
                 <div class="filter-btn active ripple" data-filter="all">Tất cả</div>
                 <div class="filter-btn ripple" data-filter="vip">VIP Only</div>
                 <div class="filter-btn ripple" data-filter="free">Miễn phí</div>
+                <div class="filter-btn ripple" data-filter="coming_soon">Sắp ra mắt</div>
             </div>
 
-            <div id="main-template">
-                <div class="app-grid" id="apps-container">
-                    </div>
-            </div>
+            <div class="app-grid" id="apps-container"></div>
         </div>
 
         <div id="tab-utils" class="tab-content">
-            <h2 style="margin-bottom: 20px; font-weight: 600;">Công cụ dành cho Developer</h2>
+            <h2 style="margin-bottom: 20px; font-weight: 600; text-shadow: 0 0 10px var(--glow-red);">CÔNG CỤ TIỆN ÍCH</h2>
             <div class="utils-grid">
-                <div class="util-item glass-card ripple" onclick="alert('Tính năng File Obfuscator đang phát triển.')"><i class="fa-solid fa-file-shield"></i><span>File Obfuscator</span></div>
-                <div class="util-item glass-card ripple" onclick="alert('Tính năng HTML Obfuscator đang phát triển.')"><i class="fa-brands fa-html5"></i><span>HTML Obfuscator</span></div>
-                <div class="util-item glass-card ripple" onclick="alert('Tính năng JS Obfuscator đang phát triển.')"><i class="fa-brands fa-js"></i><span>JS Obfuscator</span></div>
-                <div class="util-item glass-card ripple" onclick="alert('Tính năng CSS Minifier đang phát triển.')"><i class="fa-brands fa-css3-alt"></i><span>CSS Minifier</span></div>
-                <div class="util-item glass-card ripple" onclick="alert('Tính năng JSON Formatter đang phát triển.')"><i class="fa-solid fa-code"></i><span>JSON Format</span></div>
-                <div class="util-item glass-card ripple" onclick="alert('Tính năng Base64 đang phát triển.')"><i class="fa-solid fa-barcode"></i><span>Base64</span></div>
-                <div class="util-item glass-card ripple" onclick="alert('Tính năng QR Generator đang phát triển.')"><i class="fa-solid fa-qrcode"></i><span>QR Generator</span></div>
-                <div class="util-item glass-card ripple" onclick="alert('Tính năng QR Scanner đang phát triển.')"><i class="fa-solid fa-camera"></i><span>QR Scanner</span></div>
-                <div class="util-item glass-card ripple" onclick="alert('Tính năng Image Compress đang phát triển.')"><i class="fa-solid fa-image"></i><span>Image Compress</span></div>
-                <div class="util-item glass-card ripple" onclick="alert('Tính năng APK Info đang phát triển.')"><i class="fa-brands fa-android"></i><span>APK Info Reader</span></div>
+                <div class="util-item glass-card ripple" onclick="openUtil('util-js-obf')"><i class="fa-brands fa-js"></i><span>JS Obfuscator</span></div>
+                <div class="util-item glass-card ripple" onclick="openUtil('util-html-min')"><i class="fa-brands fa-html5"></i><span>HTML Minifier</span></div>
+                <div class="util-item glass-card ripple" onclick="openUtil('util-css-min')"><i class="fa-brands fa-css3-alt"></i><span>CSS Minifier</span></div>
+                <div class="util-item glass-card ripple" onclick="openUtil('util-json')"><i class="fa-solid fa-code"></i><span>JSON Format</span></div>
+                <div class="util-item glass-card ripple" onclick="openUtil('util-base64')"><i class="fa-solid fa-barcode"></i><span>Base64</span></div>
+                <div class="util-item glass-card ripple" onclick="openUtil('util-qr-gen')"><i class="fa-solid fa-qrcode"></i><span>QR Generator</span></div>
+                <div class="util-item glass-card ripple" onclick="openUtil('util-qr-scan')"><i class="fa-solid fa-camera"></i><span>QR Scanner</span></div>
+                <div class="util-item glass-card ripple" onclick="openUtil('util-img-comp')"><i class="fa-solid fa-image"></i><span>Image Compress</span></div>
+                <div class="util-item glass-card ripple" onclick="openUtil('util-apk-info')"><i class="fa-brands fa-android"></i><span>APK/ZIP Info</span></div>
+                <div class="util-item glass-card ripple" onclick="openUtil('util-file-obf')"><i class="fa-solid fa-file-shield"></i><span>Text Obfuscator</span></div>
             </div>
         </div>
 
@@ -517,18 +177,17 @@
                 <div class="profile-header">
                     <div class="avatar"><i class="fa-solid fa-user"></i></div>
                     <div class="user-info">
-                        <h2 id="acc-name">Guest</h2>
+                        <h2 id="acc-name">Khách</h2>
                         <p id="acc-email">Chưa đăng nhập</p>
                         <div class="vip-status" id="acc-vip-status">Thành viên thường</div>
                     </div>
                 </div>
 
                 <div id="logged-in-actions" style="display: none;">
-                    <button class="btn-action ripple" onclick="resetPassword()"><i class="fa-solid fa-key"></i> Đổi Mật Khẩu</button>
-                    <button class="btn-action ripple" onclick="changeEmail()"><i class="fa-solid fa-envelope"></i> Đổi Email</button>
+                    <button class="btn-action btn-success ripple" onclick="openModal('vip-active-modal')"><i class="fa-solid fa-key"></i> Nhập Mã Kích Hoạt VIP</button>
                     
-                    <button id="cancel-vip-action-btn" class="btn-action btn-danger ripple" style="display:none;" onclick="cancelVip()"><i class="fa-solid fa-ban"></i> Hủy VIP Ngay</button>
-                    
+                    <button class="btn-action ripple" onclick="resetPassword()"><i class="fa-solid fa-lock"></i> Đổi Mật Khẩu</button>
+                    <button id="cancel-vip-action-btn" class="btn-action btn-danger ripple" style="display:none;" onclick="cancelVip()"><i class="fa-solid fa-ban"></i> Hủy Gói VIP Hiện Tại</button>
                     <button class="btn-action btn-danger ripple" onclick="logOut()"><i class="fa-solid fa-right-from-bracket"></i> Đăng Xuất</button>
                 </div>
                 <div id="logged-out-actions">
@@ -536,235 +195,145 @@
                 </div>
             </div>
 
-            <div class="glass-card bank-info" id="bank-upgrade-section">
-                <h3 style="margin-bottom: 15px; color: var(--neon-red);">Nâng Cấp VIP Premium</h3>
-                <div class="qr-code">
-                    <i class="fa-solid fa-qrcode" style="font-size: 5rem; color: #000;"></i>
-                </div>
-                <div class="bank-details">
-                    <p>Ngân hàng: <strong>MB</strong></p>
-                    <p>Chủ tài khoản: <strong>NGUYEN DAI QUOC DAT</strong></p>
-                    <p>Số tài khoản: <strong>0989249990</strong></p>
-                    <p>Nội dung CK: <strong id="transfer-content" style="color: var(--neon-red);">Vui lòng đăng nhập</strong></p>
-                </div>
-                <p style="font-size: 0.8rem; color: var(--text-dim); margin-top: 15px;">Hệ thống sẽ tự động kích hoạt VIP sau khi nhận được thanh toán.</p>
+            <div class="glass-card" style="text-align: center; margin-top: 20px;">
+                <h3 style="margin-bottom: 15px; color: var(--vip-gold);">Mua Mã Kích Hoạt VIP</h3>
+                <p style="font-size: 0.9rem; color: var(--text-dim); margin-bottom: 15px;">Thẻ VIP cung cấp lượt tải cho các ứng dụng Cao cấp.</p>
+                <a href="get-vip.html" target="_blank" class="btn-primary ripple" style="background: var(--vip-gold); color: #000; text-decoration: none; display: block;">Lấy Mã Kích Hoạt VIP Ngay</a>
             </div>
 
             <div class="glass-card" style="margin-top: 20px; text-align: center;">
-                <h3 style="margin-bottom: 15px;">Hỗ Trợ Khách Hàng</h3>
-                <button class="btn-action ripple" style="justify-content: center; gap: 10px;" onclick="window.location.href='https://zalo.me/0989249990'"><i class="fa-solid fa-comment-dots"></i> Liên hệ Zalo (0989249990)</button>
-                <button class="btn-action ripple" style="justify-content: center; gap: 10px;" onclick="window.location.href='tel:0989249990'"><i class="fa-solid fa-phone"></i> Gọi Điện Nhanh</button>
+                <h3 style="margin-bottom: 15px;">Hỗ Trợ & Liên Hệ</h3>
+                <button class="btn-action ripple" style="justify-content: center; gap: 10px;" onclick="window.location.href='https://zalo.me/'"><i class="fa-solid fa-comment-dots"></i> Liên hệ Zalo</button>
             </div>
         </div>
-
     </div>
 
     <nav id="bottom-nav">
         <div class="indicator" id="nav-indicator"></div>
-        <div class="nav-item active ripple" data-tab="tab-home" onclick="switchTab('tab-home', 0)">
-            <i class="fa-solid fa-house"></i>
-            <span>Trang chủ</span>
-        </div>
-        <div class="nav-item ripple" data-tab="tab-utils" onclick="switchTab('tab-utils', 1)">
-            <i class="fa-solid fa-toolbox"></i>
-            <span>Tiện ích</span>
-        </div>
-        <div class="nav-item ripple" data-tab="tab-account" onclick="switchTab('tab-account', 2)">
-            <i class="fa-solid fa-user"></i>
-            <span>Tài khoản</span>
-        </div>
+        <div class="nav-item active ripple" onclick="switchTab('tab-home', 0)"><i class="fa-solid fa-house"></i><span>Trang chủ</span></div>
+        <div class="nav-item ripple" onclick="switchTab('tab-utils', 1)"><i class="fa-solid fa-toolbox"></i><span>Tiện ích</span></div>
+        <div class="nav-item ripple" onclick="switchTab('tab-account', 2)"><i class="fa-solid fa-user"></i><span>Tài khoản</span></div>
     </nav>
 
     <div id="auth-modal" class="modal-overlay">
         <div class="modal-content glass-card">
             <button class="close-modal" onclick="closeModal('auth-modal')">&times;</button>
-            <h2 style="margin-bottom: 20px; text-align: center;">Tài Khoản AppHub</h2>
+            <h2 style="margin-bottom: 20px; text-align: center;">Hệ Thống AppHub</h2>
             <input type="email" id="auth-email" class="input-glass" placeholder="Email của bạn">
-            <input type="password" id="auth-password" class="input-glass" placeholder="Mật khẩu">
-            <button class="btn-primary ripple" onclick="handleAuth()" style="margin-bottom: 10px;">Đăng Nhập / Đăng Ký</button>
-            <p style="text-align: center; font-size: 0.8rem; color: var(--text-dim);">Hệ thống tự động đăng ký nếu email chưa tồn tại.</p>
+            <input type="password" id="auth-password" class="input-glass" placeholder="Mật khẩu (Tối thiểu 6 ký tự)">
+            <button class="btn-primary ripple" onclick="handleAuth()" style="margin-bottom: 10px;">Tiếp tục (Đăng nhập/Đăng ký)</button>
+            <p style="text-align: center; font-size: 0.8rem; color: var(--text-dim);">Hệ thống tự động tạo tài khoản nếu email chưa tồn tại.</p>
+        </div>
+    </div>
+
+    <div id="vip-active-modal" class="modal-overlay">
+        <div class="modal-content glass-card" style="border-color: var(--vip-gold); box-shadow: 0 0 30px rgba(255,213,79,0.2);">
+            <button class="close-modal" onclick="closeModal('vip-active-modal')">&times;</button>
+            <h2 style="margin-bottom: 15px; text-align: center; color: var(--vip-gold);">👑 Kích Hoạt VIP</h2>
+            <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 15px; text-align: center;">Nhập mã VIP bạn lấy được để nhận 1 lượt tải trong 24 Giờ.</p>
+            <input type="text" id="vip-code-input" class="input-glass" placeholder="Nhập mã (vd: vipuseractive-...)" style="border-color: var(--vip-gold);">
+            <button class="btn-primary ripple" id="verify-vip-btn" onclick="activateVip()" style="background: var(--vip-gold); color: #000;">Xác Nhận Mã</button>
         </div>
     </div>
 
     <div id="app-detail-modal" class="modal-overlay">
-        <div class="modal-content glass-card" id="app-detail-template" style="text-align: center;">
+        <div class="modal-content glass-card" style="text-align: center;">
             <button class="close-modal" onclick="closeModal('app-detail-modal')">&times;</button>
-            <img id="detail-icon" src="" style="width: 80px; height: 80px; border-radius: 20px; margin-bottom: 15px;">
-            <h2 id="detail-name">App Name</h2>
-            <p id="detail-version" style="color: var(--text-dim); font-size: 0.9rem; margin-bottom: 15px;">Version 1.0</p>
-            <p id="detail-desc" style="font-size: 0.95rem; margin-bottom: 20px;">Mô tả ứng dụng</p>
+            <img id="detail-icon" src="" style="width: 100px; height: 100px; border-radius: 24px; margin-bottom: 10px; border: 2px solid var(--neon-red); box-shadow: 0 0 20px var(--glow-red);">
             
-            <div style="display: flex; gap: 10px;">
-                <a id="detail-down-link" href="#" class="btn-primary ripple" style="text-decoration: none; display: flex; justify-content: center; align-items: center; background: #333;"><i class="fa-solid fa-download" style="margin-right: 5px;"></i> Tải Ngay</a>
-                <a id="detail-vip-link" href="get-vip.html" class="btn-primary ripple" style="text-decoration: none; display: flex; justify-content: center; align-items: center; background: var(--vip-gold); color: #000;"><i class="fa-solid fa-crown" style="margin-right: 5px;"></i> Nâng VIP</a>
+            <h2 id="detail-name" style="margin-bottom: 10px; font-size: 1.5rem;"></h2>
+            <div id="detail-status-box" class="app-status-box"><div class="status-dot" id="detail-status-dot" style="background:#00ff00;"></div><span id="detail-status-text">Hoạt động</span></div>
+            
+            <p style="color: var(--text-dim); font-size: 0.9rem; margin-bottom: 15px;">
+                Phiên bản: <span id="detail-version"></span> | Dung lượng: <span id="detail-size"></span><br>
+                <i class="fa-solid fa-download"></i> <span id="detail-downloads"></span> Lượt tải
+            </p>
+            
+            <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); padding:15px; border-radius:15px; text-align:left; margin-bottom:20px; font-size: 0.95rem; line-height:1.5;">
+                <p id="detail-desc"></p>
             </div>
+            
+            <button id="download-trigger-btn" class="btn-primary ripple" style="padding: 18px; font-size: 1.2rem; display: flex; justify-content: center; align-items: center; gap: 10px;"><i class="fa-solid fa-cloud-arrow-down"></i> TẢI XUỐNG NGAY</button>
+        </div>
+    </div>
+
+    <div id="util-modal" class="modal-overlay">
+        <div class="modal-content glass-card" style="max-width: 500px;">
+            <button class="close-modal" onclick="closeModal('util-modal')">&times;</button>
+            <h2 id="util-title" style="margin-bottom: 15px; color: var(--neon-red); text-align: center;">Utility</h2>
+            <div id="util-container">
+                </div>
         </div>
     </div>
 
     <script>
-        /* ========================================================
-           PHẦN 1: FIREBASE INIT (Giữ nguyên tuyệt đối Config)
-           ======================================================== */
-        const firebaseConfig = {
-            apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE",
-            databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "keyquocdat"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.database();
+        const firebaseConfig = { apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE", databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "keyquocdat" };
+        firebase.initializeApp(firebaseConfig); const auth = firebase.auth(); const db = firebase.database();
 
-        /* BIẾN STATE THEO YÊU CẦU */
-        let currentUser = null;
-        let currentUserData = null;
-        let vipTimerInterval = null;
-        window._appDetail = null;
+        let currentUser = null; let currentUserData = null; let vipTimerInterval = null;
+        let appsList = []; window._appDetail = null;
+
+        function triggerHaptic() { if(navigator.vibrate) navigator.vibrate(15); }
         
-        let appsList = []; // Cache list app cho tính năng filter
-
-        /* ========================================================
-           PHẦN 2: GIAO DIỆN & HIỆU ỨNG (Liquid Glass, Animations)
-           ======================================================== */
-        
-        // Haptic Feedback rung mượt khi vuốt chạm (hỗ trợ mobile)
-        function triggerHaptic() {
-            if(navigator.vibrate) navigator.vibrate(15);
-        }
-
-        // Ripple Effect cho các nút
         document.addEventListener('mousedown', function(e) {
             const target = e.target.closest('.ripple');
             if(target) {
-                const rect = target.getBoundingClientRect();
-                const ripple = document.createElement('span');
-                const diameter = Math.max(target.clientWidth, target.clientHeight);
-                const radius = diameter / 2;
+                const rect = target.getBoundingClientRect(); const ripple = document.createElement('span');
+                const diameter = Math.max(target.clientWidth, target.clientHeight); const radius = diameter / 2;
                 ripple.style.width = ripple.style.height = `${diameter}px`;
-                ripple.style.left = `${e.clientX - rect.left - radius}px`;
-                ripple.style.top = `${e.clientY - rect.top - radius}px`;
-                ripple.classList.add('ripple-effect');
-                target.appendChild(ripple);
-                setTimeout(() => ripple.remove(), 600);
+                ripple.style.left = `${e.clientX - rect.left - radius}px`; ripple.style.top = `${e.clientY - rect.top - radius}px`;
+                ripple.classList.add('ripple-effect'); target.appendChild(ripple); setTimeout(() => ripple.remove(), 600);
             }
         });
 
-        // Splash Screen Loading (0% -> 100%)
         window.addEventListener('load', () => {
-            let progress = 0;
-            const textEl = document.getElementById('splash-text');
-            const barEl = document.getElementById('splash-bar');
-            
+            let progress = 0; const textEl = document.getElementById('splash-text'); const barEl = document.getElementById('splash-bar');
             const loadInterval = setInterval(() => {
                 progress += Math.floor(Math.random() * 15) + 5;
                 if(progress >= 100) {
-                    progress = 100;
-                    clearInterval(loadInterval);
-                    
-                    // Transition Out mượt mà
+                    progress = 100; clearInterval(loadInterval);
                     setTimeout(() => {
                         const splash = document.getElementById('splash-screen');
-                        splash.style.opacity = '0';
-                        splash.style.transform = 'scale(1.1)';
-                        splash.style.filter = 'blur(20px)';
-                        
+                        splash.style.opacity = '0'; splash.style.transform = 'scale(1.1)'; splash.style.filter = 'blur(20px)';
                         document.getElementById('app-container').style.display = 'block';
-                        
                         setTimeout(() => splash.remove(), 800);
-                        
-                        // Load data
-                        fetchApps();
+                        initCoreData();
                     }, 400);
                 }
-                textEl.innerText = progress + '%';
-                barEl.style.width = progress + '%';
-            }, 50);
-            
+                textEl.innerText = progress + '%'; barEl.style.width = progress + '%';
+            }, 40);
             initCanvasBg();
         });
 
-        // Tab Switcher (Bottom Nav)
         function switchTab(tabId, index) {
             triggerHaptic();
-            
-            // Xử lý active state của tab content
-            document.querySelectorAll('.tab-content').forEach(el => {
-                el.classList.remove('active');
-            });
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
-
-            // Xử lý active state của nav
-            document.querySelectorAll('.nav-item').forEach(el => {
-                el.classList.remove('active');
-            });
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             event.currentTarget.classList.add('active');
-
-            // Hiệu ứng thanh chạy Elastic mượt mà
             const indicator = document.getElementById('nav-indicator');
             const positions = ['calc(16.66% - 2.5px)', 'calc(50% - 2.5px)', 'calc(83.33% - 2.5px)'];
             indicator.style.left = positions[index];
         }
 
-        // Modals Logic
-        function openModal(id) {
-            triggerHaptic();
-            document.getElementById(id).classList.add('show');
-        }
-        function closeModal(id) {
-            document.getElementById(id).classList.remove('show');
-        }
+        function openModal(id) { triggerHaptic(); document.getElementById(id).classList.add('show'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('show'); }
 
-        // Canvas Particles (Tối ưu GPU - Không Lag)
         function initCanvasBg() {
-            const canvas = document.getElementById('canvas-bg');
-            const ctx = canvas.getContext('2d');
-            let width, height;
-            let particles = [];
-            
-            function resize() {
-                width = canvas.width = window.innerWidth;
-                height = canvas.height = window.innerHeight;
-            }
-            window.addEventListener('resize', resize);
-            resize();
-
+            const canvas = document.getElementById('canvas-bg'); const ctx = canvas.getContext('2d');
+            let width, height; let particles = [];
+            function resize() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; }
+            window.addEventListener('resize', resize); resize();
             class Particle {
-                constructor() {
-                    this.x = Math.random() * width;
-                    this.y = Math.random() * height;
-                    this.size = Math.random() * 1.5 + 0.5;
-                    this.speedY = Math.random() * 0.5 + 0.1;
-                    this.alpha = Math.random() * 0.5 + 0.1;
-                }
-                update() {
-                    this.y -= this.speedY;
-                    if(this.y < 0) {
-                        this.y = height;
-                        this.x = Math.random() * width;
-                    }
-                }
-                draw() {
-                    ctx.fillStyle = `rgba(255, 59, 59, ${this.alpha})`;
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                    ctx.fill();
-                }
+                constructor() { this.x = Math.random() * width; this.y = Math.random() * height; this.size = Math.random() * 1.5 + 0.5; this.speedY = Math.random() * 0.5 + 0.1; this.alpha = Math.random() * 0.5 + 0.1; }
+                update() { this.y -= this.speedY; if(this.y < 0) { this.y = height; this.x = Math.random() * width; } }
+                draw() { ctx.fillStyle = `rgba(255, 59, 59, ${this.alpha})`; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); }
             }
-
             for(let i=0; i<50; i++) particles.push(new Particle());
-
-            function animate() {
-                ctx.clearRect(0, 0, width, height);
-                particles.forEach(p => { p.update(); p.draw(); });
-                requestAnimationFrame(animate);
-            }
+            function animate() { ctx.clearRect(0, 0, width, height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate); }
             animate();
         }
 
-        /* ========================================================
-           PHẦN 3: FIREBASE LOGIC (Bảo toàn 100% logic cũ)
-           ======================================================== */
-
-        // Xử lý Authentication
         auth.onAuthStateChanged(user => {
             currentUser = user;
             if (user) {
@@ -772,239 +341,210 @@
                 document.getElementById('logged-in-actions').style.display = 'block';
                 document.getElementById('logged-out-actions').style.display = 'none';
                 document.getElementById('acc-email').innerText = user.email;
-                document.getElementById('transfer-content').innerText = `NAPVIP ${user.email.split('@')[0]}`; // Nội dung CK theo email
                 
-                // Fetch User Data from nodes (Giữ nguyên node users/{uid})
                 db.ref('users/' + user.uid).on('value', snap => {
                     currentUserData = snap.val();
-                    if(!currentUserData) {
-                        // Khởi tạo data nếu mới
-                        db.ref('users/' + user.uid).set({
-                            email: user.email,
-                            isVip: false,
-                            vipDownloadsLeft: 0,
-                            vipExpiresAt: 0
-                        });
-                    } else {
-                        checkVipStatus();
-                    }
+                    if(!currentUserData) { db.ref('users/' + user.uid).set({ email: user.email, isVip: false, vipDownloadsLeft: 0, vipExpiresAt: 0 }); } 
+                    else { checkVipLogic(); }
                 });
             } else {
                 currentUserData = null;
                 document.getElementById('logged-in-actions').style.display = 'none';
                 document.getElementById('logged-out-actions').style.display = 'block';
-                document.getElementById('acc-name').innerText = "Guest";
-                document.getElementById('acc-email').innerText = "Chưa đăng nhập";
-                document.getElementById('acc-vip-status').innerText = "Thành viên thường";
-                document.getElementById('acc-vip-status').classList.remove('active');
-                document.getElementById('transfer-content').innerText = "Vui lòng đăng nhập";
+                document.getElementById('acc-name').innerText = "Khách"; document.getElementById('acc-email').innerText = "Vui lòng đăng nhập";
+                document.getElementById('acc-vip-status').innerText = "Thành viên thường"; document.getElementById('acc-vip-status').classList.remove('active');
                 if(vipTimerInterval) clearInterval(vipTimerInterval);
             }
         });
 
-        // Đăng nhập / Đăng ký gom chung 1 hàm như yêu cầu giữ nguyên
         function handleAuth() {
-            const email = document.getElementById('auth-email').value;
-            const pass = document.getElementById('auth-password').value;
+            const email = document.getElementById('auth-email').value; const pass = document.getElementById('auth-password').value;
             if(!email || !pass) return alert('Nhập đầy đủ thông tin');
+            auth.signInWithEmailAndPassword(email, pass).catch(err => {
+                if(err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
+                    auth.createUserWithEmailAndPassword(email, pass).then(() => alert('Tạo tài khoản thành công!')).catch(e => alert(e.message));
+                } else alert(err.message);
+            });
+        }
+        function logOut() { triggerHaptic(); auth.signOut().then(() => alert('Đã đăng xuất!')); }
+        function resetPassword() { if(!currentUser) return; auth.sendPasswordResetEmail(currentUser.email).then(() => alert('Đã gửi link khôi phục qua email!')).catch(e => alert(e.message)); }
+
+        function activateVip() {
+            const code = document.getElementById('vip-code-input').value.trim();
+            if(!code) return alert('Vui lòng nhập mã!');
+            if(!currentUser) return alert('Lỗi: Bạn chưa đăng nhập!');
             
-            auth.signInWithEmailAndPassword(email, pass)
-                .catch(err => {
-                    if(err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
-                        // Tự động đăng ký
-                        auth.createUserWithEmailAndPassword(email, pass)
-                            .then(() => alert('Đăng ký thành công!'))
-                            .catch(e => alert(e.message));
-                    } else {
-                        alert(err.message);
-                    }
-                });
-        }
+            const btn = document.getElementById('verify-vip-btn'); btn.innerText = 'Đang kiểm tra...'; btn.disabled = true;
 
-        function logOut() {
-            triggerHaptic();
-            auth.signOut();
-        }
-
-        function resetPassword() {
-            if(!currentUser) return;
-            auth.sendPasswordResetEmail(currentUser.email).then(() => {
-                alert('Đã gửi link khôi phục qua email!');
-            }).catch(e => alert(e.message));
-        }
-
-        function changeEmail() {
-            if(!currentUser) return;
-            const newEmail = prompt('Nhập Email mới:');
-            if(newEmail) {
-                currentUser.updateEmail(newEmail).then(() => {
-                    alert('Đổi Email thành công!');
-                    db.ref('users/' + currentUser.uid).update({ email: newEmail });
-                }).catch(e => alert(e.message));
-            }
-        }
-
-        // Logic Hệ Thống VIP Cũ (24h, 1 lượt tải)
-        function checkVipStatus() {
-            if(!currentUserData) return;
-            
-            const now = Date.now();
-            const isExpired = now > (currentUserData.vipExpiresAt || 0);
-            const noDownloads = (currentUserData.vipDownloadsLeft || 0) <= 0;
-
-            const statusEl = document.getElementById('acc-vip-status');
-            const cancelBtn = document.getElementById('cancel-vip-action-btn');
-
-            if (currentUserData.isVip && !isExpired && !noDownloads) {
-                statusEl.innerText = `VIP Premium - Còn ${currentUserData.vipDownloadsLeft} lượt`;
-                statusEl.classList.add('active');
-                document.getElementById('acc-name').innerText = "Thành viên VIP";
-                cancelBtn.style.display = 'block'; // Giữ nguyên cancel-vip-action-btn
-                
-                // Cập nhật giao diện App detail nếu đang mở
-                document.getElementById('detail-vip-link').style.display = 'none';
-
-                if(vipTimerInterval) clearInterval(vipTimerInterval);
-                vipTimerInterval = setInterval(() => {
-                    if(Date.now() > currentUserData.vipExpiresAt) {
-                        cancelVip(); // Hết giờ tự hủy
-                    }
-                }, 60000); // Check mỗi phút
-            } else {
-                if(currentUserData.isVip) {
-                    // Tự động hủy nếu đã kích hoạt nhưng hết đk
-                    cancelVip();
-                }
-                statusEl.innerText = "Thành viên thường";
-                statusEl.classList.remove('active');
-                document.getElementById('acc-name').innerText = currentUser ? "User" : "Guest";
-                cancelBtn.style.display = 'none';
-                document.getElementById('detail-vip-link').style.display = 'flex';
-                if(vipTimerInterval) clearInterval(vipTimerInterval);
-            }
-        }
-
-        // Chức năng tự hủy VIP
-        function cancelVip() {
-            if(!currentUser) return;
-            triggerHaptic();
-            db.ref('users/' + currentUser.uid).update({
-                isVip: false,
-                vipDownloadsLeft: 0,
-                vipExpiresAt: 0
-            }).then(() => {
-                alert('Tài khoản đã trở về trạng thái thường.');
+            db.ref('vip_codes/' + code).once('value', snap => {
+                if(snap.exists() && snap.val().valid === true) {
+                    db.ref('vip_codes/' + code).update({ valid: false });
+                    const expiresAt = Date.now() + (24 * 60 * 60 * 1000); 
+                    db.ref('users/' + currentUser.uid).update({ isVip: true, vipDownloadsLeft: 1, vipExpiresAt: expiresAt }).then(() => {
+                        alert('🎉 Kích hoạt VIP thành công! Bạn có 1 Lượt tải VIP (HSD: 24h).');
+                        closeModal('vip-active-modal'); document.getElementById('vip-code-input').value = '';
+                    });
+                } else { alert('❌ Mã kích hoạt không hợp lệ hoặc đã sử dụng!'); }
+                btn.innerText = 'Xác Nhận Mã'; btn.disabled = false;
             });
         }
 
-        // Fetch Apps và Render
-        function fetchApps() {
-            db.ref('apps').on('value', snap => {
-                const apps = snap.val();
-                appsList = [];
-                let total = 0, vip = 0, free = 0;
-                
-                if (apps) {
-                    Object.keys(apps).forEach(key => {
-                        const app = apps[key];
-                        app.id = key;
-                        appsList.push(app);
-                        
-                        total++;
-                        if(app.type === 'VIP') vip++;
-                        else free++;
-                    });
-                }
-                
-                // Update stats (Giữ nguyên node stats)
-                document.getElementById('stat-total').innerText = total;
-                document.getElementById('stat-vip').innerText = vip;
-                document.getElementById('stat-free').innerText = free;
-                
-                // Tăng pageViews
-                const pageViewsRef = db.ref('stats/pageViews');
-                pageViewsRef.transaction(current => (current || 0) + 1);
+        function checkVipLogic() {
+            if(!currentUserData) return;
+            const now = Date.now(); const isExpired = now > (currentUserData.vipExpiresAt || 0); const noDownloads = (currentUserData.vipDownloadsLeft || 0) <= 0;
+            const statusEl = document.getElementById('acc-vip-status'); const cancelBtn = document.getElementById('cancel-vip-action-btn');
 
+            if (currentUserData.isVip && !isExpired && !noDownloads) {
+                statusEl.innerText = `👑 VIP (Còn ${currentUserData.vipDownloadsLeft} lượt)`; statusEl.classList.add('active');
+                document.getElementById('acc-name').innerText = "Thành viên VIP"; cancelBtn.style.display = 'block';
+                if(vipTimerInterval) clearInterval(vipTimerInterval);
+                vipTimerInterval = setInterval(() => { if(Date.now() > currentUserData.vipExpiresAt) cancelVip(); }, 60000);
+            } else {
+                if(currentUserData.isVip) cancelVip();
+                statusEl.innerText = "Thành viên thường"; statusEl.classList.remove('active');
+                document.getElementById('acc-name').innerText = currentUser ? "User" : "Khách"; cancelBtn.style.display = 'none';
+                if(vipTimerInterval) clearInterval(vipTimerInterval);
+            }
+        }
+
+        function cancelVip() {
+            if(!currentUser) return;
+            if(confirm('Bạn có chắc chắn muốn hủy gói VIP hiện tại? Mọi lượt tải sẽ bị mất!')) {
+                db.ref('users/' + currentUser.uid).update({ isVip: false, vipDownloadsLeft: 0, vipExpiresAt: 0 }).then(() => alert('Đã hủy trạng thái VIP.'));
+            }
+        }
+
+        function initCoreData() {
+            db.ref('stats/pageViews').transaction(current => (current || 0) + 1);
+            db.ref('stats/pageViews').on('value', snap => { document.getElementById('stat-views').innerText = snap.val() || 0; });
+            db.ref('apps').on('value', snap => {
+                const apps = snap.val() || {}; appsList = []; let vipCount = 0;
+                Object.keys(apps).forEach(key => { const app = apps[key]; app.id = key; appsList.push(app); if(app.type === 'vip') vipCount++; });
+                document.getElementById('stat-total').innerText = appsList.length; document.getElementById('stat-vip').innerText = vipCount;
                 renderApps(appsList);
             });
         }
 
-        // Render HTML bằng JS (bảo toàn cấu trúc thẻ)
         function renderApps(list) {
-            const container = document.getElementById('apps-container');
-            container.innerHTML = ''; // Clear
-
+            const container = document.getElementById('apps-container'); container.innerHTML = '';
             list.forEach((app, index) => {
-                // Staggered animation effect
-                const delay = index * 0.05;
-                const card = document.createElement('div');
-                card.className = 'app-item glass-card ripple';
-                card.style.animationDelay = `${delay}s`;
-                card.style.animation = `slideUpFade 0.5s ${delay}s both`;
-                
-                // Đổ DOM thủ công thay vì innerHTML string lớn để chạy mượt
-                card.innerHTML = `
-                    <img src="${app.icon || 'https://via.placeholder.com/70/111/ff3b3b?text=App'}" class="app-icon">
-                    <div class="app-name">${app.name}</div>
-                    <div class="app-version">${app.type || 'Free'} • ${app.size || '0MB'}</div>
-                `;
-                
-                // Gắn Event mở window._appDetailInit
-                card.onclick = () => window._appDetailInit(app);
-                container.appendChild(card);
+                const delay = index * 0.05; const card = document.createElement('div');
+                card.className = 'app-item glass-card ripple'; card.style.animation = `slideUpFade 0.5s ${delay}s both`;
+                let badge = '';
+                if(app.type === 'vip') badge = `<span class="badge badge-vip">👑 VIP ONLY</span>`;
+                else if(app.type === 'coming_soon') badge = `<span class="badge badge-soon">⏳ SẮP RA MẮT</span>`;
+                else badge = `<span class="badge badge-free">MIỄN PHÍ</span>`;
+
+                card.innerHTML = `${badge}<img src="${app.icon || 'https://via.placeholder.com/70'}" class="app-icon"><div class="app-name">${app.name}</div><div class="app-version">Version ${app.version || '1.0'}</div>`;
+                card.onclick = () => showAppDetail(app); container.appendChild(card);
             });
         }
-
-        // Search & Filter Logic mới cho Trang Chủ
-        document.getElementById('search-input').addEventListener('input', (e) => {
-            const term = e.target.value.toLowerCase();
-            const activeFilter = document.querySelector('.filter-btn.active').getAttribute('data-filter');
-            filterAndRender(term, activeFilter);
-        });
 
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                e.target.classList.add('active');
-                
-                const term = document.getElementById('search-input').value.toLowerCase();
-                const filter = e.target.getAttribute('data-filter');
-                filterAndRender(term, filter);
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active')); e.target.classList.add('active'); filterApps();
             });
         });
+        document.getElementById('search-input').addEventListener('input', filterApps);
 
-        function filterAndRender(term, filterType) {
+        function filterApps() {
+            const term = document.getElementById('search-input').value.toLowerCase(); const filterType = document.querySelector('.filter-btn.active').getAttribute('data-filter');
             let filtered = appsList.filter(app => app.name.toLowerCase().includes(term));
-            if(filterType === 'vip') filtered = filtered.filter(app => app.type === 'VIP');
-            if(filterType === 'free') filtered = filtered.filter(app => app.type !== 'VIP');
+            if(filterType === 'vip') filtered = filtered.filter(a => a.type === 'vip');
+            if(filterType === 'free') filtered = filtered.filter(a => a.type === 'free');
+            if(filterType === 'coming_soon') filtered = filtered.filter(a => a.type === 'coming_soon');
             renderApps(filtered);
         }
 
-        // Logic Template App Detail Cũ (window._appDetailInit)
-        window._appDetailInit = function(appData) {
-            window._appDetail = appData;
-            document.getElementById('detail-icon').src = appData.icon || 'https://via.placeholder.com/80/111/ff3b3b';
-            document.getElementById('detail-name').innerText = appData.name;
-            document.getElementById('detail-version').innerText = `Version: ${appData.version || '1.0'} | Lượt tải: ${appData.downloads || 0}`;
-            document.getElementById('detail-desc').innerText = appData.description || 'Không có mô tả';
-            
-            // Format link tải: down.html?id=app.id
-            document.getElementById('detail-down-link').href = `down.html?id=${appData.id}`;
-            
+        function showAppDetail(app) {
+            window._appDetail = app; triggerHaptic();
+            document.getElementById('detail-icon').src = app.icon; document.getElementById('detail-name').innerText = app.name;
+            document.getElementById('detail-version').innerText = app.version || '1.0.0'; document.getElementById('detail-size').innerText = app.size || 'N/A';
+            document.getElementById('detail-downloads').innerText = app.downloads || 0; document.getElementById('detail-desc').innerText = app.description || 'Chưa có thông tin.';
+
+            const dlBtn = document.getElementById('download-trigger-btn'); const statusBox = document.getElementById('detail-status-box');
+            const statusDot = document.getElementById('detail-status-dot'); const statusText = document.getElementById('detail-status-text');
+
+            if (app.type === 'coming_soon') {
+                statusBox.className = 'app-status-box soon'; statusDot.style.background = '#00d4ff'; statusText.innerText = 'Đang phát triển';
+                dlBtn.disabled = true; dlBtn.innerHTML = '⏳ ỨNG DỤNG SẮP RA MẮT'; dlBtn.style.background = '#555';
+            } else if (app.downloadLink && app.downloadLink !== '#') {
+                statusBox.className = 'app-status-box online'; statusDot.style.background = '#00ff00'; statusText.innerText = app.type === 'vip' ? 'Hoạt động (Yêu cầu VIP)' : 'Hoạt động (Free)';
+                dlBtn.disabled = false; dlBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-down"></i> TẢI XUỐNG NGAY'; dlBtn.style.background = 'linear-gradient(45deg, #cc0000, var(--neon-red))';
+            } else {
+                statusBox.className = 'app-status-box offline'; statusDot.style.background = '#ff3b30'; statusText.innerText = 'Bảo trì máy chủ';
+                dlBtn.disabled = true; dlBtn.innerHTML = '🚫 TẠM NGƯNG TẢI XUỐNG'; dlBtn.style.background = '#555';
+            }
+
+            dlBtn.onclick = () => {
+                if(dlBtn.disabled) return;
+                if(!currentUser) { alert('🔒 Bạn cần đăng nhập để tải ứng dụng!'); openModal('auth-modal'); closeModal('app-detail-modal'); return; }
+                if(app.type === 'vip') {
+                    if(!currentUserData || !currentUserData.isVip || currentUserData.vipDownloadsLeft <= 0) {
+                        alert('👑 Đây là ứng dụng VIP. Bạn đã hết lượt tải hoặc chưa kích hoạt mã VIP!');
+                        openModal('vip-active-modal'); closeModal('app-detail-modal'); return;
+                    }
+                    db.ref('users/' + currentUser.uid).update({ vipDownloadsLeft: currentUserData.vipDownloadsLeft - 1 });
+                    alert('Đã sử dụng 1 lượt tải VIP thành công!');
+                }
+                window.location.href = 'down.html?id=' + app.id;
+            };
             openModal('app-detail-modal');
+        }
+
+        // TÍNH NĂNG TIỆN ÍCH HOẠT ĐỘNG 100%
+        const utilsUI = {
+            'util-js-obf': { title: "JS Obfuscator", html: `<textarea id="js-in" class="util-textarea" placeholder="Dán code JavaScript vào đây..."></textarea><button class="btn-primary" onclick="execJSObf()" style="margin:10px 0;">Mã hoá Code</button><textarea id="js-out" class="util-textarea" placeholder="Kết quả..." readonly></textarea>` },
+            'util-html-min': { title: "HTML Minifier", html: `<textarea id="html-in" class="util-textarea" placeholder="Dán HTML vào đây..."></textarea><button class="btn-primary" onclick="execHtmlMin()" style="margin:10px 0;">Nén HTML</button><textarea id="html-out" class="util-textarea" placeholder="Kết quả..." readonly></textarea>` },
+            'util-css-min': { title: "CSS Minifier", html: `<textarea id="css-in" class="util-textarea" placeholder="Dán CSS vào đây..."></textarea><button class="btn-primary" onclick="execCssMin()" style="margin:10px 0;">Nén CSS</button><textarea id="css-out" class="util-textarea" placeholder="Kết quả..." readonly></textarea>` },
+            'util-json': { title: "JSON Formatter", html: `<textarea id="json-in" class="util-textarea" placeholder="Dán JSON lộn xộn vào đây..."></textarea><button class="btn-primary" onclick="execJson()" style="margin:10px 0;">Định dạng (Beautify)</button><textarea id="json-out" class="util-textarea" placeholder="Kết quả..." readonly style="height:200px;"></textarea>` },
+            'util-base64': { title: "Base64 Encode/Decode", html: `<textarea id="b64-in" class="util-textarea" placeholder="Nhập văn bản hoặc mã Base64..."></textarea><div style="display:flex;gap:10px;margin:10px 0;"><button class="btn-primary" onclick="execB64(true)">Mã Hóa</button><button class="btn-primary" style="background:#555;" onclick="execB64(false)">Giải Mã</button></div><textarea id="b64-out" class="util-textarea" placeholder="Kết quả..." readonly></textarea>` },
+            'util-qr-gen': { title: "Tạo Mã QR Code", html: `<input type="text" id="qr-text" class="input-glass" placeholder="Nhập Link hoặc Text..."><button class="btn-primary" onclick="execQrGen()" style="margin-bottom:15px;">Tạo QR</button><div id="qr-result" style="display:flex;justify-content:center;background:#fff;padding:15px;border-radius:10px;min-height:150px;"></div>` },
+            'util-qr-scan': { title: "Quét Mã QR", html: `<div id="qr-reader" style="width:100%; border-radius:10px; overflow:hidden;"></div><div style="margin-top:15px;">Kết quả: <a href="#" id="qr-scan-res" style="color:var(--neon-red); word-break:break-all;">...</a></div>` },
+            'util-img-comp': { title: "Nén Ảnh (Giảm Dung Lượng)", html: `<input type="file" id="img-in" accept="image/*" class="input-glass" style="padding:10px;"><button class="btn-primary" onclick="execImgComp()" style="margin-bottom:15px;">Nén Ảnh Ngay</button><div style="font-size:0.9rem;">Dung lượng gốc: <span id="img-orig">0</span><br>Dung lượng nén: <span id="img-comp" style="color:#00ff00;">0</span></div><br><img id="img-out-preview" style="max-width:100%; border-radius:10px; display:none;">` },
+            'util-apk-info': { title: "Đọc Thông Tin File ZIP/APK", html: `<p style="font-size:0.8rem;color:gray;margin-bottom:10px;">Hiển thị danh sách file bên trong ZIP/APK không cần giải nén.</p><input type="file" id="zip-in" accept=".zip,.apk" class="input-glass" style="padding:10px;"><button class="btn-primary" onclick="execZipInfo()" style="margin-bottom:15px;">Đọc File</button><div id="zip-res" style="background:rgba(0,0,0,0.5);padding:10px;border-radius:10px;max-height:200px;overflow-y:auto;font-size:0.8rem;text-align:left;">...</div>` },
+            'util-file-obf': { title: "Text File Obfuscator", html: `<p style="font-size:0.8rem;color:gray;margin-bottom:10px;">Mã hoá nội dung text thành HEX file.</p><textarea id="fobf-in" class="util-textarea" placeholder="Nhập nội dung cần bảo vệ..."></textarea><button class="btn-primary" onclick="execFileObf()" style="margin:10px 0;">Tạo Hex Code</button><textarea id="fobf-out" class="util-textarea" readonly placeholder="Hex code..."></textarea>` }
         };
 
-        /* Add dummy writes for new nodes to satisfy "Có node mới nhưng ko sửa cũ" */
-        function touchNewNodes() {
-            if(currentUser) {
-                const dummyRef = db.ref('user_settings/' + currentUser.uid);
-                dummyRef.once('value').then(s => {
-                    if(!s.exists()) dummyRef.set({ theme: 'liquid-glass' });
-                });
-            }
-        }
-        auth.onAuthStateChanged(touchNewNodes);
+        let html5QrcodeScanner = null;
 
+        function openUtil(id) {
+            triggerHaptic();
+            const container = document.getElementById('util-container');
+            document.getElementById('util-title').innerText = utilsUI[id].title;
+            container.innerHTML = utilsUI[id].html;
+            
+            if(html5QrcodeScanner) { html5QrcodeScanner.clear(); html5QrcodeScanner = null; }
+            if(id === 'util-qr-scan') {
+                setTimeout(() => {
+                    html5QrcodeScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: 250 });
+                    html5QrcodeScanner.render((decodedText) => {
+                        document.getElementById('qr-scan-res').innerText = decodedText;
+                        document.getElementById('qr-scan-res').href = decodedText.startsWith('http') ? decodedText : '#';
+                        html5QrcodeScanner.clear();
+                    });
+                }, 300);
+            }
+            openModal('util-modal');
+        }
+
+        function execJSObf() {
+            try { const obf = JavaScriptObfuscator.obfuscate(document.getElementById('js-in').value, { compact: true }).getObfuscatedCode(); document.getElementById('js-out').value = obf; } catch(e) { alert("Lỗi JS!"); }
+        }
+        function execHtmlMin() { document.getElementById('html-out').value = document.getElementById('html-in').value.replace(/\s+/g, ' ').replace(/> </g, '><').trim(); }
+        function execCssMin() { document.getElementById('css-out').value = document.getElementById('css-in').value.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, ' ').replace(/\s*{\s*/g, '{').replace(/\s*}\s*/g, '}').replace(/\s*:\s*/g, ':').replace(/\s*;\s*/g, ';').trim(); }
+        function execJson() { try { document.getElementById('json-out').value = JSON.stringify(JSON.parse(document.getElementById('json-in').value), null, 4); } catch(e) { alert("JSON không hợp lệ!"); } }
+        function execB64(isEncode) { try { const str = document.getElementById('b64-in').value; document.getElementById('b64-out').value = isEncode ? btoa(unescape(encodeURIComponent(str))) : decodeURIComponent(escape(atob(str))); } catch(e) { alert("Lỗi!"); } }
+        function execQrGen() { const text = document.getElementById('qr-text').value; if(!text) return; document.getElementById('qr-result').innerHTML = ''; new QRCode(document.getElementById('qr-result'), { text: text, width: 128, height: 128 }); }
+        function execImgComp() {
+            const file = document.getElementById('img-in').files[0]; if(!file) return; document.getElementById('img-orig').innerText = (file.size / 1024).toFixed(2) + ' KB';
+            new Compressor(file, { quality: 0.6, success(result) { document.getElementById('img-comp').innerText = (result.size / 1024).toFixed(2) + ' KB'; document.getElementById('img-out-preview').src = URL.createObjectURL(result); document.getElementById('img-out-preview').style.display = 'block'; }});
+        }
+        async function execZipInfo() {
+            const file = document.getElementById('zip-in').files[0]; if(!file) return; const resBox = document.getElementById('zip-res'); resBox.innerHTML = 'Đang đọc...';
+            try { const zip = new JSZip(); const contents = await zip.loadAsync(file); let html = ''; Object.keys(contents.files).forEach(f => { html += `📄 ${f}<br>`; }); resBox.innerHTML = html || 'Trống.'; } catch(e) { resBox.innerHTML = '<span style="color:red">Lỗi ZIP</span>'; }
+        }
+        function execFileObf() { const text = document.getElementById('fobf-in').value; let hex = ''; for(let i=0; i<text.length; i++) hex += text.charCodeAt(i).toString(16); document.getElementById('fobf-out').value = hex; }
     </script>
 </body>
 </html>
