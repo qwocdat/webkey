@@ -64,6 +64,8 @@
         <p id="user-status-text" class="text-secondary" style="font-size:11px; margin-top:4px;">Chế độ khách</p>
       </div>
       <div class="flex gap-1" style="flex-wrap: wrap;">
+        <a href="indexv2.html" class="btn" style="width:auto; padding:8px 12px; margin:0; font-size:13px; border-color: #00d4ff; color: #00d4ff;">✨ Giao diện V2</a>
+        
         <button class="btn hidden" style="width:auto; padding:8px 12px; margin:0; font-size:13px; border-color: #ff3b30; color: #ff3b30;" id="cancel-vip-action-btn">❌ Hủy VIP</button>
         <button class="btn hidden" style="width:auto; padding:8px 12px; margin:0; font-size:13px; border-color: #ffc107; color: #ffc107;" id="vip-action-btn">👑 Nâng VIP</button>
         <button class="btn" style="width:auto; padding:8px 16px; margin:0; font-size:13px; border-color: rgba(255,59,48,0.4);" id="auth-action-btn">Đăng nhập</button>
@@ -143,16 +145,13 @@
     firebase.initializeApp(firebaseConfig); const auth = firebase.auth(); const db = firebase.database();
     
     const appEl = document.getElementById('app'); 
-    let currentUser = null; 
-    let currentUserData = null; // Biến lưu toàn bộ thông tin user
-    let vipTimerInterval = null; // Bộ đếm thời gian
+    let currentUser = null; let currentUserData = null; let vipTimerInterval = null;
 
     function render(templateId) {
       appEl.innerHTML = ''; appEl.appendChild(document.getElementById(templateId).content.cloneNode(true));
       if (templateId === 'main-template') initMain(); else if (templateId === 'app-detail-template') window._appDetailInit();
     }
 
-    // Modal Events Auth
     document.getElementById('close-auth-btn').addEventListener('click', () => document.getElementById('auth-modal').classList.add('hidden'));
     document.getElementById('go-register').addEventListener('click', () => { document.getElementById('login-form').classList.add('hidden'); document.getElementById('register-form').classList.remove('hidden'); });
     document.getElementById('go-login').addEventListener('click', () => { document.getElementById('register-form').classList.add('hidden'); document.getElementById('login-form').classList.remove('hidden'); });
@@ -170,7 +169,6 @@
         }).catch(e => alert('Lỗi đăng ký: Email đã tồn tại hoặc mật khẩu quá yếu (cần 6 ký tự).'));
     });
 
-    // Kích hoạt VIP
     document.getElementById('close-vip-btn').addEventListener('click', () => document.getElementById('vip-modal').classList.add('hidden'));
     document.getElementById('verify-vip-btn').addEventListener('click', () => {
       const code = document.getElementById('vip-code-input').value.trim();
@@ -181,40 +179,23 @@
 
       db.ref('vip_codes/' + code).once('value', snap => {
         if(snap.exists() && snap.val().valid === true) {
-          db.ref('vip_codes/' + code).update({ valid: false }); // Đốt mã
-
-          // Cấp VIP 1 lượt tải, có hạn 24 giờ
+          db.ref('vip_codes/' + code).update({ valid: false });
           const expiresAt = Date.now() + (24 * 60 * 60 * 1000); 
-          db.ref('users/' + currentUser.uid).update({ 
-              isVip: true,
-              vipDownloadsLeft: 1,
-              vipExpiresAt: expiresAt
-          }).then(() => {
+          db.ref('users/' + currentUser.uid).update({ isVip: true, vipDownloadsLeft: 1, vipExpiresAt: expiresAt }).then(() => {
             alert('🎉 Kích hoạt VIP thành công! Bạn có 1 Lượt tải VIP và hạn sử dụng trong vòng 24 Giờ.');
             document.getElementById('vip-modal').classList.add('hidden');
           });
-        } else {
-          alert('❌ Mã kích hoạt không hợp lệ hoặc đã được sử dụng!');
-        }
+        } else { alert('❌ Mã kích hoạt không hợp lệ hoặc đã được sử dụng!'); }
         btn.textContent = '✅ Xác nhận Mã'; btn.disabled = false;
       });
     });
 
-    // Theo dõi User thay đổi
     auth.onAuthStateChanged(user => {
       currentUser = user;
-      if (user) {
-        db.ref('users/' + user.uid).on('value', snap => {
-          currentUserData = snap.val();
-          updateHeaderUI();
-        });
-      } else {
-        currentUserData = null;
-        updateHeaderUI();
-      }
+      if (user) { db.ref('users/' + user.uid).on('value', snap => { currentUserData = snap.val(); updateHeaderUI(); }); } 
+      else { currentUserData = null; updateHeaderUI(); }
     });
 
-    // Xử lý bộ đếm và giao diện Header
     function updateHeaderUI() {
       const statusText = document.getElementById('user-status-text');
       const authBtn = document.getElementById('auth-action-btn');
@@ -222,31 +203,21 @@
       const cancelVipBtn = document.getElementById('cancel-vip-action-btn');
       
       if (!statusText) return;
-      if (vipTimerInterval) clearInterval(vipTimerInterval); // Xóa đồng hồ cũ
+      if (vipTimerInterval) clearInterval(vipTimerInterval);
 
       if (currentUser) {
         if (currentUserData && currentUserData.isVip) {
-            const now = Date.now();
-            const expiresAt = currentUserData.vipExpiresAt || 0;
-            const left = currentUserData.vipDownloadsLeft || 0;
-
-            // Kiểm tra ngay: Hết lượt tải HOẶC hết thời gian -> Hủy VIP tự động
+            const now = Date.now(); const expiresAt = currentUserData.vipExpiresAt || 0; const left = currentUserData.vipDownloadsLeft || 0;
             if (left <= 0 || now > expiresAt) {
                 db.ref('users/' + currentUser.uid).update({ isVip: false, vipDownloadsLeft: 0, vipExpiresAt: null });
-                return; // Firebase sẽ kích hoạt lại updateHeaderUI
+                return;
             }
-
-            // Còn VIP hợp lệ -> Mở đồng hồ đếm ngược
-            vipBtn.classList.add('hidden');
-            cancelVipBtn.classList.remove('hidden');
+            vipBtn.classList.add('hidden'); cancelVipBtn.classList.remove('hidden');
 
             const tickTimer = () => {
-                const currentNow = Date.now();
-                const diff = expiresAt - currentNow;
-                
+                const currentNow = Date.now(); const diff = expiresAt - currentNow;
                 if (diff <= 0) {
-                    clearInterval(vipTimerInterval);
-                    db.ref('users/' + currentUser.uid).update({ isVip: false, vipDownloadsLeft: 0, vipExpiresAt: null });
+                    clearInterval(vipTimerInterval); db.ref('users/' + currentUser.uid).update({ isVip: false, vipDownloadsLeft: 0, vipExpiresAt: null });
                 } else {
                     const h = Math.floor(diff / (1000 * 60 * 60)).toString().padStart(2, '0');
                     const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
@@ -254,37 +225,26 @@
                     statusText.innerHTML = `<span style="color:#ffc107; font-weight: bold;">👑 VIP (Còn ${left} lượt) - Hết hạn: ${h}:${m}:${s}</span>`;
                 }
             };
-            tickTimer();
-            vipTimerInterval = setInterval(tickTimer, 1000);
-            authBtn.textContent = 'Đăng xuất';
-
+            tickTimer(); vipTimerInterval = setInterval(tickTimer, 1000); authBtn.textContent = 'Đăng xuất';
         } else {
             statusText.textContent = `Tài khoản: ${currentUser.email}`;
-            vipBtn.classList.remove('hidden');
-            cancelVipBtn.classList.add('hidden');
-            authBtn.textContent = 'Đăng xuất';
+            vipBtn.classList.remove('hidden'); cancelVipBtn.classList.add('hidden'); authBtn.textContent = 'Đăng xuất';
         }
       } else {
-        statusText.textContent = 'Chế độ khách';
-        authBtn.textContent = 'Đăng nhập';
-        vipBtn.classList.add('hidden');
-        cancelVipBtn.classList.add('hidden');
+        statusText.textContent = 'Chế độ khách'; authBtn.textContent = 'Đăng nhập';
+        vipBtn.classList.add('hidden'); cancelVipBtn.classList.add('hidden');
       }
     }
 
     function initMain() {
       updateHeaderUI();
-      
       document.getElementById('auth-action-btn').addEventListener('click', () => {
         if (currentUser) auth.signOut().then(() => alert('Đã đăng xuất!'));
         else document.getElementById('auth-modal').classList.remove('hidden');
       });
 
-      document.getElementById('vip-action-btn').addEventListener('click', () => {
-        document.getElementById('vip-modal').classList.remove('hidden');
-      });
+      document.getElementById('vip-action-btn').addEventListener('click', () => document.getElementById('vip-modal').classList.remove('hidden'));
 
-      // Bắt sự kiện người dùng tự hủy VIP
       const cancelBtn = document.getElementById('cancel-vip-action-btn');
       if(cancelBtn) {
         cancelBtn.addEventListener('click', () => {
@@ -299,21 +259,15 @@
       db.ref('apps').on('value', snap => {
         const apps = snap.val() || {}; listEl.innerHTML = '';
         Object.entries(apps).forEach(([id, app]) => {
-          const isVipApp = app.type === 'vip';
-          const isSoonApp = app.type === 'coming_soon';
-          
           let tagHtml = '';
-          if (isVipApp) tagHtml = '<span class="tag tag-vip">👑 VIP</span>';
-          else if (isSoonApp) tagHtml = '<span class="tag tag-soon">⏳ SẮP RA MẮT</span>';
+          if (app.type === 'vip') tagHtml = '<span class="tag tag-vip">👑 VIP</span>';
+          else if (app.type === 'coming_soon') tagHtml = '<span class="tag tag-soon">⏳ SẮP RA MẮT</span>';
           else tagHtml = '<span class="tag tag-free">Miễn phí</span>';
 
           const card = document.createElement('div'); card.className = 'app-card';
           card.innerHTML = `
             <img class="app-icon" src="${app.icon}">
-            <div style="flex:1; min-width: 0;">
-              ${tagHtml}
-              <p style="font-weight:600; font-size:15px; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">${app.name}</p>
-            </div>
+            <div style="flex:1; min-width: 0;">${tagHtml}<p style="font-weight:600; font-size:15px; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">${app.name}</p></div>
             <span style="font-size:18px; color:#ff3b30; font-weight:700;">→</span>
           `;
           card.addEventListener('click', () => { window._appDetail = { id, ...app }; render('app-detail-template'); });
@@ -333,20 +287,15 @@
       document.getElementById('detail-downloads').textContent = `📥 ${app.downloads || 0}`;
       document.getElementById('detail-desc').textContent = app.description || 'Chưa có thông tin.';
       
-      const isVipApp = app.type === 'vip';
-      const isSoonApp = app.type === 'coming_soon';
-      
       let detailTag = '';
-      if (isVipApp) detailTag = '<span class="tag tag-vip">👑 Yêu Cầu Tài Khoản VIP</span>';
-      else if (isSoonApp) detailTag = '<span class="tag tag-soon">⏳ Sản Phẩm Sắp Ra Mắt</span>';
+      if (app.type === 'vip') detailTag = '<span class="tag tag-vip">👑 Yêu Cầu Tài Khoản VIP</span>';
+      else if (app.type === 'coming_soon') detailTag = '<span class="tag tag-soon">⏳ Sản Phẩm Sắp Ra Mắt</span>';
       else detailTag = '<span class="tag tag-free">Ứng Dụng Miễn Phí</span>';
       document.getElementById('detail-tag').innerHTML = detailTag;
 
-      const dlBtn = document.getElementById('download-trigger-btn');
-      const statusBox = document.getElementById('detail-status');
-      const statusText = document.getElementById('status-text');
+      const dlBtn = document.getElementById('download-trigger-btn'); const statusBox = document.getElementById('detail-status'); const statusText = document.getElementById('status-text');
 
-      if (isSoonApp) {
+      if (app.type === 'coming_soon') {
         statusBox.className = 'app-status status-soon'; statusText.textContent = 'Đang phát triển';
         dlBtn.disabled = true; dlBtn.textContent = '⏳ Đang hoàn thiện...';
         dlBtn.style.background = 'rgba(0, 122, 255, 0.1)'; dlBtn.style.color = '#00d4ff'; dlBtn.style.boxShadow = 'none'; dlBtn.style.borderColor = 'rgba(0, 122, 255, 0.3)'; dlBtn.style.borderWidth = '1px'; dlBtn.style.borderStyle = 'solid';
@@ -362,39 +311,23 @@
         dlBtn.style.background = 'rgba(255,255,255,0.1)'; dlBtn.style.color = 'rgba(255,255,255,0.5)'; dlBtn.style.boxShadow = 'none'; dlBtn.style.border = 'none';
       }
       
-      // XỬ LÝ CLICK TẢI XUỐNG VỚI LOGIC TRỪ LƯỢT VIP
       dlBtn.addEventListener('click', () => {
         if (dlBtn.disabled) return;
-        
-        if (!currentUser) { 
-            alert('🔒 Bạn cần đăng nhập để tải ứng dụng!'); 
-            document.getElementById('auth-modal').classList.remove('hidden'); 
-            return; 
-        }
+        if (!currentUser) { alert('🔒 Bạn cần đăng nhập để tải ứng dụng!'); document.getElementById('auth-modal').classList.remove('hidden'); return; }
 
-        if (isVipApp) {
-            // Check nếu chưa VIP
+        if (app.type === 'vip') {
             if (!currentUserData || !currentUserData.isVip || currentUserData.vipDownloadsLeft <= 0) { 
                 alert('👑 Đây là ứng dụng VIP. Bạn đã hết lượt tải hoặc chưa kích hoạt, vui lòng lấy Mã mới!'); 
-                document.getElementById('vip-modal').classList.remove('hidden'); 
-                return; 
+                document.getElementById('vip-modal').classList.remove('hidden'); return; 
             }
-            
-            // Trừ 1 lượt tải VIP
-            db.ref('users/' + currentUser.uid).update({
-                vipDownloadsLeft: currentUserData.vipDownloadsLeft - 1
-            });
-            // Thông báo nhỏ
+            db.ref('users/' + currentUser.uid).update({ vipDownloadsLeft: currentUserData.vipDownloadsLeft - 1 });
             alert('Bạn đã sử dụng 1 lượt tải VIP thành công!');
         }
-
         window.location.href = 'down.html?id=' + app.id;
       });
     };
 
-    render('main-template');
-    db.ref('stats/pageViews').transaction(currentViews => (currentViews || 0) + 1);
-
+    render('main-template'); db.ref('stats/pageViews').transaction(currentViews => (currentViews || 0) + 1);
   </script>
 </body>
 </html>
