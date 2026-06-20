@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Admin - AppHub Store Premium</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: 'Inter', sans-serif; background: #000000; color: white; display: flex; justify-content: center; padding: 20px; }
+    .admin-container { max-width: 850px; width: 100%; }
+    
+    .glass { background: rgba(20, 0, 0, 0.65); backdrop-filter: blur(24px); border: 1px solid rgba(255, 59, 48, 0.3); border-radius: 24px; padding: 24px; margin-bottom: 16px; box-shadow: 0 8px 32px rgba(255, 59, 48, 0.15); }
+    
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+    .stat-box { background: rgba(255, 59, 48, 0.05); border: 1px solid rgba(255, 59, 48, 0.2); border-radius: 16px; padding: 16px; text-align: center; }
+    .stat-box p { font-size: 13px; color: rgba(255,255,255,0.7); }
+    .stat-box h2 { font-size: 24px; font-weight: 700; color: #ff3b30; }
+    
+    .btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 12px 20px; color: white; font-weight: 600; cursor: pointer; transition: 0.3s; width: 100%; margin-top: 8px; }
+    .btn-primary { background: #ff3b30; color: white; border: none; box-shadow: 0 0 15px rgba(255, 59, 48, 0.4); }
+    .btn-primary:hover { background: #ff453a; }
+    .btn-warning { background: #ffc107; color: black; border: none; box-shadow: 0 0 10px rgba(255,193,7,0.4); }
+    .btn-danger { background: rgba(255,69,58,0.15); border-color: rgba(255,69,58,0.3); color: #ff453a; }
+    .btn:disabled { background: #555; color: #ccc; cursor: not-allowed; box-shadow: none; }
+    
+    input, textarea, select { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; color: white; width: 100%; margin-bottom: 10px; outline: none; }
+    input:focus, textarea:focus, select:focus { border-color: #ff3b30; } select option { background: #111; }
+    textarea { height: 70px; resize: none; }
+    
+    .flex { display: flex; align-items: center; } .gap-1 { gap: 8px; } .hidden { display: none !important; }
+    label { display: block; font-size: 13px; color: rgba(255,255,255,0.7); margin-bottom: 6px; }
+
+    .custom-file-upload { display: inline-block; padding: 10px 15px; cursor: pointer; background: rgba(255, 59, 48, 0.1); border: 1px dashed #ff3b30; border-radius: 12px; color: #ff3b30; font-weight: 600; text-align: center; width: 100%; margin-bottom: 12px; }
+    input[type="file"] { display: none; }
+
+    /* Admin list UI */
+    .admin-list-container { max-height: 250px; overflow-y: auto; background: rgba(0,0,0,0.4); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); margin-top:10px; }
+    .admin-list-item { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; line-height: 1.5; display: flex; justify-content: space-between; align-items: center;}
+    
+    /* App list UI */
+    .app-row { display: flex; align-items: center; justify-content: space-between; padding: 14px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 59, 48, 0.15); border-radius: 16px; margin-bottom: 10px; }
+    .app-row img { width: 46px; height: 46px; border-radius: 12px; margin-right: 14px; object-fit: cover; }
+    
+    ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-thumb { background: #ff3b30; border-radius: 10px; }
+  </style>
+</head>
+<body>
+  <div class="admin-container" id="admin-app">
+    
+    <div class="stats-grid">
+      <div class="stat-box"><p>📦 Tổng App</p><h2 id="stat-total-apps">0</h2></div>
+      <div class="stat-box"><p>📥 Tổng Tải</p><h2 id="stat-total-downloads">0</h2></div>
+      <div class="stat-box"><p>👁️ Mắt xem web</p><h2 id="stat-page-views">0</h2></div>
+    </div>
+
+    <div class="glass">
+      <h3 style="margin-bottom:16px;">👥 Quản lý & Cấp Phát VIP</h3>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        
+        <div>
+          <h4 style="color:#00d4ff; font-size: 14px;">👤 Tài khoản (Users)</h4>
+          <div id="admin-user-list" class="admin-list-container"></div>
+        </div>
+
+        <div>
+          <h4 style="color:#ffc107; font-size: 14px;">🔑 Tạo Key VIP Thủ Công</h4>
+          <div style="margin-top:10px; display:flex; gap:5px;">
+              <input type="text" id="custom-key-name" placeholder="Tiền tố Key (VD: APPHUB)" style="margin-bottom:0;">
+              <button class="btn btn-warning" style="margin-top:0; width:auto; white-space:nowrap;" onclick="generateKey()">Tạo Key Mới</button>
+          </div>
+          <div id="admin-key-list" class="admin-list-container"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="glass">
+      <h2 style="font-weight:700; margin-bottom: 16px;">🛠️ Đăng tải Ứng dụng mới</h2>
+      
+      <label class="custom-file-upload">
+          <input type="file" id="icon-file" accept="image/*"> 🖼️ Bấm vào đây để Chọn & Cắt ảnh Icon
+      </label>
+      <img id="icon-preview" style="width:70px;height:70px;border-radius:16px;margin-bottom:12px;display:none;object-fit:cover; border: 2px solid #ff3b30;">
+      
+      <input type="text" id="app-name" placeholder="Tên ứng dụng (Bắt buộc)">
+      <input type="text" id="app-link" placeholder="Nhập Link (Ưu tiên link ngoài)">
+      
+      <label class="custom-file-upload" style="border-color: #00d4ff; color: #00d4ff;">
+          <input type="file" id="app-upload-file" accept=".apk,.zip,.rar,.ipa,.exe"> 📁 Tải File Lên Server Gofile (Thay thế Link trên)
+      </label>
+      <div id="file-name-display" style="font-size: 13px; color: #00d4ff; margin-bottom: 10px; text-align: center;"></div>
+      
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <input type="text" id="app-size" placeholder="Dung lượng (VD: 45 MB)">
+        <input type="text" id="app-version" placeholder="Phiên bản (VD: v1.0.2)">
+      </div>
+
+      <label>Loại ứng dụng</label>
+      <select id="app-type">
+        <option value="free">Miễn phí (Free)</option>
+        <option value="vip">Cao cấp (Yêu cầu thẻ VIP)</option>
+        <option value="coming_soon">Sắp ra mắt (Không có link tải)</option>
+      </select>
+
+      <textarea id="app-desc" placeholder="Giới thiệu về ứng dụng..."></textarea>
+      <button class="btn btn-primary" id="upload-btn">📤 Đăng tải</button>
+    </div>
+
+    <div class="glass">
+      <h3 style="margin-bottom:16px;">📋 Danh sách ứng dụng</h3>
+      <div id="app-list-admin"></div>
+    </div>
+  </div>
+
+  <div id="edit-modal" class="glass hidden" style="position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:100; width:90%; max-width:500px;">
+      <h3>✏️ Sửa ứng dụng</h3>
+      <input type="text" id="edit-name">
+      <input type="text" id="edit-link" placeholder="Link">
+      <input type="file" id="edit-upload-file">
+      <input type="text" id="edit-size"><input type="text" id="edit-version">
+      <select id="edit-type"><option value="free">Free</option><option value="vip">VIP</option><option value="coming_soon">Sắp ra mắt</option></select>
+      <textarea id="edit-desc"></textarea>
+      <div class="flex gap-1">
+        <button class="btn btn-primary" id="save-edit-btn">Lưu</button>
+        <button class="btn" id="cancel-edit-btn">Huỷ</button>
+      </div>
+  </div>
+
+  <div id="cropper-modal" class="hidden" style="position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index: 9999; display:flex; justify-content:center; align-items:center;">
+    <div style="width: 400px; background: #111; padding: 20px; border-radius: 20px;">
+      <h3 style="color:white;">Cắt Icon</h3>
+      <div style="width:100%; max-height:350px; margin-bottom:15px; overflow:hidden;"><img id="image-to-crop" style="max-width:100%;"></div>
+      <div class="flex gap-1"><button class="btn btn-primary" id="crop-ok-btn">Xong</button><button class="btn" onclick="document.getElementById('cropper-modal').classList.add('hidden')">Huỷ</button></div>
+    </div>
+  </div>
+
+  <script>
+    const firebaseConfig = { apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE", databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "keyquocdat" };
+    firebase.initializeApp(firebaseConfig); const db = firebase.database();
+
+    let currentEditId = null; let cropper = null; let finalBase64Image = null; let editBase64Image = null; let isEditingCrop = false;
+
+    // Quản lý Users và Key VIP (Mới)
+    function loadUsersAndKeys() {
+      db.ref('users').on('value', snap => {
+        const users = snap.val() || {}; const container = document.getElementById('admin-user-list'); container.innerHTML = '';
+        Object.entries(users).forEach(([uid, user]) => {
+          let statusText = (user.isVip && user.vipDownloadsLeft > 0) ? `<b style="color:#ffc107;">VIP (${user.vipDownloadsLeft} lượt)</b>` : `Free`;
+          container.innerHTML += `<div class="admin-list-item">
+            <div>${user.email}<br>Quyền: ${statusText}</div>
+            <button class="btn btn-danger" style="width:auto; padding:5px 10px; margin:0;" onclick="deleteUser('${uid}')">Xoá</button>
+          </div>`;
+        });
+      });
+
+      db.ref('vip_codes').on('value', snap => {
+        const codes = snap.val() || {}; const container = document.getElementById('admin-key-list'); container.innerHTML = '';
+        const sortedCodes = Object.entries(codes).sort((a, b) => b[1].createdAt - a[1].createdAt);
+        sortedCodes.forEach(([code, data]) => {
+          let status = data.valid ? `<span style="color:#00ff00;">Chưa dùng</span>` : `<span style="color:#ff3b30;">Đã dùng</span>`;
+          container.innerHTML += `<div class="admin-list-item" style="flex-direction:column; align-items:flex-start;">
+             🔑 <b style="color:#ffc107; user-select:all;">${code}</b><br>Trạng thái: ${status}
+             <button class="btn btn-danger" style="padding:2px 8px; margin-top:5px; font-size:11px;" onclick="deleteKey('${code}')">Xoá Key</button>
+          </div>`;
+        });
+      });
+    }
+
+    function deleteUser(uid) { if(confirm('Xoá Database User này?')) db.ref('users/' + uid).remove(); }
+    function deleteKey(code) { if(confirm('Xoá Key VIP này?')) db.ref('vip_codes/' + code).remove(); }
+
+    function generateKey() {
+        const prefix = document.getElementById('custom-key-name').value.trim() || 'VIP';
+        const randomStr = Math.random().toString(36).substring(2, 8).toUpperCase();
+        const fullKey = `${prefix}-${randomStr}`;
+        db.ref('vip_codes/' + fullKey).set({ valid: true, createdAt: Date.now() });
+        alert('Tạo mã VIP thành công: ' + fullKey);
+    }
+
+    db.ref('stats/pageViews').on('value', snap => { document.getElementById('stat-page-views').textContent = snap.val() || 0; });
+
+    // Cắt Ảnh (Giữ nguyên)
+    document.getElementById('icon-file').addEventListener('change', function(e) { if(e.target.files[0]){ isEditingCrop=false; openCropper(e.target.files[0]); this.value=''; } });
+    function openCropper(file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('image-to-crop').src = e.target.result;
+        document.getElementById('cropper-modal').classList.remove('hidden');
+        if(cropper) cropper.destroy();
+        cropper = new Cropper(document.getElementById('image-to-crop'), { aspectRatio: 1, viewMode: 1, background: false });
+      }; reader.readAsDataURL(file);
+    }
+    document.getElementById('crop-ok-btn').addEventListener('click', function() {
+      if(!cropper) return;
+      finalBase64Image = cropper.getCroppedCanvas({width:200, height:200}).toDataURL('image/jpeg', 0.8);
+      document.getElementById('icon-preview').src = finalBase64Image; document.getElementById('icon-preview').style.display = 'block';
+      document.getElementById('cropper-modal').classList.add('hidden'); cropper.destroy(); cropper = null;
+    });
+
+    // Tải File (Giữ GoFile API)
+    document.getElementById('app-upload-file').addEventListener('change', function(e) {
+      if(e.target.files[0]) { document.getElementById('file-name-display').textContent = 'File: ' + e.target.files[0].name; document.getElementById('app-link').disabled = true; }
+      else { document.getElementById('file-name-display').textContent = ''; document.getElementById('app-link').disabled = false; }
+    });
+
+    const uploadFileToCloud = async (file, btn) => {
+      btn.textContent = '⏳ Tìm Server Gofile...';
+      const serverRes = await fetch('https://api.gofile.io/servers'); const serverData = await serverRes.json();
+      const serverName = serverData.data.servers[0].name;
+      return new Promise((resolve, reject) => {
+        const formData = new FormData(); formData.append('file', file);
+        const xhr = new XMLHttpRequest(); xhr.open('POST', `https://${serverName}.gofile.io/contents/uploadfile`, true);
+        xhr.upload.onprogress = (e) => { if(e.lengthComputable) btn.textContent = 'Đang đẩy: ' + Math.round((e.loaded/e.total)*100) + '%'; };
+        xhr.onload = () => {
+          if(xhr.status === 200) { const res = JSON.parse(xhr.responseText); if(res.status==='ok') resolve(res.data.downloadPage); else reject(new Error('Server lỗi')); } 
+          else reject(new Error('Từ chối'));
+        }; xhr.send(formData);
+      });
+    };
+
+    document.getElementById('upload-btn').addEventListener('click', async () => {
+      const btn = document.getElementById('upload-btn');
+      const name = document.getElementById('app-name').value.trim(); let link = document.getElementById('app-link').value.trim();
+      const appFile = document.getElementById('app-upload-file').files[0]; const type = document.getElementById('app-type').value;
+      
+      if(!name) return alert('Nhập tên!'); if(type!=='coming_soon' && !link && !appFile) return alert('Nhập link hoặc chọn file!');
+      btn.disabled = true;
+
+      try {
+        if(appFile) link = await uploadFileToCloud(appFile, btn);
+        await db.ref('apps').push().set({
+          name, downloadLink: type==='coming_soon' ? '#' : link, type, icon: finalBase64Image || 'https://via.placeholder.com/100',
+          size: document.getElementById('app-size').value || 'N/A', version: document.getElementById('app-version').value || '1.0.0',
+          description: document.getElementById('app-desc').value || 'Chưa có mô tả', downloads: 0
+        });
+        alert('Thành công!'); window.location.reload();
+      } catch(e) { alert('Lỗi: ' + e.message); } finally { btn.disabled = false; btn.textContent = '📤 Đăng tải'; }
+    });
+
+    // Tải App List
+    function loadAppList() {
+      db.ref('apps').on('value', snap => {
+        const apps = snap.val() || {}; const container = document.getElementById('app-list-admin'); container.innerHTML = '';
+        let tApps = 0; let tDowns = 0;
+        Object.entries(apps).forEach(([id, app]) => {
+          tApps++; tDowns += (app.downloads || 0);
+          const row = document.createElement('div'); row.className = 'app-row';
+          row.innerHTML = `<div class="flex" style="flex:1;"><img src="${app.icon}"><div><b>${app.name} (${app.type})</b><br><small>Tải: ${app.downloads||0}</small></div></div>
+                           <div class="flex gap-1"><button class="btn btn-danger" style="margin:0; width:auto; padding:8px;" onclick="db.ref('apps/${id}').remove()">Xoá</button></div>`;
+          container.appendChild(row);
+        });
+        document.getElementById('stat-total-apps').textContent = tApps; document.getElementById('stat-total-downloads').textContent = tDowns;
+      });
+    }
+
+    loadAppList(); loadUsersAndKeys();
+  </script>
+</body>
+</html>
