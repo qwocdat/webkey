@@ -3,63 +3,58 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cửa hàng - AI Chatbot</title>
+  <title>Cửa hàng - Trợ Lý AI Thông Minh</title>
   <style>
-    body { font-family: Arial, sans-serif; background-color: #f4f7f6; }
-    
-    /* Nút Robot */
-    .robot-icon { position: fixed; bottom: 20px; right: 20px; font-size: 50px; cursor: pointer; transition: 0.3s; z-index: 1000; }
+    body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
+    .robot-icon { position: fixed; bottom: 20px; right: 20px; font-size: 50px; cursor: pointer; transition: 0.3s; z-index: 1000; user-select: none; }
     #badge { position: absolute; top: 0; right: 0; background: red; color: white; font-size: 14px; font-weight: bold; padding: 2px 8px; border-radius: 50%; border: 2px solid white; display: none; }
     
-    /* Hiệu ứng Thông báo */
     .shake { animation: shake 0.5s ease-in-out infinite; }
     .glow { filter: drop-shadow(0 0 15px rgba(255, 59, 48, 0.9)); }
     @keyframes shake {
-      0% { transform: rotate(0deg); }
+      0%, 100% { transform: rotate(0deg); }
       25% { transform: rotate(-15deg); }
       50% { transform: rotate(15deg); }
       75% { transform: rotate(-15deg); }
-      100% { transform: rotate(0deg); }
     }
 
-    /* Cửa sổ Chat */
-    #chat-window { position: fixed; bottom: 90px; right: 20px; width: 320px; background: white; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); display: none; flex-direction: column; overflow: hidden; z-index: 999; }
-    #chat-header { background: #007bff; color: white; padding: 15px; font-weight: bold; text-align: center; }
-    #chat-messages { height: 300px; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background: #fafafa; }
-    .msg { max-width: 80%; padding: 10px; border-radius: 15px; font-size: 14px; line-height: 1.4; }
-    .msg.user { background: #007bff; color: white; align-self: flex-end; border-bottom-right-radius: 0; }
-    .msg.ai { background: #e9ecef; color: black; align-self: flex-start; border-bottom-left-radius: 0; }
+    #chat-window { position: fixed; bottom: 90px; right: 20px; width: 340px; background: white; border-radius: 12px; box-shadow: 0 5px 25px rgba(0,0,0,0.15); display: none; flex-direction: column; overflow: hidden; z-index: 999; border: 1px solid #e1e8ed; }
+    #chat-header { background: #007bff; color: white; padding: 15px; font-weight: bold; text-align: center; font-size: 16px; display: flex; justify-content: space-between; align-items: center; }
+    #status-dot { width: 10px; height: 10px; background: #2ecc71; border-radius: 50%; display: inline-block; margin-right: 5px; }
     
-    /* Khu vực nhập tin nhắn */
+    #chat-messages { height: 320px; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; background: #f8f9fa; }
+    .msg { max-width: 80%; padding: 10px 14px; border-radius: 16px; font-size: 14px; line-height: 1.4; word-wrap: break-word; }
+    .msg.user { background: #007bff; color: white; align-self: flex-end; border-bottom-right-radius: 0; }
+    .msg.ai { background: #e9ecef; color: #333; align-self: flex-start; border-bottom-left-radius: 0; }
+    .msg.admin { background: #e67e22; color: white; align-self: flex-start; border-bottom-left-radius: 0; font-weight: 500; } /* Bubble khi Admin chat tay */
+
     #chat-input-area { display: flex; padding: 10px; border-top: 1px solid #ddd; background: white; }
-    #chat-input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; outline: none; }
-    #send-btn { margin-left: 10px; padding: 10px 15px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    #chat-input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; outline: none; font-size: 14px; }
+    #send-btn { margin-left: 10px; padding: 10px 18px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
   </style>
 </head>
 <body>
 
-  <h1>Trang Web Của Bạn</h1>
-  <p>Khách hàng truy cập vào đây. Thử nhắn tin với Robot góc dưới nhé!</p>
+  <h1>Chào mừng bạn đến với Cửa Hàng</h1>
+  <p>Nhấp vào biểu tượng Robot bên dưới để bắt đầu trò chuyện trực tiếp hoặc với AI.</p>
 
-  <!-- Nút Robot -->
-  <div id="robot-btn" class="robot-icon">
-    🤖 <span id="badge">1</span>
-  </div>
+  <div id="robot-btn" class="robot-icon">🤖<span id="badge">0</span></div>
   <audio id="noti-sound" src="https://www.soundjay.com/buttons/sounds/button-16.mp3" preload="auto"></audio>
 
-  <!-- Cửa sổ Chat -->
   <div id="chat-window">
-    <div id="chat-header">Seller AI Trợ Lý</div>
+    <div id="chat-header">
+      <div><span id="status-dot"></span><span id="header-text">AI Trợ Lý</span></div>
+    </div>
     <div id="chat-messages"></div>
     <div id="chat-input-area">
-      <input type="text" id="chat-input" placeholder="Nhập tin nhắn..." autocomplete="off">
+      <input type="text" id="chat-input" placeholder="Nhập câu hỏi của bạn..." autocomplete="off">
       <button id="send-btn">Gửi</button>
     </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-    import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+    import { getDatabase, ref, push, onValue, update, set } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -74,66 +69,71 @@
 
     let currentUid = null;
     let aiKnowledge = [];
+    let aiMuted = false; // Trạng thái Admin có đang chặn AI không
 
-    // 1. Tải kiến thức AI realtime vào RAM
+    // 1. KIẾN THỨC NỀN TẢNG TÍCH HỢP SẴN (Base Core Knowledge)
+    const BASE_KNOWLEDGE = [
+      { keywords: "chao, hello, hi, xin chao", answer: "Xin chào! Tôi là trợ lý AI thông minh. Tôi có thể giúp gì cho bạn hôm nay?" },
+      { keywords: "ai, ban la ai, bot, robot", answer: "Tôi là Seller AI - Trợ lý bán hàng tự động được huấn luyện chuyên nghiệp!" },
+      { keywords: "cam on, thank", answer: "Dạ không có gì ạ! Rất vui được hỗ trợ bạn." },
+      { keywords: "chu cua hang, admin, gap admin, nguoi that", answer: "Bạn chờ xíu nhé, tôi đã phát tín hiệu thông báo cho quản trị viên vào hỗ trợ bạn ngay!" }
+    ];
+
+    // Tải kiến thức bổ sung từ Database
     onValue(ref(db, 'knowledge'), (snap) => {
-      aiKnowledge = [];
+      aiKnowledge = [...BASE_KNOWLEDGE]; // Gộp kiến thức nền
       if(snap.exists()) {
         snap.forEach(child => aiKnowledge.push(child.val()));
       }
     });
 
-    // 2. Đăng nhập ẩn danh tạo UID cho mỗi khách
-    signInAnonymously(auth).catch(err => console.error("Lỗi đăng nhập:", err));
-
+    // Đăng nhập tạo UID định danh riêng biệt
+    signInAnonymously(auth).catch(err => console.error(err));
     onAuthStateChanged(auth, (user) => {
       if (user) {
         currentUid = user.uid;
-        update(ref(db, `customers/${currentUid}`), { lastSeen: Date.now(), visitCount: 1 });
+        // Theo dõi xem Admin có đang bật/tắt AI của mình không
+        onValue(ref(db, `customers/${currentUid}/aiMuted`), (snap) => {
+          aiMuted = snap.val() || false;
+          document.getElementById('header-text').innerText = aiMuted ? "Chuyên Viên Hỗ Trợ" : "AI Trợ Lý";
+          document.getElementById('status-dot').style.background = aiMuted ? "#e67e22" : "#2ecc71";
+        });
+
+        // Cập nhật trạng thái hoạt động trực tuyến
+        update(ref(db, `customers/${currentUid}`), { lastSeen: Date.now() });
         listenToMessages();
       }
     });
 
-    // 3. UI - Mở/Đóng chat và Tắt thông báo
-    const robotBtn = document.getElementById('robot-btn');
-    const chatWindow = document.getElementById('chat-window');
-    const badge = document.getElementById('badge');
-    const chatMessages = document.getElementById('chat-messages');
+    // Gửi tin nhắn
     const inputField = document.getElementById('chat-input');
-
-    robotBtn.addEventListener('click', () => {
-      chatWindow.style.display = chatWindow.style.display === 'flex' ? 'none' : 'flex';
-      badge.style.display = 'none';
-      robotBtn.classList.remove('glow', 'shake');
-      if (chatWindow.style.display === 'flex') {
-          chatMessages.scrollTop = chatMessages.scrollHeight;
-      }
-    });
-
-    // 4. Gửi tin nhắn
     document.getElementById('send-btn').addEventListener('click', sendMessage);
     inputField.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 
     function sendMessage() {
       const text = inputField.value.trim();
       if (!currentUid || !text) return;
-      
       inputField.value = '';
-      
-      // Lưu tin nhắn User
+
       push(ref(db, `conversations/${currentUid}`), {
         text: text, sender: "user", timestamp: Date.now()
       });
 
-      // AI xử lý trả lời sau 1 giây
+      // Cập nhật thời gian hoạt động cuối cùng của khách hàng
+      update(ref(db, `customers/${currentUid}`), { lastSeen: Date.now() });
+
+      // Nếu Admin ĐANG CHẶN AI thì không cho AI tự động trả lời
+      if (aiMuted) return;
+
       setTimeout(() => autoReplyAI(text), 1000);
     }
 
-    // 5. Logic Seller AI xử lý từ khóa
+    // 2. LOGIC AI PHÂN TÍCH & TỰ ĐI HỌC HỎI
     function autoReplyAI(userText) {
-      const textLower = userText.toLowerCase();
-      let answer = "Xin lỗi, hiện tại tôi chưa hiểu câu hỏi này. Bạn có thể nói rõ hơn không?";
+      const textLower = userText.toLowerCase().trim();
+      let answer = null;
 
+      // Quét tìm từ khóa tương thích
       for (let item of aiKnowledge) {
         if(!item.keywords) continue;
         const keywords = item.keywords.split(',');
@@ -144,14 +144,48 @@
         }
       }
 
-      push(ref(db, `conversations/${currentUid}`), {
-        text: answer, sender: "ai", timestamp: Date.now()
-      });
+      if (answer) {
+        // Có câu trả lời phù hợp
+        push(ref(db, `conversations/${currentUid}`), { text: answer, sender: "ai", timestamp: Date.now() });
+      } else {
+        // 🤖 HÀNH ĐỘNG TỰ HỌC: Không biết câu trả lời -> Tự đẩy lên Node chờ Admin huấn luyện
+        const cleanKey = userText.replace(/[.\/*#$\[\]]/g, ""); // Dọn sạch ký tự đặc biệt để làm Key Firebase
+        if(cleanKey.length > 2) {
+          // Lưu câu hỏi lạ vào danh sách chờ duyệt, kèm theo đếm số lần khách hỏi câu này
+          update(ref(db, `pending_knowledge/${cleanKey}`), {
+            question: userText,
+            timestamp: Date.now()
+          });
+        }
+        
+        // Trả lời tạm thời trong lúc chờ được dạy học
+        push(ref(db, `conversations/${currentUid}`), {
+          text: "Yêu cầu của bạn hơi mới lạ, tôi đang kết nối với quản trị viên để lấy câu trả lời chính xác nhất cho bạn nhé!",
+          sender: "ai",
+          timestamp: Date.now()
+        });
+      }
     }
 
-    // 6. Lắng nghe tin nhắn Realtime & Kích hoạt thông báo
+    // Hiển thị tin nhắn và tạo hiệu ứng thông báo bong bóng
+    const robotBtn = document.getElementById('robot-btn');
+    const chatWindow = document.getElementById('chat-window');
+    const badge = document.getElementById('badge');
+    const chatMessages = document.getElementById('chat-messages');
+    let unreadCount = 0;
+    let isInitialLoad = true;
+
+    robotBtn.addEventListener('click', () => {
+      chatWindow.style.display = chatWindow.style.display === 'flex' ? 'none' : 'flex';
+      if (chatWindow.style.display === 'flex') {
+        unreadCount = 0;
+        badge.style.display = 'none';
+        robotBtn.classList.remove('glow', 'shake');
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+    });
+
     function listenToMessages() {
-      let isInitialLoad = true;
       onValue(ref(db, `conversations/${currentUid}`), (snapshot) => {
         chatMessages.innerHTML = '';
         let lastSender = '';
@@ -161,6 +195,7 @@
             const msg = child.val();
             lastSender = msg.sender;
             const div = document.createElement('div');
+            // Gán class style: user, ai hoặc admin
             div.className = `msg ${msg.sender}`;
             div.innerText = msg.text;
             chatMessages.appendChild(div);
@@ -168,12 +203,14 @@
           chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
-        // Kích hoạt hiệu ứng nếu có tin nhắn mới từ AI và hộp chat đang đóng
-        if (!isInitialLoad && lastSender === 'ai' && chatWindow.style.display !== 'flex') {
+        // Nếu có tin nhắn mới từ AI hoặc ADMIN gửi sang mà cửa sổ đang đóng -> Báo động
+        if (!isInitialLoad && (lastSender === 'ai' || lastSender === 'admin') && chatWindow.style.display !== 'flex') {
+          unreadCount++;
+          badge.innerText = unreadCount;
           badge.style.display = 'block';
           robotBtn.classList.add('shake', 'glow');
           document.getElementById('noti-sound').play().catch(() => {});
-          setTimeout(() => robotBtn.classList.remove('shake'), 2000); // Tắt rung sau 2s, giữ sáng
+          setTimeout(() => robotBtn.classList.remove('shake'), 2000);
         }
         isInitialLoad = false;
       });
