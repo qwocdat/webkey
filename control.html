@@ -3,92 +3,180 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quản Trị Cao Cấp - Tự Động Huấn Luyện & Live Chat</title>
+  <title>Quản Trị Tối Cao - Seller AI Dashboard</title>
   <style>
-    :root { --bg-main: #111827; --bg-card: #1f2937; --bg-input: #374151; --text-main: #f9fafb; --accent: #2563eb; --danger: #dc2626; --success: #16a34a; --warning: #d97706; }
+    :root { 
+      --bg-main: #111827; 
+      --bg-card: #1f2937; 
+      --bg-input: #374151; 
+      --text-main: #f9fafb; 
+      --text-muted: #9ca3af;
+      --accent: #2563eb; 
+      --danger: #dc2626; 
+      --success: #16a34a; 
+      --warning: #d97706; 
+    }
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
     body { background: var(--bg-main); color: var(--text-main); display: flex; min-height: 100vh; }
     
-    .sidebar { width: 260px; background: #111; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
-    .sidebar h2 { color: var(--accent); font-size: 18px; text-align: center; margin-bottom: 20px; }
-    .nav-btn { width: 100%; padding: 12px; background: transparent; border: none; color: #9ca3af; text-align: left; font-size: 14px; cursor: pointer; border-radius: 6px; font-weight: bold; }
+    /* Sidebar */
+    .sidebar { width: 260px; background: #0b0f19; padding: 20px; display: flex; flex-direction: column; gap: 8px; border-right: 1px solid #1f2937; }
+    .sidebar h2 { color: var(--accent); font-size: 18px; text-align: center; margin-bottom: 25px; font-weight: bold; }
+    .nav-btn { width: 100%; padding: 12px 15px; background: transparent; border: none; color: #9ca3af; text-align: left; font-size: 14px; cursor: pointer; border-radius: 6px; font-weight: bold; transition: 0.2s; }
     .nav-btn.active, .nav-btn:hover { background: var(--accent); color: white; }
 
+    /* Main Content */
     .main-content { flex: 1; padding: 30px; overflow-y: auto; }
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    /* Layout Live Chat */
-    .chat-layout { display: grid; grid-template-columns: 280px 1fr; gap: 20px; height: 550px; background: var(--bg-card); border-radius: 8px; overflow: hidden; }
-    .user-list { border-right: 1px solid #374151; overflow-y: auto; background: #1a222f; }
-    .user-item { padding: 12px; border-bottom: 1px solid #374151; cursor: pointer; }
+    /* Thống kê số liệu */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 30px; }
+    .stat-card { background: var(--bg-card); padding: 20px; border-radius: 8px; border: 1px solid #374151; }
+    .stat-card h3 { font-size: 12px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
+    .stat-card h2 { font-size: 28px; color: var(--success); font-weight: bold; }
+
+    /* Layout Live Chat Can Thiệp */
+    .chat-layout { display: grid; grid-template-columns: 280px 1fr; gap: 20px; height: 550px; background: var(--bg-card); border-radius: 8px; overflow: hidden; border: 1px solid #374151; }
+    .user-list { border-right: 1px solid #374151; overflow-y: auto; background: #151d2a; }
+    .user-item { padding: 15px; border-bottom: 1px solid #243042; cursor: pointer; transition: 0.2s; }
     .user-item:hover, .user-item.active { background: var(--bg-input); }
-    .user-item .uid { font-weight: bold; color: var(--accent); font-size: 13px; }
-    .user-item .status { font-size: 11px; color: #9ca3af; margin-top: 3px; }
+    .user-item .uid { font-weight: bold; color: var(--accent); font-size: 13px; margin-bottom: 4px; }
+    .user-item .status { font-size: 12px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    .chat-box { display: flex; flex-direction: column; height: 100%; background: #151f2e; }
-    .chat-header { padding: 12px; background: var(--bg-input); font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+    .chat-box { display: flex; flex-direction: column; height: 100%; background: #111c2a; }
+    .chat-header { padding: 15px; background: var(--bg-input); font-weight: bold; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #4b5563; }
     .chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-    .bubble { max-width: 75%; padding: 8px 12px; border-radius: 6px; font-size: 13px; }
-    .bubble.user { background: #374151; align-self: flex-start; }
-    .bubble.ai { background: #4b5563; align-self: flex-start; border-left: 3px solid #2ecc71; }
-    .bubble.admin { background: var(--warning); align-self: flex-end; } /* Tin nhắn do Admin gõ */
+    .bubble { max-width: 75%; padding: 10px 14px; border-radius: 8px; font-size: 13px; line-height: 1.4; }
+    .bubble.user { background: #374151; align-self: flex-start; color: white; }
+    .bubble.ai { background: #1f2937; align-self: flex-start; border-left: 3px solid #2ecc71; color: #e5e7eb; }
+    .bubble.admin { background: var(--warning); align-self: flex-end; color: white; }
     
-    .chat-control-input { display: flex; padding: 10px; background: var(--bg-card); gap: 10px; border-top: 1px solid #374151; }
-    .chat-control-input input { flex: 1; padding: 10px; background: var(--bg-input); border: none; border-radius: 4px; color: white; }
-    .btn-send { background: var(--success); color: white; border: none; padding: 0 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-    .btn-toggle-ai { padding: 6px 12px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; color: white; }
+    .chat-control-input { display: flex; padding: 12px; background: var(--bg-card); gap: 10px; border-top: 1px solid #374151; }
+    .chat-control-input input { flex: 1; padding: 12px; background: var(--bg-input); border: 1px solid #4b5563; border-radius: 6px; color: white; outline: none; }
+    .btn-send { background: var(--success); color: white; border: none; padding: 0 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+    .btn-toggle-ai { padding: 8px 15px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; color: white; font-size: 12px; }
 
-    /* Học tập thông minh */
-    table { width: 100%; border-collapse: collapse; margin-top: 15px; background: var(--bg-card); }
-    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #374151; font-size: 13px; }
-    th { background: #111827; }
-    .input-fast { width: 70%; padding: 6px; background: var(--bg-input); border: none; color: white; border-radius: 4px; }
-    .btn-approve { background: var(--success); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+    /* Biểu mẫu Forms */
+    .form-container { background: var(--bg-card); padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #374151; }
+    .form-container h2 { font-size: 16px; margin-bottom: 15px; border-bottom: 1px solid #374151; padding-bottom: 5px; }
+    .form-group { display: flex; flex-direction: column; margin-bottom: 15px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    label { font-size: 13px; color: var(--text-muted); margin-bottom: 5px; }
+    input[type="text"], textarea { padding: 10px; background: var(--bg-input); border: 1px solid #4b5563; border-radius: 6px; color: white; outline: none; font-size: 14px; }
+    textarea { height: 80px; resize: vertical; }
+    .btn-submit { background: var(--accent); color: white; border: none; padding: 12px; font-weight: bold; border-radius: 6px; cursor: pointer; width: 100%; }
+
+    /* Bảng dữ liệu Tables */
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; background: var(--bg-card); border-radius: 8px; overflow: hidden; }
+    th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #374151; font-size: 13px; }
+    th { background: #1f2937; color: var(--text-muted); font-weight: bold; }
+    .input-fast { padding: 6px 10px; background: var(--bg-input); border: 1px solid #4b5563; color: white; border-radius: 4px; width: 90%; outline: none; }
+    .btn-approve { background: var(--success); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    .btn-delete { background: var(--danger); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
   </style>
 </head>
 <body>
 
   <div class="sidebar">
-    <h2>DASHBOARD SELLER AI</h2>
-    <button class="nav-btn active" onclick="switchTab('tab-live-chat')">💬 Live Chat Can Thiệp</button>
-    <button class="nav-btn" onclick="switchTab('tab-auto-study')">🧠 Trung Tâm AI Tự Học</button>
+    <h2>🛠️ SELLER AI SYSTEM</h2>
+    <button class="nav-btn active" onclick="switchTab('tab-overview', this)">📊 Thống Kê Tổng Quan</button>
+    <button class="nav-btn" onclick="switchTab('tab-live-chat', this)">💬 Live Chat Can Thiệp</button>
+    <button class="nav-btn" onclick="switchTab('tab-auto-study', this)">🧠 AI Tự Học (Đợi Duyệt)</button>
+    <button class="nav-btn" onclick="switchTab('tab-knowledge-base', this)">📚 Kho Kiến Thức Gốc</button>
+    <button class="nav-btn" onclick="switchTab('tab-products', this)">📦 Quản Lý Sản Phẩm</button>
   </div>
 
   <div class="main-content">
     
-    <div id="tab-live-chat" class="tab-content active">
-      <h1>Hệ Thống Giám Sát & Can Thiệp Trực Tiếp (Live Takeover)</h1><br>
+    <div id="tab-overview" class="tab-content active">
+      <h1>Hệ Thống Thống Kê Realtime</h1><br>
+      <div class="stats-grid">
+        <div class="stat-card"><h3>Khách Online (5p)</h3><h2 id="stat-online">0</h2></div>
+        <div class="stat-card"><h3>Tổng Cuộc Trò Chuyện</h3><h2 id="stat-conversations">0</h2></div>
+        <div class="stat-card"><h3>Tin Nhắn Hôm Nay</h3><h2 id="stat-today-messages">0</h2></div>
+        <div class="stat-card"><h3>Kiến Thức AI Đã Học</h3><h2 id="stat-knowledge">0</h2></div>
+        <div class="stat-card"><h3>Sản Phẩm Trong Kho</h3><h2 id="stat-products">0</h2></div>
+      </div>
+      <p style="color: var(--text-muted)">* Hệ thống đang kết nối trực tiếp với Firebase, dữ liệu tự nhảy số khi có khách truy cập.</p>
+    </div>
+
+    <div id="tab-live-chat" class="tab-content">
+      <h1>Giám Sát & Can Thiệp Trực Tiếp (Live Takeover)</h1>
+      <p style="color: var(--text-muted); margin-bottom: 15px;">Khi bạn gõ tin nhắn vào đây, AI của khách hàng đó sẽ tự động khóa để bạn độc quyền tư vấn.</p>
+      
       <div class="chat-layout">
         <div class="user-list" id="chat-user-list"></div>
         <div class="chat-box">
           <div class="chat-header">
-            <span id="active-chat-title">Chọn khách hàng để xem log</span>
+            <span id="active-chat-title">Vui lòng chọn một khách hàng...</span>
             <button id="toggle-ai-btn" class="btn-toggle-ai" style="display:none;"></button>
           </div>
           <div class="chat-messages" id="chat-messages-area"></div>
           <div class="chat-control-input">
-            <input type="text" id="admin-reply-input" placeholder="Nhập tin nhắn chat tay đè AI tại đây..." disabled>
-            <button class="btn-send" id="admin-send-btn" disabled>Gửi Đi</button>
+            <input type="text" id="admin-reply-input" placeholder="Nhập tin nhắn chat tay đè AI..." disabled>
+            <button class="btn-send" id="admin-send-btn" disabled>Gửi</button>
           </div>
         </div>
       </div>
     </div>
 
     <div id="tab-auto-study" class="tab-content">
-      <h1>Trung Tâm Huấn Luyện Tự Động (Duyệt 1-Click)</h1>
-      <p style="color: #9ca3af;">Dưới đây là các câu hỏi khách đã hỏi trên web nhưng AI chưa biết trả lời. Hãy cấp đáp án nhanh cho chúng!</p>
-      
+      <h1>Hộp Thư Chờ Duyệt Kiến Thức Tự Học</h1>
+      <p style="color: var(--text-muted); margin-bottom: 15px;">Các câu hỏi khách nhập trên Web mà AI không hiểu sẽ gom về đây. Bạn chỉ cần điền đáp án và bấm Duyệt!</p>
       <table>
         <thead>
           <tr>
-            <th>Câu Hỏi Khách Đã Nhập</th>
-            <th>Gợi Ý Từ Khóa Kích Hoạt</th>
-            <th>Nhập Câu Trả Lời Gợi Ý Nhanh</th>
-            <th>Thao Tác</th>
+            <th>Câu Hỏi Của Khách</th>
+            <th>Từ Khóa Kích Hoạt Gợi Ý</th>
+            <th>Nhập Câu Trả Lời Cho AI</th>
+            <th style="width: 100px;">Thao Tác</th>
           </tr>
         </thead>
         <tbody id="pending-questions-body"></tbody>
+      </table>
+    </div>
+
+    <div id="tab-knowledge-base" class="tab-content">
+      <h1>Danh Sách Kiến Thức AI Đã Học Chính Thức</h1><br>
+      <table>
+        <thead>
+          <tr>
+            <th>Câu Hỏi Mẫu</th>
+            <th>Từ Khóa Đối Khớp</th>
+            <th>Câu Trả Lời Của AI</th>
+            <th style="width: 80px;">Hành Động</th>
+          </tr>
+        </thead>
+        <tbody id="table-knowledge-body"></tbody>
+      </table>
+    </div>
+
+    <div id="tab-products" class="tab-content">
+      <h1>Quản Lý Kho Sản Phẩm</h1><br>
+      <div class="form-container">
+        <h2>📦 Thêm Sản Phẩm Mới</h2>
+        <div class="form-row">
+          <div class="form-group"><label>Tên sản phẩm:</label><input type="text" id="p-name" placeholder="VD: Canva Pro 1 năm"></div>
+          <div class="form-group"><label>Giá bán:</label><input type="text" id="p-price" placeholder="VD: 99.000đ"></div>
+        </div>
+        <div class="form-group"><label>Mô tả chi tiết sản phẩm:</label><textarea id="p-desc" placeholder="Tự động gia hạn, bảo hành 12 tháng..."></textarea></div>
+        <div class="form-group"><label>Từ khóa kích hoạt:</label><input type="text" id="p-keywords" placeholder="VD: canva, canva pro, mua canva"></div>
+        <button class="btn-submit" id="btn-add-product">Lưu Sản Phẩm</button>
+      </div>
+
+      <h2>Danh sách sản phẩm hiện có</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Tên Sản Phẩm</th>
+            <th>Giá</th>
+            <th>Mô Tả</th>
+            <th>Từ Khóa</th>
+            <th style="width: 80px;">Hành Động</th>
+          </tr>
+        </thead>
+        <tbody id="table-products-body"></tbody>
       </table>
     </div>
 
@@ -110,143 +198,252 @@
     let currentSelectedUid = null;
     let isAiMutedForCurrent = false;
 
-    window.switchTab = function(id) {
+    // Logic Chuyển Đổi Các Tab
+    window.switchTab = function(tabId, btnElement) {
       document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-      event.target.classList.add('active');
-    }
+      document.getElementById(tabId).classList.add('active');
+      btnElement.classList.add('active');
+    };
 
     // ----------------------------------------------------
-    // XỬ LÝ KHU VỰC LIVE CHAT & CAN THIỆP TRỰC TIẾP (CHAT ĐÈ AI)
+    // 1. ĐỒNG BỘ SỐ LIỆU THỐNG KÊ (OVERVIEW TAB)
+    // ----------------------------------------------------
+    onValue(ref(db, 'customers'), (snap) => {
+      let onlineCount = 0;
+      const fiveMinsAgo = Date.now() - 5 * 60 * 1000;
+      if (snap.exists()) {
+        Object.values(snap.val()).forEach(c => {
+          if (c.lastSeen && c.lastSeen >= fiveMinsAgo) onlineCount++;
+        });
+      }
+      document.getElementById('stat-online').innerText = onlineCount;
+    });
+
+    // ----------------------------------------------------
+    // 2. LIVE CHAT GIÁM SÁT & CAN THIỆP (LIVE CHAT TAB)
     // ----------------------------------------------------
     onValue(ref(db, 'conversations'), (snap) => {
       const uList = document.getElementById('chat-user-list');
       uList.innerHTML = '';
-      if(snap.exists()) {
-        Object.keys(snap.val()).forEach(uid => {
+      let totalConvs = 0;
+      let todayMsgs = 0;
+      const startOfToday = new Date().setHours(0,0,0,0);
+
+      if (snap.exists()) {
+        const convs = snap.val();
+        totalConvs = Object.keys(convs).length;
+
+        Object.keys(convs).forEach(uid => {
+          let lastMsgText = "...";
+          Object.values(convs[uid]).forEach(m => {
+            lastMsgText = m.text;
+            if (m.timestamp && m.timestamp >= startOfToday) todayMsgs++;
+          });
+
+          // Tạo item trong danh sách bên trái
           const item = document.createElement('div');
           item.className = `user-item ${currentSelectedUid === uid ? 'active' : ''}`;
-          item.innerHTML = `<div class="uid">👤 ${uid.substring(0,12)}...</div><div class="status">Đang hoạt động</div>`;
+          item.innerHTML = `
+            <div class="uid">👤 ${uid.substring(0,14)}...</div>
+            <div class="status">${lastMsgText}</div>
+          `;
           item.onclick = () => openChatBox(uid);
           uList.appendChild(item);
         });
       }
+      document.getElementById('stat-conversations').innerText = totalConvs;
+      document.getElementById('stat-today-messages').innerText = todayMsgs;
     });
 
     function openChatBox(uid) {
       currentSelectedUid = uid;
-      
       document.getElementById('admin-reply-input').disabled = false;
       document.getElementById('admin-send-btn').disabled = false;
-      document.getElementById('toggle-ai-btn').style.display = 'block';
-      document.getElementById('active-chat-title').innerText = `Cuộc trò chuyện: ${uid}`;
+      
+      const toggleBtn = document.getElementById('toggle-ai-btn');
+      toggleBtn.style.display = 'block';
+      document.getElementById('active-chat-title').innerText = `Cuộc trò chuyện của: ${uid}`;
 
-      // Đọc trạng thái Mute AI hiện tại từ Database
+      // Đọc trạng thái Khóa AI của khách hàng (SỬA LỖI BIẾN CSS TRÊN JS TẠI ĐÂY)
       onValue(ref(db, `customers/${uid}/aiMuted`), (snap) => {
         isAiMutedForCurrent = snap.val() || false;
-        const btn = document.getElementById('toggle-ai-btn');
         if (isAiMutedForCurrent) {
-          btn.innerText = "🤖 AI ĐANG TẮT (Chat tay)";
-          btn.style.background = var(--danger);
+          toggleBtn.innerText = "🤖 AI ĐANG TẮT (Chat Tay)";
+          toggleBtn.style.backgroundColor = "var(--danger)";
         } else {
-          btn.innerText = "🤖 AI ĐANG BẬT (Tự động)";
-          btn.style.background = var(--success);
+          toggleBtn.innerText = "🤖 AI ĐANG BẬT (Tự Động)";
+          toggleBtn.style.backgroundColor = "var(--success)";
         }
       });
 
-      // Lắng nghe tin nhắn Realtime đổ về khung quản trị
+      // Tải tin nhắn thời gian thực vào khung chat
       onValue(ref(db, `conversations/${uid}`), (msgSnap) => {
         if (currentSelectedUid !== uid) return;
-        const msgArea = document.getElementById('chat-messages-area');
-        msgArea.innerHTML = '';
-        if(msgSnap.exists()) {
+        const area = document.getElementById('chat-messages-area');
+        area.innerHTML = '';
+        if (msgSnap.exists()) {
           msgSnap.forEach(child => {
-            const data = child.val();
+            const m = child.val();
             const div = document.createElement('div');
-            div.className = `bubble ${data.sender}`;
-            div.innerText = `${data.sender === 'user' ? 'Khách' : data.sender === 'ai' ? 'AI Bot' : 'Bạn (Admin)'}: ${data.text}`;
-            msgArea.appendChild(div);
+            div.className = `bubble ${m.sender}`;
+            div.innerText = `${m.sender === 'user' ? 'Khách' : m.sender === 'ai' ? 'AI Bot' : 'Bạn (Admin)'}: ${m.text}`;
+            area.appendChild(div);
           });
-          msgArea.scrollTop = msgArea.scrollHeight;
+          area.scrollTop = area.scrollHeight;
         }
       });
     }
 
-    // Nút kích hoạt bật tắt nhanh trạng thái Robot AI hoạt động
+    // Nút Bật/Tắt thủ công AI
     document.getElementById('toggle-ai-btn').onclick = () => {
-      if(!currentSelectedUid) return;
+      if (!currentSelectedUid) return;
       set(ref(db, `customers/${currentSelectedUid}/aiMuted`), !isAiMutedForCurrent);
     };
 
-    // Khi Admin gõ text và bấm gửi can thiệp
-    document.getElementById('admin-send-btn').onclick = sendAdminMessage;
-    document.getElementById('admin-reply-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') sendAdminMessage(); });
+    // Admin gửi tin nhắn can thiệp
+    document.getElementById('admin-send-btn').onclick = sendAdminMsg;
+    document.getElementById('admin-reply-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') sendAdminMsg(); });
 
-    function sendAdminMessage() {
+    function sendAdminMsg() {
       const input = document.getElementById('admin-reply-input');
       const text = input.value.trim();
-      if(!currentSelectedUid || !text) return;
+      if (!currentSelectedUid || !text) return;
       input.value = '';
 
-      // Tự động chặn AI của khách hàng này ngay lập tức khi Admin gõ can thiệp chat tay
+      // Khi Admin nhắn, hệ thống tự động khóa AI của khách này để tránh AI nói leo
       update(ref(db, `customers/${currentSelectedUid}`), { aiMuted: true });
 
-      // Đẩy tin nhắn của Admin lên Node chat với tag sender: "admin"
       push(ref(db, `conversations/${currentSelectedUid}`), {
         text: text, sender: "admin", timestamp: Date.now()
       });
     }
 
     // ----------------------------------------------------
-    // XỬ LÝ KHU VỰC TRUNG TÂM AI TỰ HỌC (AI COGNITIVE)
+    // 3. TRUNG TÂM TỰ HỌC - DUYỆT 1-CLICK (AUTO STUDY TAB)
     // ----------------------------------------------------
     onValue(ref(db, 'pending_knowledge'), (snap) => {
       const tbody = document.getElementById('pending-questions-body');
       tbody.innerHTML = '';
-      
-      if(snap.exists()) {
-        const data = snap.val();
-        Object.keys(data).forEach(key => {
-          const item = data[key];
-          const tr = document.createElement('tr');
-          
-          // Tạo một từ khóa gợi ý tự động bằng cách viết thường câu hỏi
-          const suggestedKeyword = item.question.toLowerCase().replace(/[?.,!]/g, "");
 
+      if (snap.exists()) {
+        Object.entries(snap.val()).forEach(([key, item]) => {
+          const tr = document.createElement('tr');
+          const suggestedKw = item.question.toLowerCase().replace(/[?.,!]/g, "");
+          
           tr.innerHTML = `
             <td><b>${item.question}</b></td>
-            <td><input type="text" class="input-fast" id="kw-${key}" value="${suggestedKeyword}"></td>
-            <td><input type="text" class="input-fast" id="ans-${key}" placeholder="Nhập nhanh câu trả lời để dạy AI..."></td>
-            <td><button class="btn-approve" onclick="approveKnowledge('${key}', '${btoa(unescape(encodeURIComponent(item.question)))}')">Duyệt Dạy AI</button></td>
+            <td><input type="text" class="input-fast kw-input" value="${suggestedKw}"></td>
+            <td><input type="text" class="input-fast ans-input" placeholder="Nhập đáp án tại đây..."></td>
+            <td><button class="btn-approve">Duyệt Dạy AI</button></td>
           `;
+
+          // Xử lý sự kiện Duyệt bằng EventListener động (Bảo mật, không bị lỗi font chữ Tiếng Việt)
+          tr.querySelector('.btn-approve').onclick = () => {
+            const kw = tr.querySelector('.kw-input').value.trim();
+            const ans = tr.querySelector('.ans-input').value.trim();
+            if (!kw || !ans) return alert("Vui lòng không bỏ trống từ khóa hoặc câu trả lời!");
+
+            push(ref(db, 'knowledge'), {
+              id: Date.now().toString(),
+              question: item.question,
+              keywords: kw,
+              answer: ans
+            }).then(() => {
+              remove(ref(db, `pending_knowledge/${key}`));
+              alert("Đã duyệt! AI đã học được câu hỏi này.");
+            });
+          };
+
           tbody.appendChild(tr);
         });
       } else {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#9ca3af;padding:20px;">🎉 Tuyệt vời! AI chưa ghi nhận câu hỏi lạ nào từ khách hàng gần đây.</td></tr>`;
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px;">🎉 Không có câu hỏi lạ nào đang chờ duyệt. AI hoạt động rất tốt!</td></tr>';
       }
     });
 
-    // Hàm duyệt chuyển câu hỏi lạ thành kiến thức chính thức
-    window.approveKnowledge = function(key, encodedQuestion) {
-      const question = decodeURIComponent(escape(atob(encodedQuestion)));
-      const kw = document.getElementById(`kw-${key}`).value.trim();
-      const ans = document.getElementById(`ans-${key}`).value.trim();
+    // ----------------------------------------------------
+    // 4. KHO KIẾN THỨC GỐC - XEM & XÓA (KNOWLEDGE BASE TAB)
+    // ----------------------------------------------------
+    onValue(ref(db, 'knowledge'), (snap) => {
+      const tbody = document.getElementById('table-knowledge-body');
+      tbody.innerHTML = '';
+      let count = 0;
 
-      if(!kw || !ans) return alert("Vui lòng không để trống từ khóa hoặc câu trả lời mẫu!");
+      if (snap.exists()) {
+        Object.entries(snap.val()).forEach(([id, item]) => {
+          count++;
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><b>${item.question || 'Không rõ'}</b></td>
+            <td style="color:var(--accent)">${item.keywords}</td>
+            <td>${item.answer}</td>
+            <td><button class="btn-delete">Xóa</button></td>
+          `;
+          tr.querySelector('.btn-delete').onclick = () => {
+            if (confirm("Bạn có chắc chắn muốn xóa bộ kiến thức này?")) remove(ref(db, `knowledge/${id}`));
+          };
+          tbody.appendChild(tr);
+        });
+      } else {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted)">Chưa có kiến thức bổ sung nào được huấn luyện.</td></tr>';
+      }
+      document.getElementById('stat-knowledge').innerText = count;
+    });
 
-      // 1. Thêm thẳng dữ liệu vào danh mục Kiến thức chính thức `knowledge`
-      push(ref(db, 'knowledge'), {
+    // ----------------------------------------------------
+    // 5. QUẢN LÝ SẢN PHẨM (PRODUCTS TAB)
+    // ----------------------------------------------------
+    document.getElementById('btn-add-product').onclick = () => {
+      const name = document.getElementById('p-name').value.trim();
+      const price = document.getElementById('p-price').value.trim();
+      const desc = document.getElementById('p-desc').value.trim();
+      const kw = document.getElementById('p-keywords').value.trim();
+
+      if (!name || !price) return alert("Vui lòng nhập đầy đủ tên sản phẩm và giá bán!");
+
+      push(ref(db, 'products'), {
         id: Date.now().toString(),
-        question: question,
-        keywords: kw,
-        answer: ans
+        name: name,
+        price: price,
+        description: desc,
+        keywords: kw
       }).then(() => {
-        // 2. Xóa bỏ câu hỏi này khỏi danh mục Hàng đợi `pending_knowledge`
-        remove(ref(db, `pending_knowledge/${key}`));
-        alert("Đã duyệt! Hệ thống đồng bộ kiến thức này xuống toàn bộ Client.");
+        alert("Đã thêm sản phẩm thành công!");
+        document.getElementById('p-name').value = '';
+        document.getElementById('p-price').value = '';
+        document.getElementById('p-desc').value = '';
+        document.getElementById('p-keywords').value = '';
       });
-    }
+    };
+
+    onValue(ref(db, 'products'), (snap) => {
+      const tbody = document.getElementById('table-products-body');
+      tbody.innerHTML = '';
+      let count = 0;
+
+      if (snap.exists()) {
+        Object.entries(snap.val()).forEach(([id, item]) => {
+          count++;
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><b>${item.name}</b></td>
+            <td style="color:var(--success);font-weight:bold;">${item.price}</td>
+            <td>${item.description}</td>
+            <td style="color:var(--text-muted);">${item.keywords}</td>
+            <td><button class="btn-delete">Xóa</button></td>
+          `;
+          tr.querySelector('.btn-delete').onclick = () => {
+            if (confirm("Xóa sản phẩm này khỏi hệ thống?")) remove(ref(db, `products/${id}`));
+          };
+          tbody.appendChild(tr);
+        });
+      } else {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted)">Kho sản phẩm trống.</td></tr>';
+      }
+      document.getElementById('stat-products').innerText = count;
+    });
+
   </script>
 </body>
 </html>
