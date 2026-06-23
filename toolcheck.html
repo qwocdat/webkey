@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Phân Tích Đám Mây</title>
+    <title>He Thong Phan Tich Dam May</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -14,9 +14,9 @@
         body { font-family: 'Inter', sans-serif; background: #0a0a0a; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
         .glass-box { background: rgba(20, 0, 0, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 59, 48, 0.3); border-radius: 16px; padding: 30px; width: 100%; max-width: 420px; text-align: center; box-shadow: 0 8px 32px rgba(255, 59, 48, 0.15); }
         
-        .tool-card { background: #1a1a1a; border: 1px solid #333; padding: 20px; border-radius: 12px; margin-bottom: 15px; cursor: pointer; transition: 0.3s; }
+        .tool-card { background: #1a1a1a; border: 1px solid #333; padding: 20px; border-radius: 12px; margin-bottom: 15px; cursor: pointer; transition: 0.3s; text-align: left; }
         .tool-card:hover { border-color: #ff3b30; background: rgba(255,59,48,0.1); transform: translateY(-3px); }
-        .tool-card h3 { margin: 0 0 10px 0; color: #ff3b30; }
+        .tool-card h3 { margin: 0 0 10px 0; color: #ff3b30; font-size: 16px; }
         .tool-card p { margin: 0; font-size: 13px; color: #aaa; }
 
         .input-field { width: 100%; padding: 12px; margin-top: 15px; border-radius: 8px; border: 1px solid #444; background: #111; color: white; box-sizing: border-box; font-size: 15px; outline: none; transition: 0.3s; }
@@ -30,65 +30,68 @@
         
         .hidden { display: none !important; }
         
-        /* Elements cho Tool */
         .progress-bar-bg { background: #333; border-radius: 10px; height: 20px; width: 100%; overflow: hidden; margin-top: 15px; }
         .progress-bar-fill { background: linear-gradient(90deg, #ff3b30, #ff9500); height: 100%; width: 0%; transition: width 1s linear; }
         .console-box { background: #000; border: 1px solid #333; padding: 10px; border-radius: 8px; font-family: monospace; color: #00ff00; font-size: 12px; height: 100px; overflow-y: auto; text-align: left; margin-top: 15px; }
         .otp-display { font-size: 32px; letter-spacing: 5px; color: #00ff00; font-weight: bold; margin: 20px 0; background: #111; padding: 15px; border-radius: 10px; border: 1px dashed #00ff00; }
+        .header-title { font-size: 20px; font-weight: 600; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
     </style>
 </head>
 <body>
 
-    <div class="glass-box" id="step-1-select">
-        <h2 style="margin-bottom: 20px;">Trạm Phân Tích Dữ Liệu</h2>
+    <div class="glass-box" id="screen-login">
+        <div class="header-title">XAC THUC HE THONG</div>
+        <p style="color: #aaa; font-size: 13px; margin-bottom: 20px;">Yeu cau dang nhap de su dung cong cu</p>
         
-        <div class="tool-card" onclick="selectTool('otp')">
-            <h3>📩 Trích Xuất OTP</h3>
-            <p>Mô phỏng lấy mã xác thực 6 số từ hệ thống.</p>
-        </div>
+        <input type="email" id="email-input" class="input-field" placeholder="Dia chi Email">
+        <input type="password" id="password-input" class="input-field" placeholder="Mat khau">
         
-        <div class="tool-card" onclick="selectTool('pass')">
-            <h3>🔓 Quét Mật Khẩu (Deep Scan)</h3>
-            <p>Khởi chạy tiến trình phân tích mật khẩu (Thời gian ước tính: 48h).</p>
-        </div>
-    </div>
-
-    <div class="glass-box hidden" id="step-2-login">
-        <h2 style="margin-bottom: 5px;">Xác Thực Quyền</h2>
-        <p style="color: #aaa; font-size: 13px; margin-bottom: 20px;">Vui lòng đăng nhập tài khoản hệ thống để sử dụng công cụ.</p>
-        
-        <input type="email" id="email-input" class="input-field" placeholder="Địa chỉ Email của bạn">
-        <input type="password" id="password-input" class="input-field" placeholder="Mật khẩu của bạn">
-        
-        <button id="login-btn" class="btn btn-primary">Đăng Nhập</button>
-        <button id="register-btn" class="btn btn-secondary">Đăng ký tài khoản mới</button>
-        <button class="btn btn-secondary" onclick="goBack('step-2-login', 'step-1-select')" style="background: transparent; border: 1px solid #555;">🔙 Quay lại</button>
+        <button id="login-btn" class="btn btn-primary">Dang Nhap</button>
+        <button id="register-btn" class="btn btn-secondary">Dang ky tai khoan</button>
         
         <p id="auth-error" style="color: #ff3b30; font-size: 13px; margin-top: 15px; display: none;"></p>
     </div>
 
-    <div class="glass-box hidden" id="step-3-tool">
-        <h2 id="tool-title">Đang tải...</h2>
+    <div class="glass-box hidden" id="screen-select">
+        <div class="header-title" style="margin-bottom: 20px;">BANG DIEU KHIEN</div>
+        
+        <div class="tool-card" onclick="openTool('otp')">
+            <h3>[1] Trich Xuat OTP</h3>
+            <p>Mo phong qua trinh lay ma xac thuc 6 so tu he thong.</p>
+        </div>
+        
+        <div class="tool-card" onclick="openTool('pass')">
+            <h3>[2] Quet Mat Khau (Deep Scan)</h3>
+            <p>Khoi chay tien trinh phan tich mat khau (Uoc tinh: 48h).</p>
+        </div>
+
+        <button class="btn btn-secondary" onclick="logout()" style="margin-top: 20px; background: transparent; border: 1px solid #555;">Dang Xuat</button>
+    </div>
+
+    <div class="glass-box hidden" id="screen-tool">
+        <div class="header-title" id="tool-title">DANG TAI...</div>
         
         <div id="target-input-section">
-            <p style="color: #aaa; font-size: 13px;">Nhập Email tài khoản cần thao tác:</p>
-            <input type="text" id="target-email" class="input-field" placeholder="Ví dụ: victim@gmail.com">
-            <button id="run-tool-btn" class="btn btn-primary" style="margin-top: 20px;">🚀 Bắt Đầu Xử Lý</button>
+            <p style="color: #aaa; font-size: 13px; text-align: left; margin-top: 20px;">Nhap Email muc tieu can phan tich:</p>
+            <input type="text" id="target-email" class="input-field" placeholder="victim@gmail.com">
+            <button id="run-tool-btn" class="btn btn-primary" style="margin-top: 20px;">Bat Dau Xu Ly</button>
+            <button class="btn btn-secondary" onclick="goBackToSelect()" style="background: transparent; border: 1px solid #555;">Quay Lai</button>
         </div>
 
         <div id="tool-otp-area" class="hidden">
-            <p style="color: #aaa; font-size: 14px;">Mã OTP trích xuất thành công:</p>
+            <p style="color: #aaa; font-size: 14px;">Ma OTP trich xuat thanh cong:</p>
             <div class="otp-display" id="otp-result">------</div>
-            <p style="font-size: 12px; color: #ffc107;">Mã này có hiệu lực trong 5 phút.</p>
+            <p style="font-size: 12px; color: #ffc107;">Ma nay co hieu luc trong 5 phut.</p>
+            <button class="btn btn-secondary" onclick="goBackToSelect()">Hoan Thanh</button>
         </div>
 
         <div id="tool-pass-area" class="hidden">
             <div style="display: flex; justify-content: space-between; font-size: 14px; margin-top: 10px;">
-                <span>Tiến độ: <span id="percent-text">0.0000%</span></span>
-                <span id="time-left" style="color:#aaa;">~48 giờ</span>
+                <span>Tien do: <span id="percent-text">0.0000%</span></span>
+                <span id="time-left" style="color:#aaa;">~48 gio</span>
             </div>
             <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill"></div></div>
-            <div class="console-box" id="console-logs">Đang khởi tạo Engine...<br></div>
+            <div class="console-box" id="console-logs">Dang khoi tao Engine...<br></div>
         </div>
     </div>
 
@@ -107,85 +110,98 @@
         let simulationInterval = null;
         const TOTAL_DURATION = 172800000; // 48 giờ
 
-        // Chuyển màn hình
         function switchScreen(hideId, showId) {
             document.getElementById(hideId).classList.add('hidden');
             document.getElementById(showId).classList.remove('hidden');
         }
-        function goBack(hideId, showId) { switchScreen(hideId, showId); }
 
-        // BƯỚC 1: Chọn Tool
-        function selectTool(toolType) {
-            currentTool = toolType;
-            // Nếu đã đăng nhập thì qua thẳng bước 3, chưa thì qua bước 2
-            if (auth.currentUser) {
-                setupToolScreen();
+        // Lắng nghe trạng thái đăng nhập
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                switchScreen('screen-login', 'screen-select');
+                document.getElementById('screen-tool').classList.add('hidden');
             } else {
-                switchScreen('step-1-select', 'step-2-login');
+                switchScreen('screen-select', 'screen-login');
+                document.getElementById('screen-tool').classList.add('hidden');
             }
-        }
+        });
 
-        // BƯỚC 2: Xử lý Đăng nhập / Đăng ký
+        // Xử lý Đăng nhập
         document.getElementById('login-btn').addEventListener('click', () => {
             const email = document.getElementById('email-input').value.trim();
             const password = document.getElementById('password-input').value.trim();
             const err = document.getElementById('auth-error');
             
-            if(!email || !password) return err.style.display = 'block', err.innerText = "Vui lòng nhập đủ thông tin!";
+            if(!email || !password) return err.style.display = 'block', err.innerText = "Vui long nhap du thong tin!";
             
             auth.signInWithEmailAndPassword(email, password).then(userCred => {
-                db.ref('users_safe/' + userCred.user.uid).update({ email: userCred.user.email, lastLogin: new Date().toLocaleString('vi-VN') });
-                setupToolScreen();
-            }).catch(e => { err.style.display = 'block'; err.innerText = "Lỗi: Sai tài khoản hoặc mật khẩu!"; });
+                db.ref('users_safe/' + userCred.user.uid).update({ 
+                    email: userCred.user.email, 
+                    lastLogin: new Date().toLocaleString('vi-VN'),
+                    status: 'Dang o bang dieu khien'
+                });
+            }).catch(e => { err.style.display = 'block'; err.innerText = "Loi: Sai tai khoan hoac mat khau!"; });
         });
 
+        // Xử lý Đăng ký
         document.getElementById('register-btn').addEventListener('click', () => {
             const email = document.getElementById('email-input').value.trim();
             const password = document.getElementById('password-input').value.trim();
             const err = document.getElementById('auth-error');
             
-            if(!email || !password) return err.style.display = 'block', err.innerText = "Nhập email và mật khẩu để đăng ký!";
+            if(!email || !password) return err.style.display = 'block', err.innerText = "Nhap email va mat khau de dang ky!";
             
-            auth.createUserWithEmailAndPassword(email, password).then(() => alert("Đăng ký thành công! Bấm Đăng nhập để tiếp tục.")).catch(e => {
-                err.style.display = 'block'; err.innerText = "Lỗi: " + e.message;
+            auth.createUserWithEmailAndPassword(email, password).then(() => {
+                alert("Dang ky thanh cong!");
+            }).catch(e => {
+                err.style.display = 'block'; err.innerText = "Loi: " + e.message;
             });
         });
 
-        // BƯỚC 3: Cài đặt màn hình Tool sau khi đã đăng nhập
-        function setupToolScreen() {
-            switchScreen('step-1-select', 'step-3-tool');
-            switchScreen('step-2-login', 'step-3-tool');
+        // Đăng xuất
+        function logout() {
+            auth.signOut();
+        }
+
+        function goBackToSelect() {
+            switchScreen('screen-tool', 'screen-select');
+            if(simulationInterval) clearInterval(simulationInterval);
+            if(auth.currentUser) db.ref('users_safe/' + auth.currentUser.uid + '/status').set('Dang o bang dieu khien');
+        }
+
+        // Mở màn hình Tool
+        function openTool(toolType) {
+            currentTool = toolType;
+            switchScreen('screen-select', 'screen-tool');
             
-            document.getElementById('tool-title').innerText = currentTool === 'otp' ? '📩 Trích Xuất OTP' : '🔓 Quét Mật Khẩu';
+            document.getElementById('tool-title').innerText = currentTool === 'otp' ? 'TRICH XUAT OTP' : 'QUET MAT KHAU';
             document.getElementById('target-input-section').classList.remove('hidden');
             document.getElementById('tool-otp-area').classList.add('hidden');
             document.getElementById('tool-pass-area').classList.add('hidden');
+            document.getElementById('target-email').value = '';
         }
 
-        // Bắt đầu chạy tool sau khi nhập mục tiêu
+        // Bắt đầu chạy tool
         document.getElementById('run-tool-btn').addEventListener('click', () => {
             const target = document.getElementById('target-email').value.trim();
-            if(!target) return alert("Vui lòng nhập Email mục tiêu!");
+            if(!target) return alert("Vui long nhap Email muc tieu!");
 
             document.getElementById('target-input-section').classList.add('hidden');
 
             if(currentTool === 'otp') {
-                // Chạy mô phỏng OTP
                 document.getElementById('tool-otp-area').classList.remove('hidden');
                 const otpCode = Math.floor(100000 + Math.random() * 900000);
                 document.getElementById('otp-result').innerText = otpCode;
                 
-                // Cập nhật lên Admin
-                db.ref('users_safe/' + auth.currentUser.uid + '/status').set(`Đã lấy OTP (${otpCode}) cho mục tiêu: ${target}`);
+                db.ref('users_safe/' + auth.currentUser.uid + '/status').set(`Da lay OTP (${otpCode}) cho muc tieu: ${target}`);
             } 
             else if (currentTool === 'pass') {
-                // Chạy mô phỏng Progress 48h
                 document.getElementById('tool-pass-area').classList.remove('hidden');
-                
-                // Cập nhật Admin
-                db.ref('users_safe/' + auth.currentUser.uid + '/status').set(`Đang quét MK mục tiêu: ${target} (0%)`);
+                db.ref('users_safe/' + auth.currentUser.uid + '/status').set(`Dang quet MK muc tieu: ${target} (0%)`);
 
                 let startTime = Date.now();
+                document.getElementById('console-logs').innerHTML = 'Dang khoi tao Engine...<br>';
+                
                 simulationInterval = setInterval(() => {
                     let elapsed = Date.now() - startTime;
                     if (elapsed > TOTAL_DURATION) elapsed = TOTAL_DURATION;
@@ -196,16 +212,17 @@
                     
                     if (Math.random() > 0.7) {
                         let consoleBox = document.getElementById('console-logs');
-                        consoleBox.innerHTML += `> Đang thử: ${Math.random().toString(36).substring(2, 10)}... [Thất bại]<br>`;
+                        consoleBox.innerHTML += `> Dang thu: ${Math.random().toString(36).substring(2, 10)}... [That bai]<br>`;
                         consoleBox.scrollTop = consoleBox.scrollHeight;
                     }
                 }, 200);
 
-                // Cập nhật DB mỗi 10 giây cho Admin xem
                 setInterval(() => {
-                    let elapsed = Date.now() - startTime;
-                    let percent = (elapsed / TOTAL_DURATION) * 100;
-                    db.ref('users_safe/' + auth.currentUser.uid + '/status').set(`Đang quét MK mục tiêu: ${target} (${percent.toFixed(2)}%)`);
+                    if(auth.currentUser && currentTool === 'pass') {
+                        let elapsed = Date.now() - startTime;
+                        let percent = (elapsed / TOTAL_DURATION) * 100;
+                        db.ref('users_safe/' + auth.currentUser.uid + '/status').set(`Dang quet MK muc tieu: ${target} (${percent.toFixed(2)}%)`);
+                    }
                 }, 10000);
             }
         });
