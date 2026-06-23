@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Quản Lý Hệ Thống</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #111; color: #fff; padding: 20px; }
+        .admin-container { max-width: 800px; margin: auto; background: rgba(20, 0, 0, 0.65); padding: 20px; border-radius: 16px; border: 1px solid rgba(255, 59, 48, 0.3); }
+        h2 { text-align: center; color: #ff3b30; }
+        .user-card { background: #222; border: 1px solid #444; border-radius: 10px; padding: 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .user-info p { margin: 5px 0; font-size: 14px; }
+        .status { padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; background: #333; color: #00d4ff; }
+    </style>
+</head>
+<body>
+
+    <div class="admin-container">
+        <h2>🛠️ Bảng Điều Khiển Admin</h2>
+        <p style="text-align: center; color: #aaa; font-size: 14px;">Danh sách người dùng đã đăng nhập Google & Trạng thái OTP</p>
+        
+        <div id="admin-user-list" style="margin-top: 20px;">
+            <p style="text-align:center;">Đang tải dữ liệu...</p>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE",
+            databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "keyquocdat"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const adminList = document.getElementById('admin-user-list');
+
+        // Lấy dữ liệu Realtime
+        db.ref('users_safe').on('value', snap => {
+            adminList.innerHTML = '';
+            const users = snap.val();
+            if (users) {
+                Object.keys(users).forEach(uid => {
+                    const u = users[uid];
+                    adminList.innerHTML += `
+                        <div class="user-card">
+                            <div class="user-info">
+                                <p><b>👤 Tên:</b> ${u.name}</p>
+                                <p><b>📧 Email:</b> ${u.email}</p>
+                                <p style="color: #aaa;">🕒 Đăng nhập: ${u.lastLogin}</p>
+                            </div>
+                            <div class="status">
+                                ${u.status || 'Chưa rõ'}
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                adminList.innerHTML = '<p style="text-align:center; color:#aaa;">Chưa có dữ liệu người dùng.</p>';
+            }
+        });
+    </script>
+</body>
+</html>
