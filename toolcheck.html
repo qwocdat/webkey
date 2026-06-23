@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Nhập & Xác Thực OTP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #000; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .glass-box { background: rgba(20, 0, 0, 0.65); backdrop-filter: blur(10px); border: 1px solid rgba(255, 59, 48, 0.3); border-radius: 16px; padding: 30px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 8px 32px rgba(255, 59, 48, 0.15); }
+        .btn { border: none; border-radius: 12px; padding: 12px; font-weight: 600; width: 100%; cursor: pointer; margin-top: 15px; transition: 0.3s; }
+        .btn-google { background: #4285F4; color: white; }
+        .btn-google:hover { background: #357ae8; }
+        .btn-primary { background: #ff3b30; color: white; }
+        .btn-primary:hover { background: #ff453a; }
+        input { width: 100%; padding: 12px; margin-top: 15px; border-radius: 8px; border: 1px solid #555; background: #222; color: white; box-sizing: border-box; text-align: center; font-size: 18px; letter-spacing: 2px; }
+        .hidden { display: none; }
+        #otp-notification { color: #00d4ff; margin-top: 10px; font-size: 14px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="glass-box">
+        <h2>🔒 Cổng Xác Thực</h2>
+        
+        <div id="login-section">
+            <p style="color: #aaa; font-size: 14px;">Vui lòng đăng nhập để tiếp tục</p>
+            <button id="login-btn" class="btn btn-google">Đăng nhập bằng Google</button>
+        </div>
+
+        <div id="otp-section" class="hidden">
+            <p style="color: #4CAF50;" id="welcome-text"></p>
+            <button id="get-otp-btn" class="btn btn-primary">📩 Lấy mã OTP mô phỏng</button>
+            <div id="otp-notification"></div>
+            
+            <input type="text" id="otp-input" placeholder="Nhập mã 6 số" maxlength="6">
+            <button id="verify-otp-btn" class="btn btn-google" style="background: #28a745;">Xác nhận OTP</button>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE",
+            databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "keyquocdat"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        let generatedOTP = "";
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                document.getElementById('login-section').classList.add('hidden');
+                document.getElementById('otp-section').classList.remove('hidden');
+                document.getElementById('welcome-text').innerHTML = `Xin chào, <b>${user.displayName}</b>!`;
+                
+                // Lưu thông tin (an toàn) vào database cho Admin thấy
+                db.ref('users_safe/' + user.uid).set({
+                    name: user.displayName,
+                    email: user.email,
+                    lastLogin: new Date().toLocaleString('vi-VN'),
+                    status: 'Đang chờ xác thực OTP'
+                });
+            }
+        });
+
+        document.getElementById('login-btn').addEventListener('click', () => {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider).catch(err => alert("Lỗi: " + err.message));
+        });
+
+        // Chức năng mô phỏng OTP
+        document.getElementById('get-otp-btn').addEventListener('click', () => {
+            generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
+            document.getElementById('otp-notification').innerText = `[Mô phỏng] Mã OTP của bạn là: ${generatedOTP}`;
+            
+            // Cập nhật trạng thái lên Admin
+            if(auth.currentUser) {
+                db.ref('users_safe/' + auth.currentUser.uid + '/status').set('Đã gửi OTP: ' + generatedOTP);
+            }
+        });
+
+        document.getElementById('verify-otp-btn').addEventListener('click', () => {
+            const inputOTP = document.getElementById('otp-input').value;
+            if (inputOTP === generatedOTP && generatedOTP !== "") {
+                alert("✅ Xác thực OTP thành công!");
+                if(auth.currentUser) {
+                    db.ref('users_safe/' + auth.currentUser.uid + '/status').set('✅ Đã xác thực thành công');
+                }
+            } else {
+                alert("❌ Mã OTP không hợp lệ!");
+            }
+        });
+    </script>
+</body>
+</html>
