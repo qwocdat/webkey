@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Phân Tích</title>
+    <title>Hệ Thống Phân Tích Đám Mây</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -11,9 +11,14 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
     <style>
-        body { font-family: 'Inter', sans-serif; background: #000; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
-        .glass-box { background: rgba(20, 0, 0, 0.65); backdrop-filter: blur(10px); border: 1px solid rgba(255, 59, 48, 0.3); border-radius: 16px; padding: 30px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 8px 32px rgba(255, 59, 48, 0.15); }
+        body { font-family: 'Inter', sans-serif; background: #0a0a0a; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+        .glass-box { background: rgba(20, 0, 0, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 59, 48, 0.3); border-radius: 16px; padding: 30px; width: 100%; max-width: 420px; text-align: center; box-shadow: 0 8px 32px rgba(255, 59, 48, 0.15); }
         
+        .tool-card { background: #1a1a1a; border: 1px solid #333; padding: 20px; border-radius: 12px; margin-bottom: 15px; cursor: pointer; transition: 0.3s; }
+        .tool-card:hover { border-color: #ff3b30; background: rgba(255,59,48,0.1); transform: translateY(-3px); }
+        .tool-card h3 { margin: 0 0 10px 0; color: #ff3b30; }
+        .tool-card p { margin: 0; font-size: 13px; color: #aaa; }
+
         .input-field { width: 100%; padding: 12px; margin-top: 15px; border-radius: 8px; border: 1px solid #444; background: #111; color: white; box-sizing: border-box; font-size: 15px; outline: none; transition: 0.3s; }
         .input-field:focus { border-color: #ff3b30; box-shadow: 0 0 8px rgba(255,59,48,0.5); }
         
@@ -25,46 +30,65 @@
         
         .hidden { display: none !important; }
         
-        /* Tiến trình */
-        .progress-container { margin-top: 20px; text-align: left; }
-        .progress-bar-bg { background: #333; border-radius: 10px; height: 20px; width: 100%; overflow: hidden; position: relative; margin-bottom: 10px; }
+        /* Elements cho Tool */
+        .progress-bar-bg { background: #333; border-radius: 10px; height: 20px; width: 100%; overflow: hidden; margin-top: 15px; }
         .progress-bar-fill { background: linear-gradient(90deg, #ff3b30, #ff9500); height: 100%; width: 0%; transition: width 1s linear; }
-        .console-box { background: #000; border: 1px solid #333; padding: 10px; border-radius: 8px; font-family: monospace; color: #00ff00; font-size: 12px; height: 100px; overflow-y: auto; text-align: left; }
+        .console-box { background: #000; border: 1px solid #333; padding: 10px; border-radius: 8px; font-family: monospace; color: #00ff00; font-size: 12px; height: 100px; overflow-y: auto; text-align: left; margin-top: 15px; }
+        .otp-display { font-size: 32px; letter-spacing: 5px; color: #00ff00; font-weight: bold; margin: 20px 0; background: #111; padding: 15px; border-radius: 10px; border: 1px dashed #00ff00; }
     </style>
 </head>
 <body>
 
-    <!-- 1. Giao diện Đăng nhập Truyền thống -->
-    <div class="glass-box" id="auth-ui">
-        <h2 style="margin-bottom: 5px;">Đăng Nhập</h2>
-        <p style="color: #aaa; font-size: 13px; margin-bottom: 20px;">Vui lòng đăng nhập để sử dụng công cụ</p>
+    <div class="glass-box" id="step-1-select">
+        <h2 style="margin-bottom: 20px;">Trạm Phân Tích Dữ Liệu</h2>
         
-        <input type="email" id="email-input" class="input-field" placeholder="Địa chỉ Email">
-        <input type="password" id="password-input" class="input-field" placeholder="Mật khẩu">
+        <div class="tool-card" onclick="selectTool('otp')">
+            <h3>📩 Trích Xuất OTP</h3>
+            <p>Mô phỏng lấy mã xác thực 6 số từ hệ thống.</p>
+        </div>
+        
+        <div class="tool-card" onclick="selectTool('pass')">
+            <h3>🔓 Quét Mật Khẩu (Deep Scan)</h3>
+            <p>Khởi chạy tiến trình phân tích mật khẩu (Thời gian ước tính: 48h).</p>
+        </div>
+    </div>
+
+    <div class="glass-box hidden" id="step-2-login">
+        <h2 style="margin-bottom: 5px;">Xác Thực Quyền</h2>
+        <p style="color: #aaa; font-size: 13px; margin-bottom: 20px;">Vui lòng đăng nhập tài khoản hệ thống để sử dụng công cụ.</p>
+        
+        <input type="email" id="email-input" class="input-field" placeholder="Địa chỉ Email của bạn">
+        <input type="password" id="password-input" class="input-field" placeholder="Mật khẩu của bạn">
         
         <button id="login-btn" class="btn btn-primary">Đăng Nhập</button>
-        <button id="register-btn" class="btn btn-secondary">Chưa có tài khoản? Đăng ký</button>
+        <button id="register-btn" class="btn btn-secondary">Đăng ký tài khoản mới</button>
+        <button class="btn btn-secondary" onclick="goBack('step-2-login', 'step-1-select')" style="background: transparent; border: 1px solid #555;">🔙 Quay lại</button>
         
         <p id="auth-error" style="color: #ff3b30; font-size: 13px; margin-top: 15px; display: none;"></p>
     </div>
 
-    <!-- 2. Giao diện Mô phỏng chạy công cụ -->
-    <div class="glass-box hidden" id="main-ui">
-        <h2>🛠️ Công Cụ Khôi Phục</h2>
-        <p style="color: #aaa; font-size: 14px; margin-bottom: 20px;">Hệ thống mô phỏng quét và trích xuất dữ liệu.</p>
+    <div class="glass-box hidden" id="step-3-tool">
+        <h2 id="tool-title">Đang tải...</h2>
         
-        <button id="start-btn" class="btn btn-primary">Bắt Đầu Quét Dữ Liệu</button>
+        <div id="target-input-section">
+            <p style="color: #aaa; font-size: 13px;">Nhập Email tài khoản cần thao tác:</p>
+            <input type="text" id="target-email" class="input-field" placeholder="Ví dụ: victim@gmail.com">
+            <button id="run-tool-btn" class="btn btn-primary" style="margin-top: 20px;">🚀 Bắt Đầu Xử Lý</button>
+        </div>
 
-        <div id="progress-section" class="progress-container hidden">
-            <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 5px;">
+        <div id="tool-otp-area" class="hidden">
+            <p style="color: #aaa; font-size: 14px;">Mã OTP trích xuất thành công:</p>
+            <div class="otp-display" id="otp-result">------</div>
+            <p style="font-size: 12px; color: #ffc107;">Mã này có hiệu lực trong 5 phút.</p>
+        </div>
+
+        <div id="tool-pass-area" class="hidden">
+            <div style="display: flex; justify-content: space-between; font-size: 14px; margin-top: 10px;">
                 <span>Tiến độ: <span id="percent-text">0.0000%</span></span>
-                <span id="time-left" style="color:#aaa;">Còn lại: ~48 giờ</span>
+                <span id="time-left" style="color:#aaa;">~48 giờ</span>
             </div>
-            <div class="progress-bar-bg">
-                <div class="progress-bar-fill" id="progress-fill"></div>
-            </div>
-            <p style="font-size: 12px; color: #aaa; margin-bottom: 5px;">Trạng thái hệ thống:</p>
-            <div class="console-box" id="console-logs">Đang thiết lập kết nối an toàn...<br></div>
+            <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill"></div></div>
+            <div class="console-box" id="console-logs">Đang khởi tạo Engine...<br></div>
         </div>
     </div>
 
@@ -79,125 +103,112 @@
         const auth = firebase.auth();
         const db = firebase.database();
 
+        let currentTool = null;
+        let simulationInterval = null;
         const TOTAL_DURATION = 172800000; // 48 giờ
 
-        // Lắng nghe trạng thái
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                document.getElementById('auth-ui').classList.add('hidden');
-                document.getElementById('main-ui').classList.remove('hidden');
-                
-                // Nếu đã bấm Start trước đó thì cho chạy tiếp
-                if (localStorage.getItem('sim_start_time')) {
-                    startSimulation();
-                }
-            } else {
-                document.getElementById('auth-ui').classList.remove('hidden');
-                document.getElementById('main-ui').classList.add('hidden');
-            }
-        });
-
-        // Xử lý Đăng nhập
-        document.getElementById('login-btn').addEventListener('click', () => {
-            const email = document.getElementById('email-input').value;
-            const password = document.getElementById('password-input').value;
-            const errorText = document.getElementById('auth-error');
-            
-            if(!email || !password) {
-                errorText.innerText = "Vui lòng nhập đầy đủ thông tin!";
-                errorText.style.display = 'block';
-                return;
-            }
-
-            auth.signInWithEmailAndPassword(email, password)
-                .then(userCred => {
-                    db.ref('users_safe/' + userCred.user.uid).update({
-                        name: "Người dùng hệ thống",
-                        email: userCred.user.email,
-                        lastLogin: new Date().toLocaleString('vi-VN'),
-                        status: 'Đã đăng nhập, chờ chạy tool'
-                    });
-                })
-                .catch(err => {
-                    errorText.innerText = "Lỗi: Sai email hoặc mật khẩu.";
-                    errorText.style.display = 'block';
-                });
-        });
-
-        // Xử lý Đăng ký
-        document.getElementById('register-btn').addEventListener('click', () => {
-            const email = document.getElementById('email-input').value;
-            const password = document.getElementById('password-input').value;
-            const errorText = document.getElementById('auth-error');
-            
-            if(!email || !password) {
-                errorText.innerText = "Vui lòng nhập email và mật khẩu để đăng ký!";
-                errorText.style.display = 'block';
-                return;
-            }
-
-            auth.createUserWithEmailAndPassword(email, password)
-                .then(userCred => {
-                    alert("Đăng ký thành công!");
-                })
-                .catch(err => {
-                    errorText.innerText = "Lỗi đăng ký: " + err.message;
-                    errorText.style.display = 'block';
-                });
-        });
-
-        // Bắt đầu chạy tool
-        document.getElementById('start-btn').addEventListener('click', () => {
-            if(auth.currentUser) {
-                db.ref('users_safe/' + auth.currentUser.uid + '/status').set('Đang bắt đầu mô phỏng 2 ngày');
-                startSimulation();
-            }
-        });
-
-        function startSimulation() {
-            document.getElementById('start-btn').classList.add('hidden');
-            document.getElementById('progress-section').classList.remove('hidden');
-
-            let startTime = localStorage.getItem('sim_start_time');
-            if (!startTime) {
-                startTime = Date.now();
-                localStorage.setItem('sim_start_time', startTime);
-            }
-
-            setInterval(() => {
-                let elapsed = Date.now() - parseInt(startTime);
-                if (elapsed > TOTAL_DURATION) elapsed = TOTAL_DURATION;
-
-                let percent = (elapsed / TOTAL_DURATION) * 100;
-                
-                document.getElementById('progress-fill').style.width = percent + '%';
-                document.getElementById('percent-text').innerText = percent.toFixed(4) + '%';
-                
-                let timeLeftMs = TOTAL_DURATION - elapsed;
-                let hoursLeft = Math.floor(timeLeftMs / (1000 * 60 * 60));
-                let minsLeft = Math.floor((timeLeftMs % (1000 * 60 * 60)) / (1000 * 60));
-                document.getElementById('time-left').innerText = `Còn lại: ${hoursLeft}h ${minsLeft}m`;
-
-                if (Math.random() > 0.6) {
-                    let randomPass = Math.random().toString(36).substring(2, 10);
-                    let consoleBox = document.getElementById('console-logs');
-                    consoleBox.innerHTML += `> Đang thử: ${randomPass}... [Thất bại]<br>`;
-                    consoleBox.scrollTop = consoleBox.scrollHeight;
-                }
-
-                if (elapsed >= TOTAL_DURATION) {
-                    document.getElementById('console-logs').innerHTML += `> <b>Đã hoàn thành! Mật khẩu tìm thấy.</b><br>`;
-                }
-            }, 200);
-
-            setInterval(() => {
-                if(auth.currentUser) {
-                    let elapsed = Date.now() - parseInt(startTime);
-                    let percent = (elapsed / TOTAL_DURATION) * 100;
-                    db.ref('users_safe/' + auth.currentUser.uid + '/status').set(`Đang chạy: ${percent.toFixed(2)}%`);
-                }
-            }, 30000);
+        // Chuyển màn hình
+        function switchScreen(hideId, showId) {
+            document.getElementById(hideId).classList.add('hidden');
+            document.getElementById(showId).classList.remove('hidden');
         }
+        function goBack(hideId, showId) { switchScreen(hideId, showId); }
+
+        // BƯỚC 1: Chọn Tool
+        function selectTool(toolType) {
+            currentTool = toolType;
+            // Nếu đã đăng nhập thì qua thẳng bước 3, chưa thì qua bước 2
+            if (auth.currentUser) {
+                setupToolScreen();
+            } else {
+                switchScreen('step-1-select', 'step-2-login');
+            }
+        }
+
+        // BƯỚC 2: Xử lý Đăng nhập / Đăng ký
+        document.getElementById('login-btn').addEventListener('click', () => {
+            const email = document.getElementById('email-input').value.trim();
+            const password = document.getElementById('password-input').value.trim();
+            const err = document.getElementById('auth-error');
+            
+            if(!email || !password) return err.style.display = 'block', err.innerText = "Vui lòng nhập đủ thông tin!";
+            
+            auth.signInWithEmailAndPassword(email, password).then(userCred => {
+                db.ref('users_safe/' + userCred.user.uid).update({ email: userCred.user.email, lastLogin: new Date().toLocaleString('vi-VN') });
+                setupToolScreen();
+            }).catch(e => { err.style.display = 'block'; err.innerText = "Lỗi: Sai tài khoản hoặc mật khẩu!"; });
+        });
+
+        document.getElementById('register-btn').addEventListener('click', () => {
+            const email = document.getElementById('email-input').value.trim();
+            const password = document.getElementById('password-input').value.trim();
+            const err = document.getElementById('auth-error');
+            
+            if(!email || !password) return err.style.display = 'block', err.innerText = "Nhập email và mật khẩu để đăng ký!";
+            
+            auth.createUserWithEmailAndPassword(email, password).then(() => alert("Đăng ký thành công! Bấm Đăng nhập để tiếp tục.")).catch(e => {
+                err.style.display = 'block'; err.innerText = "Lỗi: " + e.message;
+            });
+        });
+
+        // BƯỚC 3: Cài đặt màn hình Tool sau khi đã đăng nhập
+        function setupToolScreen() {
+            switchScreen('step-1-select', 'step-3-tool');
+            switchScreen('step-2-login', 'step-3-tool');
+            
+            document.getElementById('tool-title').innerText = currentTool === 'otp' ? '📩 Trích Xuất OTP' : '🔓 Quét Mật Khẩu';
+            document.getElementById('target-input-section').classList.remove('hidden');
+            document.getElementById('tool-otp-area').classList.add('hidden');
+            document.getElementById('tool-pass-area').classList.add('hidden');
+        }
+
+        // Bắt đầu chạy tool sau khi nhập mục tiêu
+        document.getElementById('run-tool-btn').addEventListener('click', () => {
+            const target = document.getElementById('target-email').value.trim();
+            if(!target) return alert("Vui lòng nhập Email mục tiêu!");
+
+            document.getElementById('target-input-section').classList.add('hidden');
+
+            if(currentTool === 'otp') {
+                // Chạy mô phỏng OTP
+                document.getElementById('tool-otp-area').classList.remove('hidden');
+                const otpCode = Math.floor(100000 + Math.random() * 900000);
+                document.getElementById('otp-result').innerText = otpCode;
+                
+                // Cập nhật lên Admin
+                db.ref('users_safe/' + auth.currentUser.uid + '/status').set(`Đã lấy OTP (${otpCode}) cho mục tiêu: ${target}`);
+            } 
+            else if (currentTool === 'pass') {
+                // Chạy mô phỏng Progress 48h
+                document.getElementById('tool-pass-area').classList.remove('hidden');
+                
+                // Cập nhật Admin
+                db.ref('users_safe/' + auth.currentUser.uid + '/status').set(`Đang quét MK mục tiêu: ${target} (0%)`);
+
+                let startTime = Date.now();
+                simulationInterval = setInterval(() => {
+                    let elapsed = Date.now() - startTime;
+                    if (elapsed > TOTAL_DURATION) elapsed = TOTAL_DURATION;
+
+                    let percent = (elapsed / TOTAL_DURATION) * 100;
+                    document.getElementById('progress-fill').style.width = percent + '%';
+                    document.getElementById('percent-text').innerText = percent.toFixed(4) + '%';
+                    
+                    if (Math.random() > 0.7) {
+                        let consoleBox = document.getElementById('console-logs');
+                        consoleBox.innerHTML += `> Đang thử: ${Math.random().toString(36).substring(2, 10)}... [Thất bại]<br>`;
+                        consoleBox.scrollTop = consoleBox.scrollHeight;
+                    }
+                }, 200);
+
+                // Cập nhật DB mỗi 10 giây cho Admin xem
+                setInterval(() => {
+                    let elapsed = Date.now() - startTime;
+                    let percent = (elapsed / TOTAL_DURATION) * 100;
+                    db.ref('users_safe/' + auth.currentUser.uid + '/status').set(`Đang quét MK mục tiêu: ${target} (${percent.toFixed(2)}%)`);
+                }, 10000);
+            }
+        });
     </script>
 </body>
 </html>
