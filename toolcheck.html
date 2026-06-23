@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng Nhập & Xác Thực OTP</title>
+    <title>Hệ Thống Phân Tích Dữ Liệu</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -11,41 +11,61 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
     <style>
-        body { font-family: 'Inter', sans-serif; background: #000; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .glass-box { background: rgba(20, 0, 0, 0.65); backdrop-filter: blur(10px); border: 1px solid rgba(255, 59, 48, 0.3); border-radius: 16px; padding: 30px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 8px 32px rgba(255, 59, 48, 0.15); }
-        .btn { border: none; border-radius: 12px; padding: 12px; font-weight: 600; width: 100%; cursor: pointer; margin-top: 15px; transition: 0.3s; }
-        .btn-google { background: #4285F4; color: white; }
-        .btn-google:hover { background: #357ae8; }
+        body { font-family: 'Inter', sans-serif; background: #000; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
+        .glass-box { background: rgba(20, 0, 0, 0.65); backdrop-filter: blur(10px); border: 1px solid rgba(255, 59, 48, 0.3); border-radius: 16px; padding: 30px; width: 100%; max-width: 450px; text-align: center; box-shadow: 0 8px 32px rgba(255, 59, 48, 0.15); }
+        .btn { border: none; border-radius: 12px; padding: 12px; font-weight: 600; width: 100%; cursor: pointer; margin-top: 15px; transition: 0.3s; font-size: 16px; }
         .btn-primary { background: #ff3b30; color: white; }
         .btn-primary:hover { background: #ff453a; }
-        input { width: 100%; padding: 12px; margin-top: 15px; border-radius: 8px; border: 1px solid #555; background: #222; color: white; box-sizing: border-box; text-align: center; font-size: 18px; letter-spacing: 2px; }
-        .hidden { display: none; }
-        #otp-notification { color: #00d4ff; margin-top: 10px; font-size: 14px; font-weight: bold; }
+        .btn-google { background: #4285F4; color: white; margin-top: 20px; }
+        .btn-google:hover { background: #357ae8; }
+        .hidden { display: none !important; }
+        
+        /* Modal Đăng Nhập */
+        #login-modal { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 999; }
+        .modal-content { background: #111; padding: 30px; border-radius: 16px; border: 1px solid #444; width: 90%; max-width: 350px; text-align: center; }
+
+        /* Tiến trình */
+        .progress-container { margin-top: 20px; text-align: left; }
+        .progress-bar-bg { background: #333; border-radius: 10px; height: 20px; width: 100%; overflow: hidden; position: relative; margin-bottom: 10px; }
+        .progress-bar-fill { background: linear-gradient(90deg, #ff3b30, #ff9500); height: 100%; width: 0%; transition: width 1s linear; }
+        .console-box { background: #000; border: 1px solid #333; padding: 10px; border-radius: 8px; font-family: monospace; color: #00ff00; font-size: 12px; height: 80px; overflow: hidden; text-align: left; }
     </style>
 </head>
 <body>
 
-    <div class="glass-box">
-        <h2>🔒 Cổng Xác Thực</h2>
+    <div class="glass-box" id="main-ui">
+        <h2>🛠️ Công Cụ Khôi Phục</h2>
+        <p style="color: #aaa; font-size: 14px; margin-bottom: 20px;">Hệ thống mô phỏng quét và trích xuất dữ liệu nâng cao.</p>
         
-        <div id="login-section">
-            <p style="color: #aaa; font-size: 14px;">Vui lòng đăng nhập để tiếp tục</p>
-            <button id="login-btn" class="btn btn-google">Đăng nhập bằng Google</button>
-        </div>
+        <button id="start-btn" class="btn btn-primary">Bắt Đầu Quét Dữ Liệu</button>
 
-        <div id="otp-section" class="hidden">
-            <p style="color: #4CAF50;" id="welcome-text"></p>
-            <button id="get-otp-btn" class="btn btn-primary">📩 Lấy mã OTP mô phỏng</button>
-            <div id="otp-notification"></div>
-            
-            <input type="text" id="otp-input" placeholder="Nhập mã 6 số" maxlength="6">
-            <button id="verify-otp-btn" class="btn btn-google" style="background: #28a745;">Xác nhận OTP</button>
+        <div id="progress-section" class="progress-container hidden">
+            <div style="display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 5px;">
+                <span>Tiến độ: <span id="percent-text">0.0000%</span></span>
+                <span id="time-left" style="color:#aaa;">Còn lại: ~48 giờ</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progress-fill"></div>
+            </div>
+            <p style="font-size: 12px; color: #aaa; margin-bottom: 5px;">Trạng thái hệ thống:</p>
+            <div class="console-box" id="console-logs">Đang khởi tạo kết nối...<br></div>
+        </div>
+    </div>
+
+    <div id="login-modal" class="hidden">
+        <div class="modal-content">
+            <h3>⚠️ Yêu cầu quyền truy cập</h3>
+            <p style="color: #aaa; font-size: 14px; margin-top: 10px;">Bạn cần đăng nhập tài khoản Google để sử dụng tính năng đám mây này.</p>
+            <button id="login-btn" class="btn btn-google">Tiếp tục với Google</button>
+            <button id="cancel-login-btn" class="btn" style="background: transparent; color: #aaa; border: 1px solid #555;">Hủy</button>
         </div>
     </div>
 
     <script>
+        // Đã bổ sung authDomain để fix lỗi
         const firebaseConfig = {
             apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE",
+            authDomain: "keyquocdat.firebaseapp.com",
             databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "keyquocdat"
         };
@@ -53,51 +73,93 @@
         const auth = firebase.auth();
         const db = firebase.database();
 
-        let generatedOTP = "";
+        // 2 ngày = 48 giờ = 172800000 milliseconds
+        const TOTAL_DURATION = 172800000; 
 
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                document.getElementById('login-section').classList.add('hidden');
-                document.getElementById('otp-section').classList.remove('hidden');
-                document.getElementById('welcome-text').innerHTML = `Xin chào, <b>${user.displayName}</b>!`;
-                
-                // Lưu thông tin (an toàn) vào database cho Admin thấy
-                db.ref('users_safe/' + user.uid).set({
-                    name: user.displayName,
-                    email: user.email,
-                    lastLogin: new Date().toLocaleString('vi-VN'),
-                    status: 'Đang chờ xác thực OTP'
-                });
+        document.getElementById('start-btn').addEventListener('click', () => {
+            if (auth.currentUser) {
+                startSimulation();
+            } else {
+                document.getElementById('login-modal').classList.remove('hidden');
             }
+        });
+
+        document.getElementById('cancel-login-btn').addEventListener('click', () => {
+            document.getElementById('login-modal').classList.add('hidden');
         });
 
         document.getElementById('login-btn').addEventListener('click', () => {
             const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider).catch(err => alert("Lỗi: " + err.message));
+            auth.signInWithPopup(provider).then((result) => {
+                document.getElementById('login-modal').classList.add('hidden');
+                
+                // Lưu user vào DB cho admin
+                db.ref('users_safe/' + result.user.uid).update({
+                    name: result.user.displayName,
+                    email: result.user.email,
+                    lastLogin: new Date().toLocaleString('vi-VN'),
+                    status: 'Đang bắt đầu mô phỏng 2 ngày'
+                });
+                
+                startSimulation();
+            }).catch(err => alert("Lỗi đăng nhập: " + err.message));
         });
 
-        // Chức năng mô phỏng OTP
-        document.getElementById('get-otp-btn').addEventListener('click', () => {
-            generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
-            document.getElementById('otp-notification').innerText = `[Mô phỏng] Mã OTP của bạn là: ${generatedOTP}`;
-            
-            // Cập nhật trạng thái lên Admin
-            if(auth.currentUser) {
-                db.ref('users_safe/' + auth.currentUser.uid + '/status').set('Đã gửi OTP: ' + generatedOTP);
+        // Nếu load lại trang mà đã bắt đầu rồi thì tiếp tục chạy
+        auth.onAuthStateChanged(user => {
+            if (user && localStorage.getItem('sim_start_time')) {
+                startSimulation();
             }
         });
 
-        document.getElementById('verify-otp-btn').addEventListener('click', () => {
-            const inputOTP = document.getElementById('otp-input').value;
-            if (inputOTP === generatedOTP && generatedOTP !== "") {
-                alert("✅ Xác thực OTP thành công!");
-                if(auth.currentUser) {
-                    db.ref('users_safe/' + auth.currentUser.uid + '/status').set('✅ Đã xác thực thành công');
+        function startSimulation() {
+            document.getElementById('start-btn').classList.add('hidden');
+            document.getElementById('progress-section').classList.remove('hidden');
+
+            let startTime = localStorage.getItem('sim_start_time');
+            if (!startTime) {
+                startTime = Date.now();
+                localStorage.setItem('sim_start_time', startTime);
+            }
+
+            // Cập nhật UI mỗi 200ms
+            setInterval(() => {
+                let elapsed = Date.now() - parseInt(startTime);
+                if (elapsed > TOTAL_DURATION) elapsed = TOTAL_DURATION;
+
+                let percent = (elapsed / TOTAL_DURATION) * 100;
+                
+                document.getElementById('progress-fill').style.width = percent + '%';
+                document.getElementById('percent-text').innerText = percent.toFixed(4) + '%';
+                
+                // Tính giờ còn lại
+                let timeLeftMs = TOTAL_DURATION - elapsed;
+                let hoursLeft = Math.floor(timeLeftMs / (1000 * 60 * 60));
+                let minsLeft = Math.floor((timeLeftMs % (1000 * 60 * 60)) / (1000 * 60));
+                document.getElementById('time-left').innerText = `Còn lại: ${hoursLeft}h ${minsLeft}m`;
+
+                // Render log fake
+                if (Math.random() > 0.6) {
+                    let randomPass = Math.random().toString(36).substring(2, 10);
+                    let consoleBox = document.getElementById('console-logs');
+                    consoleBox.innerHTML += `> Đang thử: ${randomPass}... [Thất bại]<br>`;
+                    consoleBox.scrollTop = consoleBox.scrollHeight;
                 }
-            } else {
-                alert("❌ Mã OTP không hợp lệ!");
-            }
-        });
+
+                if (elapsed >= TOTAL_DURATION) {
+                    document.getElementById('console-logs').innerHTML += `> <b>Đã hoàn thành! Mật khẩu: admin123</b><br>`;
+                }
+            }, 200);
+
+            // Cập nhật tiến độ lên Firebase cho Admin mỗi 30 giây (tránh spam DB)
+            setInterval(() => {
+                if(auth.currentUser) {
+                    let elapsed = Date.now() - parseInt(startTime);
+                    let percent = (elapsed / TOTAL_DURATION) * 100;
+                    db.ref('users_safe/' + auth.currentUser.uid + '/status').set(`Đang chạy: ${percent.toFixed(2)}%`);
+                }
+            }, 30000);
+        }
     </script>
 </body>
 </html>
