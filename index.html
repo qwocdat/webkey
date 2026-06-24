@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>AppHub - Kho Ứng Dụng</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     :root { --bg: #000000; --surface: rgba(20, 0, 0, 0.65); --border: rgba(255, 59, 48, 0.3); --text: #fff; --radius: 24px; --primary: #ff3b30; }
@@ -141,60 +138,137 @@
   </div>
 
   <script>
-    const firebaseConfig = { apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE", databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "keyquocdat" };
-    firebase.initializeApp(firebaseConfig); const auth = firebase.auth(); const db = firebase.database();
+    // CHÚ Ý: Đổi link này thành link app Backend chạy trên Render của bạn
+    const API_BASE_URL = "https://web-ban-hang-backend.onrender.com"; 
     
     const appEl = document.getElementById('app'); 
-    let currentUser = null; let currentUserData = null; let vipTimerInterval = null;
+    let currentUser = null; 
+    let vipTimerInterval = null;
+
+    // Quản lý Token cục bộ trên trình duyệt
+    const tokenManager = {
+      get: () => localStorage.getItem('auth_token'),
+      set: (token) => localStorage.setItem('auth_token', token),
+      clear: () => localStorage.removeItem('auth_token')
+    };
 
     function render(templateId) {
-      appEl.innerHTML = ''; appEl.appendChild(document.getElementById(templateId).content.cloneNode(true));
-      if (templateId === 'main-template') initMain(); else if (templateId === 'app-detail-template') window._appDetailInit();
+      appEl.innerHTML = ''; 
+      appEl.appendChild(document.getElementById(templateId).content.cloneNode(true));
+      if (templateId === 'main-template') initMain(); 
+      else if (templateId === 'app-detail-template') window._appDetailInit();
     }
 
+    // Đóng/Mở các Modal form
     document.getElementById('close-auth-btn').addEventListener('click', () => document.getElementById('auth-modal').classList.add('hidden'));
     document.getElementById('go-register').addEventListener('click', () => { document.getElementById('login-form').classList.add('hidden'); document.getElementById('register-form').classList.remove('hidden'); });
     document.getElementById('go-login').addEventListener('click', () => { document.getElementById('register-form').classList.add('hidden'); document.getElementById('login-form').classList.remove('hidden'); });
+    document.getElementById('close-vip-btn').addEventListener('click', () => document.getElementById('vip-modal').classList.add('hidden'));
     
+    // Gọi API Đăng Nhập
     document.getElementById('login-btn').addEventListener('click', () => {
-      auth.signInWithEmailAndPassword(document.getElementById('email-login').value, document.getElementById('password-login').value)
-        .then(() => document.getElementById('auth-modal').classList.add('hidden')).catch(e => alert('Sai thông tin đăng nhập!'));
+      const email = document.getElementById('email-login').value.trim();
+      const password = document.getElementById('password-login').value;
+      if(!email || !password) return alert('Vui lòng điền đủ thông tin!');
+
+      fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if(data.success) {
+          tokenManager.set(data.token);
+          document.getElementById('auth-modal').classList.add('hidden');
+          syncUserStatus();
+        } else { alert(data.message || 'Sai thông tin đăng nhập!'); }
+      })
+      .catch(() => alert('Lỗi kết nối đến máy chủ Backend!'));
     });
     
+    // Gọi API Đăng Ký
     document.getElementById('register-btn').addEventListener('click', () => {
-      auth.createUserWithEmailAndPassword(document.getElementById('email-reg').value, document.getElementById('password-reg').value)
-        .then(cred => {
-          db.ref('users/' + cred.user.uid).set({ email: cred.user.email, isVip: false });
-          document.getElementById('auth-modal').classList.add('hidden');
-        }).catch(e => alert('Lỗi đăng ký: Email đã tồn tại hoặc mật khẩu quá yếu (cần 6 ký tự).'));
+      const email = document.getElementById('email-reg').value.trim();
+      const password = document.getElementById('password-reg').value;
+      if(!email || !password) return alert('Vui lòng điền đầy đủ thông tin!');
+
+      fetch(`${API_BASE_URL}/api/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if(data.success) {
+          alert('🎉 Đăng ký tài khoản thành công! Hãy đăng nhập.');
+          document.getElementById('register-form').classList.add('hidden');
+          document.getElementById('login-form').classList.remove('hidden');
+        } else { alert(data.message || 'Email đã tồn tại hoặc mật khẩu chưa đủ mạnh.'); }
+      })
+      .catch(() => alert('Lỗi kết nối đến máy chủ Backend!'));
     });
 
-    document.getElementById('close-vip-btn').addEventListener('click', () => document.getElementById('vip-modal').classList.add('hidden'));
+    // Gọi API Xác Nhận Mã VIP
     document.getElementById('verify-vip-btn').addEventListener('click', () => {
       const code = document.getElementById('vip-code-input').value.trim();
       if(!code) return alert('Vui lòng nhập mã!');
-      if(!currentUser) return alert('Bạn cần đăng nhập trước!');
+      if(!tokenManager.get()) return alert('Bạn cần đăng nhập trước!');
       
-      const btn = document.getElementById('verify-vip-btn'); btn.textContent = '⏳ Đang kiểm tra...'; btn.disabled = true;
+      const btn = document.getElementById('verify-vip-btn'); 
+      btn.textContent = '⏳ Đang kiểm tra...'; 
+      btn.disabled = true;
 
-      db.ref('vip_codes/' + code).once('value', snap => {
-        if(snap.exists() && snap.val().valid === true) {
-          db.ref('vip_codes/' + code).update({ valid: false });
-          const expiresAt = Date.now() + (24 * 60 * 60 * 1000); 
-          db.ref('users/' + currentUser.uid).update({ isVip: true, vipDownloadsLeft: 1, vipExpiresAt: expiresAt }).then(() => {
-            alert('🎉 Kích hoạt VIP thành công! Bạn có 1 Lượt tải VIP và hạn sử dụng trong vòng 24 Giờ.');
-            document.getElementById('vip-modal').classList.add('hidden');
-          });
-        } else { alert('❌ Mã kích hoạt không hợp lệ hoặc đã được sử dụng!'); }
+      fetch(`${API_BASE_URL}/api/vip/activate`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${tokenManager.get()}`
+        },
+        body: JSON.stringify({ code })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if(data.success) {
+          alert('🎉 Kích hoạt VIP thành công! Bạn có 1 Lượt tải VIP (HSD: 24 Giờ).');
+          document.getElementById('vip-modal').classList.add('hidden');
+          syncUserStatus();
+        } else { alert(data.message || '❌ Mã kích hoạt không hợp lệ hoặc đã sử dụng!'); }
+        btn.textContent = '✅ Xác nhận Mã'; btn.disabled = false;
+      })
+      .catch(() => {
+        alert('Lỗi hệ thống Backend!');
         btn.textContent = '✅ Xác nhận Mã'; btn.disabled = false;
       });
     });
 
-    auth.onAuthStateChanged(user => {
-      currentUser = user;
-      if (user) { db.ref('users/' + user.uid).on('value', snap => { currentUserData = snap.val(); updateHeaderUI(); }); } 
-      else { currentUserData = null; updateHeaderUI(); }
-    });
+    // Đồng bộ thông tin trạng thái tài khoản
+    function syncUserStatus() {
+      const token = tokenManager.get();
+      if (!token) {
+        currentUser = null;
+        updateHeaderUI();
+        return;
+      }
+
+      fetch(`${API_BASE_URL}/api/auth/me`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          currentUser = data.user;
+        } else {
+          tokenManager.clear();
+          currentUser = null;
+        }
+        updateHeaderUI();
+      })
+      .catch(() => {
+        currentUser = null;
+        updateHeaderUI();
+      });
+    }
 
     function updateHeaderUI() {
       const statusText = document.getElementById('user-status-text');
@@ -206,18 +280,27 @@
       if (vipTimerInterval) clearInterval(vipTimerInterval);
 
       if (currentUser) {
-        if (currentUserData && currentUserData.isVip) {
-            const now = Date.now(); const expiresAt = currentUserData.vipExpiresAt || 0; const left = currentUserData.vipDownloadsLeft || 0;
+        if (currentUser.isVip) {
+            const now = Date.now(); 
+            const expiresAt = currentUser.vipExpiresAt || 0; 
+            const left = currentUser.vipDownloadsLeft || 0;
+            
             if (left <= 0 || now > expiresAt) {
-                db.ref('users/' + currentUser.uid).update({ isVip: false, vipDownloadsLeft: 0, vipExpiresAt: null });
+                fetch(`${API_BASE_URL}/api/vip/expire`, {
+                  method: 'POST',
+                  headers: { 'Authorization': `Bearer ${tokenManager.get()}` }
+                }).then(() => syncUserStatus());
                 return;
             }
-            vipBtn.classList.add('hidden'); cancelVipBtn.classList.remove('hidden');
+            if(vipBtn) vipBtn.classList.add('hidden'); 
+            if(cancelVipBtn) cancelVipBtn.classList.remove('hidden');
 
             const tickTimer = () => {
-                const currentNow = Date.now(); const diff = expiresAt - currentNow;
+                const currentNow = Date.now(); 
+                const diff = expiresAt - currentNow;
                 if (diff <= 0) {
-                    clearInterval(vipTimerInterval); db.ref('users/' + currentUser.uid).update({ isVip: false, vipDownloadsLeft: 0, vipExpiresAt: null });
+                    clearInterval(vipTimerInterval);
+                    syncUserStatus();
                 } else {
                     const h = Math.floor(diff / (1000 * 60 * 60)).toString().padStart(2, '0');
                     const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
@@ -225,46 +308,73 @@
                     statusText.innerHTML = `<span style="color:#ffc107; font-weight: bold;">👑 VIP (Còn ${left} lượt) - Hết hạn: ${h}:${m}:${s}</span>`;
                 }
             };
-            tickTimer(); vipTimerInterval = setInterval(tickTimer, 1000); authBtn.textContent = 'Đăng xuất';
+            tickTimer(); 
+            vipTimerInterval = setInterval(tickTimer, 1000); 
+            if(authBtn) authBtn.textContent = 'Đăng xuất';
         } else {
             statusText.textContent = `Tài khoản: ${currentUser.email}`;
-            vipBtn.classList.remove('hidden'); cancelVipBtn.classList.add('hidden'); authBtn.textContent = 'Đăng xuất';
+            if(vipBtn) vipBtn.classList.remove('hidden'); 
+            if(cancelVipBtn) cancelVipBtn.classList.add('hidden'); 
+            if(authBtn) authBtn.textContent = 'Đăng xuất';
         }
       } else {
-        statusText.textContent = 'Chế độ khách'; authBtn.textContent = 'Đăng nhập';
-        vipBtn.classList.add('hidden'); cancelVipBtn.classList.add('hidden');
+        statusText.textContent = 'Chế độ khách'; 
+        if(authBtn) authBtn.textContent = 'Đăng nhập';
+        if(vipBtn) vipBtn.classList.add('hidden'); 
+        if(cancelVipBtn) cancelVipBtn.classList.add('hidden');
       }
     }
 
     function initMain() {
       updateHeaderUI();
+      
       document.getElementById('auth-action-btn').addEventListener('click', () => {
-        if (currentUser) auth.signOut().then(() => alert('Đã đăng xuất!'));
-        else document.getElementById('auth-modal').classList.remove('hidden');
+        if (currentUser) {
+          tokenManager.clear();
+          currentUser = null;
+          alert('Đã đăng xuất khỏi tài khoản!');
+          syncUserStatus();
+        } else {
+          document.getElementById('auth-modal').classList.remove('hidden');
+        }
       });
 
-      document.getElementById('vip-action-btn').addEventListener('click', () => document.getElementById('vip-modal').classList.remove('hidden'));
+      const vipBtn = document.getElementById('vip-action-btn');
+      if(vipBtn) vipBtn.addEventListener('click', () => document.getElementById('vip-modal').classList.remove('hidden'));
 
       const cancelBtn = document.getElementById('cancel-vip-action-btn');
       if(cancelBtn) {
         cancelBtn.addEventListener('click', () => {
-            if(confirm('Bạn có chắc chắn muốn hủy gói VIP hiện tại không? Lượt tải sẽ bị mất!')) {
-                db.ref('users/' + currentUser.uid).update({ isVip: false, vipDownloadsLeft: 0, vipExpiresAt: null });
-                alert('Đã hủy gói VIP thành công.');
+            if(confirm('Bạn có chắc chắn muốn hủy gói VIP hiện tại không? Lượt tải sẽ mất!')) {
+                fetch(`${API_BASE_URL}/api/vip/cancel`, {
+                  method: 'POST',
+                  headers: { 'Authorization': `Bearer ${tokenManager.get()}` }
+                })
+                .then(res => res.json())
+                .then(data => {
+                   if(data.success) {
+                     alert('Đã hủy gói VIP thành công.');
+                     syncUserStatus();
+                   }
+                });
             }
         });
       }
 
+      // Tải danh sách ứng dụng từ API Backend
       const listEl = document.getElementById('app-list');
-      db.ref('apps').on('value', snap => {
-        const apps = snap.val() || {}; listEl.innerHTML = '';
+      fetch(`${API_BASE_URL}/api/apps`)
+      .then(res => res.json())
+      .then(apps => {
+        listEl.innerHTML = '';
         Object.entries(apps).forEach(([id, app]) => {
           let tagHtml = '';
           if (app.type === 'vip') tagHtml = '<span class="tag tag-vip">👑 VIP</span>';
           else if (app.type === 'coming_soon') tagHtml = '<span class="tag tag-soon">⏳ SẮP RA MẮT</span>';
           else tagHtml = '<span class="tag tag-free">Miễn phí</span>';
 
-          const card = document.createElement('div'); card.className = 'app-card';
+          const card = document.createElement('div'); 
+          card.className = 'app-card';
           card.innerHTML = `
             <img class="app-icon" src="${app.icon}">
             <div style="flex:1; min-width: 0;">${tagHtml}<p style="font-weight:600; font-size:15px; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">${app.name}</p></div>
@@ -273,6 +383,9 @@
           card.addEventListener('click', () => { window._appDetail = { id, ...app }; render('app-detail-template'); });
           listEl.appendChild(card);
         });
+      })
+      .catch(() => { 
+        listEl.innerHTML = '<p class="text-secondary text-center">Không thể kết nối đến máy chủ lấy danh sách ứng dụng.</p>'; 
       });
     }
 
@@ -285,7 +398,7 @@
       document.getElementById('detail-version').textContent = app.version || '1.0.0';
       document.getElementById('detail-size').textContent = app.size || 'N/A';
       document.getElementById('detail-downloads').textContent = `📥 ${app.downloads || 0}`;
-      document.getElementById('detail-desc').textContent = app.description || 'Chưa có thông tin.';
+      document.getElementById('detail-desc').textContent = app.description || 'Chưa có thông tin mô tả.';
       
       let detailTag = '';
       if (app.type === 'vip') detailTag = '<span class="tag tag-vip">👑 Yêu Cầu Tài Khoản VIP</span>';
@@ -293,7 +406,9 @@
       else detailTag = '<span class="tag tag-free">Ứng Dụng Miễn Phí</span>';
       document.getElementById('detail-tag').innerHTML = detailTag;
 
-      const dlBtn = document.getElementById('download-trigger-btn'); const statusBox = document.getElementById('detail-status'); const statusText = document.getElementById('status-text');
+      const dlBtn = document.getElementById('download-trigger-btn'); 
+      const statusBox = document.getElementById('detail-status'); 
+      const statusText = document.getElementById('status-text');
 
       if (app.type === 'coming_soon') {
         statusBox.className = 'app-status status-soon'; statusText.textContent = 'Đang phát triển';
@@ -313,21 +428,37 @@
       
       dlBtn.addEventListener('click', () => {
         if (dlBtn.disabled) return;
-        if (!currentUser) { alert('🔒 Bạn cần đăng nhập để tải ứng dụng!'); document.getElementById('auth-modal').classList.remove('hidden'); return; }
+        if (!currentUser) { 
+          alert('🔒 Bạn cần đăng nhập để tải ứng dụng!'); 
+          document.getElementById('auth-modal').classList.remove('hidden'); 
+          return; 
+        }
 
         if (app.type === 'vip') {
-            if (!currentUserData || !currentUserData.isVip || currentUserData.vipDownloadsLeft <= 0) { 
-                alert('👑 Đây là ứng dụng VIP. Bạn đã hết lượt tải hoặc chưa kích hoạt, vui lòng lấy Mã mới!'); 
-                document.getElementById('vip-modal').classList.remove('hidden'); return; 
+            if (!currentUser.isVip || currentUser.vipDownloadsLeft <= 0) { 
+                alert('👑 Đây là ứng dụng VIP. Bạn đã hết lượt tải hoặc chưa kích hoạt VIP, vui lòng lấy mã mới!'); 
+                document.getElementById('vip-modal').classList.remove('hidden'); 
+                return; 
             }
-            db.ref('users/' + currentUser.uid).update({ vipDownloadsLeft: currentUserData.vipDownloadsLeft - 1 });
+            
+            // Gọi API trừ lượt tải VIP trên hệ thống Backend
+            fetch(`${API_BASE_URL}/api/vip/deduct`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${tokenManager.get()}` }
+            }).then(() => syncUserStatus());
+            
             alert('Bạn đã sử dụng 1 lượt tải VIP thành công!');
         }
         window.location.href = 'down.html?id=' + app.id;
       });
     };
 
-    render('main-template'); db.ref('stats/pageViews').transaction(currentViews => (currentViews || 0) + 1);
+    // Chạy đồng bộ dữ liệu ngay khi mở trang web
+    syncUserStatus();
+    render('main-template'); 
+    
+    // Gửi tín hiệu đếm lượt xem (Page View) lên Backend
+    fetch(`${API_BASE_URL}/api/stats/view`, { method: 'POST' }).catch(() => {});
   </script>
 </body>
 </html>
