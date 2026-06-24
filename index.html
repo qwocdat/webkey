@@ -96,7 +96,7 @@
           <span id="detail-version"></span> • <span id="detail-size"></span> • <span id="detail-downloads"></span>
         </div>
         
-        <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,59,48,0.2); padding:16px; border-radius:14px; width:100%; text-align:left; margin-bottom:15px;">
+        <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255, 59, 48, 0.2); padding:16px; border-radius:14px; width:100%; text-align:left; margin-bottom:15px;">
           <p id="detail-desc" style="font-size:15px; line-height:1.6; color:rgba(255,255,255,0.85); white-space:pre-line;"></p>
         </div>
         
@@ -138,14 +138,13 @@
   </div>
 
   <script>
-    // CHÚ Ý: Đổi link này thành link app Backend chạy trên Render của bạn
-    const API_BASE_URL = "https://web-ban-hang-backend.onrender.com"; 
+    // Đã cập nhật đúng liên kết kết nối đến Backend Render của bạn
+    const API_BASE_URL = "https://quocdat.onrender.com"; 
     
     const appEl = document.getElementById('app'); 
     let currentUser = null; 
     let vipTimerInterval = null;
 
-    // Quản lý Token cục bộ trên trình duyệt
     const tokenManager = {
       get: () => localStorage.getItem('auth_token'),
       set: (token) => localStorage.setItem('auth_token', token),
@@ -159,13 +158,11 @@
       else if (templateId === 'app-detail-template') window._appDetailInit();
     }
 
-    // Đóng/Mở các Modal form
     document.getElementById('close-auth-btn').addEventListener('click', () => document.getElementById('auth-modal').classList.add('hidden'));
     document.getElementById('go-register').addEventListener('click', () => { document.getElementById('login-form').classList.add('hidden'); document.getElementById('register-form').classList.remove('hidden'); });
     document.getElementById('go-login').addEventListener('click', () => { document.getElementById('register-form').classList.add('hidden'); document.getElementById('login-form').classList.remove('hidden'); });
     document.getElementById('close-vip-btn').addEventListener('click', () => document.getElementById('vip-modal').classList.add('hidden'));
     
-    // Gọi API Đăng Nhập
     document.getElementById('login-btn').addEventListener('click', () => {
       const email = document.getElementById('email-login').value.trim();
       const password = document.getElementById('password-login').value;
@@ -187,7 +184,6 @@
       .catch(() => alert('Lỗi kết nối đến máy chủ Backend!'));
     });
     
-    // Gọi API Đăng Ký
     document.getElementById('register-btn').addEventListener('click', () => {
       const email = document.getElementById('email-reg').value.trim();
       const password = document.getElementById('password-reg').value;
@@ -209,7 +205,6 @@
       .catch(() => alert('Lỗi kết nối đến máy chủ Backend!'));
     });
 
-    // Gọi API Xác Nhận Mã VIP
     document.getElementById('verify-vip-btn').addEventListener('click', () => {
       const code = document.getElementById('vip-code-input').value.trim();
       if(!code) return alert('Vui lòng nhập mã!');
@@ -242,7 +237,6 @@
       });
     });
 
-    // Đồng bộ thông tin trạng thái tài khoản
     function syncUserStatus() {
       const token = tokenManager.get();
       if (!token) {
@@ -361,7 +355,6 @@
         });
       }
 
-      // Tải danh sách ứng dụng từ API Backend
       const listEl = document.getElementById('app-list');
       fetch(`${API_BASE_URL}/api/apps`)
       .then(res => res.json())
@@ -441,7 +434,6 @@
                 return; 
             }
             
-            // Gọi API trừ lượt tải VIP trên hệ thống Backend
             fetch(`${API_BASE_URL}/api/vip/deduct`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${tokenManager.get()}` }
@@ -453,11 +445,9 @@
       });
     };
 
-    // Chạy đồng bộ dữ liệu ngay khi mở trang web
     syncUserStatus();
     render('main-template'); 
     
-    // Gửi tín hiệu đếm lượt xem (Page View) lên Backend
     fetch(`${API_BASE_URL}/api/stats/view`, { method: 'POST' }).catch(() => {});
   </script>
 </body>
