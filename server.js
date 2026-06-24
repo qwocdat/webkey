@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken'); 
+const path = require('path'); // Thư viện để định vị đường dẫn file
 const app = express();
 
 const PORT = process.env.PORT || 3000;
@@ -9,17 +10,9 @@ const JWT_SECRET = "APP_HUB_SECRET_KEY_123!";
 app.use(cors());
 app.use(express.json());
 
-// ================= THÊM ĐOẠN NÀY ĐỂ HẾT LỖI CANNOT GET / =================
+// ================= TỰ ĐỘNG HIỂN THỊ GIAO DIỆN DIỆN CŨ KHI VÀO LINK =================
 app.get('/', (req, res) => {
-    res.send(`
-        <div style="font-family: sans-serif; text-align: center; padding: 50px; background: #000; color: #fff; min-height: 100vh;">
-            <h1 style="color: #ff3b30; font-size: 40px; margin-bottom: 10px;">📱 AppHub Backend</h1>
-            <p style="color: #666; font-size: 18px;">Máy chủ API đã kết nối trực tuyến và hoạt động 100% mượt mà!</p>
-            <div style="margin-top: 30px; display: inline-block; padding: 10px 20px; background: rgba(0,255,0,0.1); border: 1px solid #00ff00; color: #00ff00; border-radius: 20px; font-weight: bold;">
-                ● STATUS: LIVE
-            </div>
-        </div>
-    `);
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // ================= DATABASE GIẢ LẬP TRÊN RAM =================
