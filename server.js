@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken'); 
-const path = require('path'); // Thư viện để định vị đường dẫn file
+const path = require('path'); 
 const app = express();
 
 const PORT = process.env.PORT || 3000;
@@ -10,9 +10,14 @@ const JWT_SECRET = "APP_HUB_SECRET_KEY_123!";
 app.use(cors());
 app.use(express.json());
 
-// ================= TỰ ĐỘNG HIỂN THỊ GIAO DIỆN DIỆN CŨ KHI VÀO LINK =================
+// ================= 1. VÀO LINK GỐC (/) SẼ RA TRANG CỬA HÀNG ===============
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// ================= 2. VÀO ĐUÔI (/dash) SẼ RA THẲNG TRANG ADMIN ============
+app.get('/dash', (req, res) => {
+    res.sendFile(path.join(__dirname, 'dash.html'));
 });
 
 // ================= DATABASE GIẢ LẬP TRÊN RAM =================
@@ -119,5 +124,5 @@ app.post('/api/stats/view', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Backend AppHub đang chạy mượt mà tại cổng: ${PORT}`);
+    console.log(`Backend và trang Dash đang chạy mượt mà tại cổng: ${PORT}`);
 });
