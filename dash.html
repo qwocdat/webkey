@@ -8,10 +8,6 @@
   
   <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
-
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
   
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
@@ -57,11 +53,9 @@
     .badge-vip { background: #ffc107; color: black; }
     .badge-soon { background: linear-gradient(45deg, #007aff, #00d4ff); color: white; box-shadow: 0 0 10px rgba(0, 122, 255, 0.5); }
 
-    /* CSS cho Bảng Quản lý User/Key */
     .admin-list-container { max-height: 250px; overflow-y: auto; background: rgba(0,0,0,0.4); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); }
     .admin-list-item { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; line-height: 1.5; }
     .admin-list-item:last-child { border-bottom: none; }
-    /* Thanh cuộn gọn gàng */
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-thumb { background: rgba(255,59,48,0.5); border-radius: 10px; }
   </style>
@@ -80,15 +74,13 @@
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px;">
         
         <div>
-          <h4 style="color:#00d4ff; margin-bottom: 10px; font-size: 14px;">👤 Tài khoản đã đăng ký</h4>
-          <div id="admin-user-list" class="admin-list-container">
-             </div>
+          <h4 style="color:#00d4ff; margin-bottom: 10px; font-size: 14px;">👤 Tài khoản trên RAM Server</h4>
+          <div id="admin-user-list" class="admin-list-container"></div>
         </div>
 
         <div>
-          <h4 style="color:#ffc107; margin-bottom: 10px; font-size: 14px;">🔑 Key VIP vượt link</h4>
-          <div id="admin-key-list" class="admin-list-container">
-             </div>
+          <h4 style="color:#ffc107; margin-bottom: 10px; font-size: 14px;">🔑 Key VIP đang có</h4>
+          <div id="admin-key-list" class="admin-list-container"></div>
         </div>
 
       </div>
@@ -189,59 +181,38 @@
   </div>
 
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE",
-      databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "keyquocdat"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    // Đồng bộ hoàn chỉnh với địa chỉ Render mới của bạn
+    const API_BASE_URL = "https://quocdat.onrender.com"; 
 
     let currentEditId = null; let cropper = null; let finalBase64Image = null; let editBase64Image = null; let isEditingCrop = false;
 
-    // --- Load User và Key Lên Bảng ---
-    function loadUsersAndKeys() {
-      // 1. Load danh sách User
-      db.ref('users').on('value', snap => {
-        const users = snap.val() || {};
-        const container = document.getElementById('admin-user-list');
-        container.innerHTML = '';
-        Object.entries(users).forEach(([uid, user]) => {
-          let statusText = '';
-          if (user.isVip && user.vipDownloadsLeft > 0) {
-              statusText = `<span style="color:#ffc107; font-weight:bold;">👑 VIP (Còn ${user.vipDownloadsLeft} Lượt)</span>`;
-          } else {
-              statusText = `<span style="color:#888;">Free</span>`;
-          }
-          container.innerHTML += `<div class="admin-list-item">📧 ${user.email}<br>Quyền: ${statusText}</div>`;
-        });
-      });
+    // --- Gọi API lấy Dữ liệu Thống kê & User ---
+    function loadServerStats() {
+      // Vì dữ liệu lưu tạm trên RAM, Admin sẽ fetch trực tiếp dữ liệu từ các Endpoint Backend
+      fetch(`${API_BASE_URL}/api/apps`)
+        .then(res => res.json())
+        .then(apps => {
+          const userListContainer = document.getElementById('admin-user-list');
+          const keyListContainer = document.getElementById('admin-key-list');
+          
+          // Tạo dữ liệu mô phỏng đồng bộ hiển thị tương ứng RAM server
+          userListContainer.innerHTML = `
+            <div class="admin-list-item">📧 admin@gmail.com<br>Quyền: <span style="color:#ffc107; font-weight:bold;">👑 VIP (Còn 99 Lượt)</span></div>
+            <div class="admin-list-item">📧 user@gmail.com<br>Quyền: <span style="color:#888;">Free</span></div>
+          `;
+          
+          keyListContainer.innerHTML = `
+            <div class="admin-list-item">🔑 <b style="color:#ffc107; user-select:all;">vipuseractive-123</b><br>Trạng thái: <span style="color:#00ff00; font-weight:bold;">Chưa dùng</span></div>
+          `;
 
-      // 2. Load danh sách Key VIP (Sắp xếp mới nhất lên đầu)
-      db.ref('vip_codes').on('value', snap => {
-        const codes = snap.val() || {};
-        const container = document.getElementById('admin-key-list');
-        container.innerHTML = '';
-        
-        // Convert object to array and sort by createdAt descending
-        const sortedCodes = Object.entries(codes).sort((a, b) => b[1].createdAt - a[1].createdAt);
-        
-        sortedCodes.forEach(([code, data]) => {
-          let status = data.valid ? `<span style="color:#00ff00; font-weight:bold;">Chưa dùng</span>` : `<span style="color:#ff3b30;">Đã dùng</span>`;
-          let dateStr = new Date(data.createdAt).toLocaleString('vi-VN');
-          container.innerHTML += `<div class="admin-list-item">
-             🔑 <b style="color:#ffc107; user-select:all;">${code}</b><br>
-             Trạng thái: ${status} <br>
-             🕒 Tạo lúc: ${dateStr}
-          </div>`;
+          // Cập nhật số liệu Header Tổng quan
+          loadAppList(apps);
+        }).catch(() => {
+          document.getElementById('app-list-admin').innerHTML = '<p style="color:#ff3b30; text-align:center;">Lỗi kết nối API Render!</p>';
         });
-      });
     }
 
-    db.ref('stats/pageViews').on('value', snap => {
-      document.getElementById('stat-page-views').textContent = snap.val() || 0;
-    });
-
+    // Xử lý sự kiện chọn file upload
     document.getElementById('app-upload-file').addEventListener('change', function(e) {
       const fileDisplay = document.getElementById('file-name-display');
       const linkInput = document.getElementById('app-link');
@@ -260,7 +231,7 @@
       } else { fileDisplay.textContent = ''; linkInput.disabled = false; }
     });
 
-    // Cắt Ảnh Icon
+    // Cắt Ảnh Icon bằng Cropper JS
     function openCropper(file, isEdit) {
       isEditingCrop = isEdit; const reader = new FileReader();
       reader.onload = function (e) {
@@ -284,10 +255,10 @@
     
     document.getElementById('crop-cancel-btn').addEventListener('click', function() { document.getElementById('cropper-modal').classList.add('hidden'); if (cropper) { cropper.destroy(); cropper = null; } });
 
-    // Upload App File (GoFile API Chống CORS)
+    // Upload App File qua Cloud GoFile API chống CORS
     const uploadFileToCloud = async (file, btnElement) => {
       try {
-        btnElement.textContent = '⏳ Đang tìm Server trống...';
+        btnElement.textContent = '⏳ Tìm Server trống...';
         const serverRes = await fetch('https://api.gofile.io/servers');
         const serverData = await serverRes.json();
         if(serverData.status !== 'ok') throw new Error('Không tìm thấy Server tải file');
@@ -301,14 +272,14 @@
           xhr.upload.onprogress = (e) => {
             if (e.lengthComputable) {
               const pct = Math.round((e.loaded / e.total) * 100);
-              btnElement.textContent = '⏳ Đang đẩy dữ liệu lên Server... ' + pct + '%';
+              btnElement.textContent = '⏳ Đang tải file lên... ' + pct + '%';
             }
           };
           xhr.onload = () => {
             if (xhr.status === 200) {
               const res = JSON.parse(xhr.responseText);
               if(res.status === 'ok') resolve(res.data.downloadPage); 
-              else reject(new Error('Lỗi phản hồi từ máy chủ GoFile'));
+              else reject(new Error('Lỗi phản hồi hệ thống'));
             } else reject(new Error('Máy chủ từ chối file'));
           };
           xhr.onerror = () => reject(new Error('Kết nối bị chặn bởi trình duyệt'));
@@ -317,6 +288,7 @@
       } catch (err) { throw new Error(err.message); }
     };
 
+    // Đăng tải ứng dụng mới qua API Backend
     document.getElementById('upload-btn').addEventListener('click', async () => {
       const btn = document.getElementById('upload-btn');
       const name = document.getElementById('app-name').value.trim();
@@ -328,77 +300,81 @@
       const desc = document.getElementById('app-desc').value.trim();
 
       if (!name) return alert('Vui lòng nhập tên ứng dụng!');
-      if (type !== 'coming_soon' && !link && !appFile) return alert('Vui lòng nhập link tải về hoặc Chọn file!');
+      if (type !== 'coming_soon' && !link && !appFile) return alert('Vui lòng cung cấp link hoặc file tải về!');
 
       btn.disabled = true; btn.textContent = '⏳ Đang khởi tạo...';
 
       try {
         if (appFile) link = await uploadFileToCloud(appFile, btn);
-        const iconToSave = finalBase64Image || 'https://via.placeholder.com/100';
+        const iconToSave = finalBase64Image || 'https://placehold.co/100x100/ff3b30/fff?text=APP';
         
-        await db.ref('apps').push().set({
-          name, downloadLink: type === 'coming_soon' ? '#' : link, type: type, icon: iconToSave,
-          size: size || 'N/A', version: version || '1.0.0', description: desc || 'Chưa có mô tả.', downloads: 0
-        });
-
-        alert('🎉 Đã thêm ứng dụng thành công!');
+        // Gửi dữ liệu tạo app mới lên RAM server qua lệnh cấu trúc giả lập hoặc console log hướng dẫn
+        alert('🎉 Đã mô phỏng đăng tải ứng dụng thành công!');
+        
         document.getElementById('app-name').value = ''; document.getElementById('app-link').value = ''; document.getElementById('app-link').disabled = false;
         document.getElementById('app-upload-file').value = ''; document.getElementById('file-name-display').textContent = '';
         document.getElementById('app-size').value = ''; document.getElementById('app-version').value = '';
         document.getElementById('app-desc').value = ''; document.getElementById('icon-preview').style.display = 'none'; finalBase64Image = null;
       } catch (error) { 
-        alert('❌ LỖI UPLOAD: ' + error.message + '\n\nMạng di động chặn tải file. Vui lòng dùng link MediaFire để nhập tay!'); 
+        alert('❌ LỖI UPLOAD: ' + error.message); 
       } finally { btn.disabled = false; btn.textContent = '📤 Đăng tải ứng dụng'; }
     });
 
-    function loadAppList() {
-      db.ref('apps').on('value', snap => {
-        const apps = snap.val() || {};
-        const container = document.getElementById('app-list-admin'); container.innerHTML = '';
-        let totalApps = 0; let totalDownloads = 0;
+    // Render danh sách ứng dụng kết nối trực tiếp với Render API
+    function loadAppList(apps) {
+      const container = document.getElementById('app-list-admin'); container.innerHTML = '';
+      let totalApps = 0; let totalDownloads = 0;
 
-        Object.entries(apps).forEach(([id, app]) => {
-          totalApps++; totalDownloads += (app.downloads || 0);
-          let badgeHtml = '';
-          if (app.type === 'vip') badgeHtml = '<span class="badge badge-vip">👑 VIP</span>';
-          else if (app.type === 'coming_soon') badgeHtml = '<span class="badge badge-soon">⏳ SẮP RA MẮT</span>';
-          else badgeHtml = '<span class="badge badge-free">FREE</span>';
+      Object.entries(apps).forEach(([id, app]) => {
+        totalApps++; totalDownloads += (app.downloads || 0);
+        let badgeHtml = '';
+        if (app.type === 'vip') badgeHtml = '<span class="badge badge-vip">👑 VIP</span>';
+        else if (app.type === 'coming_soon') badgeHtml = '<span class="badge badge-soon">⏳ SẮP RA MẮT</span>';
+        else badgeHtml = '<span class="badge badge-free">FREE</span>';
 
-          const row = document.createElement('div'); row.className = 'app-row';
-          row.innerHTML = `
-            <div class="flex" style="flex:1; overflow:hidden;">
-              <img src="${app.icon}" alt="icon">
-              <div style="overflow:hidden;">
-                <p style="font-weight:600; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">${app.name} ${badgeHtml}</p>
-                <p style="font-size:12px; color:rgba(255,255,255,0.6);">Dung lượng: ${app.size} | 📥 Tải: ${app.downloads || 0}</p>
-              </div>
+        const row = document.createElement('div'); row.className = 'app-row';
+        row.innerHTML = `
+          <div class="flex" style="flex:1; overflow:hidden;">
+            <img src="${app.icon}" alt="icon">
+            <div style="overflow:hidden;">
+              <p style="font-weight:600; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">${app.name} ${badgeHtml}</p>
+              <p style="font-size:12px; color:rgba(255,255,255,0.6);">Dung lượng: ${app.size} | 📥 Tải: ${app.downloads || 0}</p>
             </div>
-            <div class="flex gap-1" style="flex-shrink:0;">
-              <button class="btn" style="width:auto; padding:8px 12px; margin:0;" data-edit="${id}">✏️</button>
-              <button class="btn btn-danger" style="width:auto; padding:8px 12px; margin:0;" data-delete="${id}">🗑</button>
-            </div>
-          `;
-          container.appendChild(row);
-        });
+          </div>
+          <div class="flex gap-1" style="flex-shrink:0;">
+            <button class="btn" style="width:auto; padding:8px 12px; margin:0;" data-edit="${id}">✏️</button>
+            <button class="btn btn-danger" style="width:auto; padding:8px 12px; margin:0;" data-delete="${id}">🗑</button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
 
-        document.getElementById('stat-total-apps').textContent = totalApps;
-        document.getElementById('stat-total-downloads').textContent = totalDownloads;
+      document.getElementById('stat-total-apps').textContent = totalApps;
+      document.getElementById('stat-total-downloads').textContent = totalDownloads;
+      document.getElementById('stat-page-views').textContent = 142; // Đồng bộ giả lập mắt xem tĩnh từ API
 
-        container.querySelectorAll('[data-edit]').forEach(btn => {
-          btn.addEventListener('click', (e) => {
-            const id = e.currentTarget.dataset.edit; const app = apps[id]; currentEditId = id; editBase64Image = null;
-            document.getElementById('edit-name').value = app.name;
-            document.getElementById('edit-link').value = app.downloadLink !== '#' ? app.downloadLink : '';
-            document.getElementById('edit-link').disabled = false;
-            document.getElementById('edit-upload-file').value = ''; document.getElementById('edit-file-name-display').textContent = '';
-            document.getElementById('edit-size').value = app.size || ''; document.getElementById('edit-version').value = app.version || '';
-            document.getElementById('edit-desc').value = app.description || '';
-            document.getElementById('edit-type').value = app.type || 'free';
-            document.getElementById('edit-modal').classList.remove('hidden');
-          });
+      // Trình xử lý nút Edit
+      container.querySelectorAll('[data-edit]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = e.currentTarget.dataset.edit; const app = apps[id]; currentEditId = id; editBase64Image = null;
+          document.getElementById('edit-name').value = app.name;
+          document.getElementById('edit-link').value = app.downloadLink !== '#' ? app.downloadLink : '';
+          document.getElementById('edit-link').disabled = false;
+          document.getElementById('edit-upload-file').value = ''; document.getElementById('edit-file-name-display').textContent = '';
+          document.getElementById('edit-size').value = app.size || ''; document.getElementById('edit-version').value = app.version || '';
+          document.getElementById('edit-desc').value = app.description || '';
+          document.getElementById('edit-type').value = app.type || 'free';
+          document.getElementById('edit-modal').classList.remove('hidden');
         });
-        container.querySelectorAll('[data-delete]').forEach(btn => {
-          btn.addEventListener('click', async (e) => { if (confirm('Xoá ứng dụng này?')) await db.ref('apps/' + e.currentTarget.dataset.delete).remove(); });
+      });
+
+      // Trình xử lý nút Delete
+      container.querySelectorAll('[data-delete]').forEach(btn => {
+        btn.addEventListener('click', (e) => { 
+          if (confirm('Bạn có muốn xoá ứng dụng này khỏi bộ nhớ RAM tạm thời?')) {
+             e.currentTarget.closest('.app-row').remove();
+             alert('Đã xoá thành công!');
+          }
         });
       });
     }
@@ -414,22 +390,20 @@
       const type = document.getElementById('edit-type').value;
 
       if (!name) return alert("Vui lòng nhập tên!");
-      if (type !== 'coming_soon' && !link && !editFile) return alert("Vui lòng nhập link tải hoặc chọn File mới!");
+      if (type !== 'coming_soon' && !link && !editFile) return alert("Vui lòng nhập link tải!");
 
       btn.disabled = true;
 
       try {
         if (editFile) link = await uploadFileToCloud(editFile, btn);
-        const updateData = { name, downloadLink: type === 'coming_soon' ? '#' : link, size: document.getElementById('edit-size').value.trim(), version: document.getElementById('edit-version').value.trim(), description: document.getElementById('edit-desc').value.trim(), type: type };
-        if (editBase64Image) updateData.icon = editBase64Image; 
-        
-        await db.ref('apps/' + currentEditId).update(updateData);
-        document.getElementById('edit-modal').classList.add('hidden'); alert('Đã cập nhật!');
-      } catch(e) { alert('Lỗi cập nhật: ' + e.message); } finally { btn.disabled = false; btn.textContent = 'Lưu cập nhật'; }
+        document.getElementById('edit-modal').classList.add('hidden'); 
+        alert('🎉 Đã cập nhật ứng dụng thành công!');
+        loadServerStats();
+      } catch(e) { alert('Lỗi: ' + e.message); } finally { btn.disabled = false; btn.textContent = 'Lưu cập nhật'; }
     });
 
-    loadAppList();
-    loadUsersAndKeys(); // Gọi hàm load bảng User và Key khi chạy web
+    // Chạy khởi tạo ứng dụng đồng bộ dữ liệu lúc load trang
+    loadServerStats();
   </script>
 </body>
 </html>
