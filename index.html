@@ -310,8 +310,11 @@
                         document.getElementById('app-container').style.display = 'block';
                         setTimeout(() => splash.remove(), 800);
                         
-                        // Hiển thị Popup xác minh ngay sau khi Splash Screen biến mất
-                        openModal('user-verification-modal');
+                        // KIỂM TRA TRẠNG THÁI XÁC MINH (localStorage)
+                        const isVerified = localStorage.getItem('apphub_user_verified');
+                        if (!isVerified) {
+                            openModal('user-verification-modal');
+                        }
                         
                         initCoreData();
                     }, 400);
@@ -321,16 +324,21 @@
             initCanvasBg();
         });
 
-        // XỬ LÝ XÁC MINH NGƯỜI DÙNG - CHUYỂN HƯỚNG SANG ZALO
+        // XỬ LÝ XÁC MINH NGƯỜI DÙNG & LƯU TRẠNG THÁI KHÔNG HIỂN THỊ LẠI
         function handleUserVerification() {
             triggerHaptic();
             const btn = document.getElementById('btn-verify-zalo');
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang chuyển trang...';
             btn.disabled = true;
             
+            // Đánh dấu đã xác minh vào bộ nhớ trình duyệt để lần sau vào lại không hiện bảng nữa
+            localStorage.setItem('apphub_user_verified', 'true');
+            
             setTimeout(() => {
                 window.open('https://zalo.me/g/cilgretbzmsxk0mmv334', '_blank');
-                // Trở lại trạng thái bình thường nếu họ quay lại tab cũ
+                // Đóng popup ngay lập tức sau khi nhấn
+                closeModal('user-verification-modal');
+                // Trở lại trạng thái bình thường cho nút bấm
                 btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Xác Minh Ngay';
                 btn.disabled = false;
             }, 1000);
