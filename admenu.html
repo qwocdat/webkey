@@ -2,124 +2,270 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Free Fire Key Generator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Hệ Thống Quản Lý Key - Admin</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
     <style>
-        /* GIỮ NGUYÊN CSS */
-        :root { --bg-color: #0b0c10; --primary-blue: #0078ff; --primary-purple: #8a2be2; --glass-bg: rgba(255, 255, 255, 0.05); --glass-border: rgba(255, 255, 255, 0.1); }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: linear-gradient(135deg, #000000, #0a0a2a, #1a0b2e); color: #fff; min-height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
-        .container { width: 90%; max-width: 400px; background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 30px; padding: 40px 20px; text-align: center; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(255,255,255,0.05); animation: slideUpFade 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) forwards; }
-        @keyframes slideUpFade { from { opacity: 0; transform: translateY(40px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
-        .logo { width: 80px; height: 80px; background: linear-gradient(45deg, var(--primary-blue), var(--primary-purple)); border-radius: 50%; margin: 0 auto 20px; display: flex; justify-content: center; align-items: center; font-size: 32px; font-weight: bold; box-shadow: 0 0 20px rgba(0, 120, 255, 0.4); animation: pulseGlow 2s infinite alternate; }
-        @keyframes pulseGlow { from { box-shadow: 0 0 15px rgba(0, 120, 255, 0.4); } to { box-shadow: 0 0 30px rgba(138, 43, 226, 0.6); } }
-        h1 { font-size: 24px; margin-bottom: 30px; background: linear-gradient(to right, #00c6ff, #0072ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 10px rgba(0, 198, 255, 0.3); }
-        .btn { position: relative; width: 100%; padding: 16px; border: none; border-radius: 20px; background: linear-gradient(90deg, var(--primary-blue), var(--primary-purple)); color: #fff; font-size: 16px; font-weight: bold; cursor: pointer; overflow: hidden; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 0 5px 15px rgba(0, 120, 255, 0.3); margin-bottom: 15px; }
-        .btn:active { transform: scale(0.96); box-shadow: 0 2px 10px rgba(138, 43, 226, 0.5); }
-        .btn:hover { box-shadow: 0 8px 25px rgba(0, 120, 255, 0.6); }
-        .result-area { display: none; margin-top: 25px; animation: fadeIn 0.4s ease forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-        .key-display { background: rgba(0, 0, 0, 0.3); border: 1px solid var(--glass-border); border-radius: 15px; padding: 15px; font-size: 18px; letter-spacing: 2px; font-family: monospace; margin-bottom: 15px; color: #00e5ff; text-shadow: 0 0 8px rgba(0, 229, 255, 0.5); }
-        .btn-copy { background: rgba(255, 255, 255, 0.1); border: 1px solid var(--glass-border); box-shadow: none; }
-        .btn-copy:hover { background: rgba(255, 255, 255, 0.15); box-shadow: 0 0 15px rgba(255,255,255,0.2); }
-        .ripple { position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.4); transform: scale(0); animation: ripple-anim 0.6s linear; pointer-events: none; }
-        @keyframes ripple-anim { to { transform: scale(4); opacity: 0; } }
-        .toast { position: fixed; bottom: -60px; left: 50%; transform: translateX(-50%); background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); padding: 12px 25px; border-radius: 30px; color: #fff; font-size: 14px; transition: bottom 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); z-index: 1000; }
-        .toast.show { bottom: 30px; }
+        :root {
+            --bg: #000000; --glass-bg: rgba(30, 30, 40, 0.6); --glass-border: rgba(255, 255, 255, 0.1);
+            --blue: #0A84FF; --green: #30D158; --red: #FF453A; --orange: #FF9F0A; --text: #FFFFFF;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); background-image: radial-gradient(circle at 50% -20%, #1a1a3a, #000); color: var(--text); min-height: 100vh; padding: 20px; padding-top: max(20px, env(safe-area-inset-top)); }
+        
+        /* Glassmorphism & iOS Styles */
+        .glass { background: var(--glass-bg); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .header h1 { font-size: 24px; font-weight: 700; letter-spacing: 0.5px; }
+        
+        /* Dashboard Stats */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-box { text-align: center; padding: 15px; border-radius: 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); }
+        .stat-box p { font-size: 13px; color: #8E8E93; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;}
+        .stat-box h2 { font-size: 28px; font-weight: 700; color: var(--blue); }
+        .stat-box.green h2 { color: var(--green); } .stat-box.red h2 { color: var(--red); } .stat-box.orange h2 { color: var(--orange); }
+
+        /* Buttons & Inputs */
+        .btn { background: var(--blue); color: #fff; border: none; padding: 12px 20px; border-radius: 14px; font-weight: 600; font-size: 15px; cursor: pointer; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 4px 15px rgba(10, 132, 255, 0.3); display: inline-flex; align-items: center; justify-content: center; }
+        .btn:active { transform: scale(0.95); opacity: 0.8; }
+        .btn-red { background: var(--red); box-shadow: 0 4px 15px rgba(255, 69, 58, 0.3); }
+        .btn-green { background: var(--green); box-shadow: 0 4px 15px rgba(48, 209, 88, 0.3); }
+        
+        .controls { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+        input, select { background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); color: #fff; padding: 12px 15px; border-radius: 12px; font-size: 14px; outline: none; transition: 0.3s; width: 100%; max-width: 200px;}
+        input:focus, select:focus { border-color: var(--blue); box-shadow: 0 0 10px rgba(10,132,255,0.3); }
+        select option { background: #1c1c1e; color: #fff; }
+
+        /* Table iOS Style */
+        .table-wrapper { overflow-x: auto; border-radius: 14px; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; white-space: nowrap; }
+        th { background: rgba(255,255,255,0.05); padding: 15px; font-weight: 600; color: #8E8E93; border-bottom: 1px solid var(--glass-border); }
+        td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #E5E5EA; }
+        tr:last-child td { border-bottom: none; }
+        .badge { padding: 4px 10px; border-radius: 10px; font-size: 12px; font-weight: 600; }
+        .badge.active { background: rgba(48,209,88,0.2); color: var(--green); }
+        .badge.expired { background: rgba(255,69,58,0.2); color: var(--red); }
+
+        /* Modal iOS */
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: 0.4s ease; z-index: 100; }
+        .overlay.show { opacity: 1; pointer-events: auto; }
+        .modal { background: rgba(30,30,40,0.85); backdrop-filter: blur(25px); border: 1px solid var(--glass-border); border-radius: 24px; padding: 30px; width: 90%; max-width: 400px; transform: scale(0.9) translateY(20px); transition: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
+        .overlay.show .modal { transform: scale(1) translateY(0); }
+        .modal h2 { margin-bottom: 20px; font-size: 20px; text-align: center; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 8px; font-size: 13px; color: #8E8E93; }
+        .form-group select { max-width: 100%; }
+
+        /* Dynamic Island Toast */
+        .toast { position: fixed; top: -60px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); backdrop-filter: blur(20px); border-radius: 30px; padding: 12px 25px; display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; color: #fff; z-index: 1000; transition: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 10px 20px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); }
+        .toast.show { top: max(20px, env(safe-area-inset-top)); }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="logo">FF</div>
-        <h1>Free Fire Key Generator</h1>
-        
-        <button class="btn" onclick="generateKey(event)">TẠO KEY</button>
+    <div class="glass header">
+        <h1>Admin Panel</h1>
+        <button class="btn" onclick="openModal()">+ Tạo Key</button>
+    </div>
 
-        <div class="result-area" id="resultArea">
-            <div style="font-size: 14px; margin-bottom: 10px; color: #aaa;">Key của bạn:</div>
-            <div class="key-display" id="keyDisplay">DAT-XXXX-XXXX</div>
-            <button class="btn btn-copy" onclick="copyKey(event)">COPY KEY</button>
+    <div class="stats-grid glass">
+        <div class="stat-box">
+            <p>Tổng Key</p><h2 id="sTotal">0</h2>
+        </div>
+        <div class="stat-box green">
+            <p>Hoạt Động</p><h2 id="sActive">0</h2>
+        </div>
+        <div class="stat-box red">
+            <p>Hết Hạn</p><h2 id="sExpired">0</h2>
+        </div>
+        <div class="stat-box orange">
+            <p>Lượt Kích Hoạt</p><h2 id="sActivations">0</h2>
         </div>
     </div>
 
-    <div class="toast" id="toast">Đã copy Key</div>
+    <div class="glass">
+        <div class="controls">
+            <input type="text" id="searchInput" placeholder="Tìm kiếm Key..." onkeyup="filterTable()">
+            <select id="filterStatus" onchange="filterTable()">
+                <option value="all">Tất cả trạng thái</option>
+                <option value="active">Còn hạn</option>
+                <option value="expired">Hết hạn</option>
+            </select>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Key</th>
+                        <th>Trạng thái</th>
+                        <th>Thiết bị</th>
+                        <th>Ngày tạo</th>
+                        <th>Hết hạn</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody id="keyTableBody">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="overlay" id="createModal">
+        <div class="modal">
+            <h2>Tạo Key Mới</h2>
+            <div class="form-group">
+                <label>Thời hạn (Ngày)</label>
+                <select id="keyDuration">
+                    <option value="1">1 Ngày</option>
+                    <option value="2">2 Ngày</option>
+                    <option value="3">3 Ngày</option>
+                    <option value="5">5 Ngày</option>
+                    <option value="7">7 Ngày</option>
+                    <option value="15">15 Ngày</option>
+                    <option value="30">30 Ngày</option>
+                    <option value="60">60 Ngày</option>
+                    <option value="90">90 Ngày</option>
+                    <option value="180">180 Ngày</option>
+                    <option value="365">365 Ngày</option>
+                    <option value="unlimited">Không giới hạn</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Giới hạn thiết bị</label>
+                <select id="keyDevices">
+                    <option value="1">1 Thiết bị</option>
+                    <option value="2">2 Thiết bị</option>
+                    <option value="3">3 Thiết bị</option>
+                    <option value="5">5 Thiết bị</option>
+                    <option value="unlimited">Không giới hạn</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 25px;">
+                <button class="btn btn-red" style="flex:1" onclick="closeModal()">Hủy</button>
+                <button class="btn btn-green" style="flex:1" onclick="generateKey()">Tạo & Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">✅ Thao tác thành công</div>
 
     <script>
-        // Khởi tạo Firebase
-        const firebaseConfig = { 
-            apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE", 
-            databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app", 
-            projectId: "keyquocdat" 
-        };
-        firebase.initializeApp(firebaseConfig); 
+        const firebaseConfig = { apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE", databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "keyquocdat" };
+        firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        function randomString(length) {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let result = '';
-            for (let i = 0; i < length; i++) {
-                result += chars.charAt(Math.floor(Math.random() * chars.length));
+        let allKeys = {};
+
+        // Lấy dữ liệu Realtime
+        db.ref('vip_ff_keys').on('value', snapshot => {
+            allKeys = snapshot.val() || {};
+            renderTable();
+            updateStats();
+        });
+
+        function randStr(len) { return Math.random().toString(36).substring(2, 2+len).toUpperCase(); }
+
+        function generateKey() {
+            const duration = document.getElementById('keyDuration').value;
+            const devices = document.getElementById('keyDevices').value;
+            const newKey = `DAT-${randStr(4)}-${randStr(4)}-${randStr(4)}`;
+            const now = Date.now();
+            
+            let expiresAt = "unlimited";
+            if (duration !== "unlimited") {
+                expiresAt = now + (parseInt(duration) * 24 * 60 * 60 * 1000);
             }
-            return result;
-        }
 
-        function generateKey(e) {
-            createRipple(e);
-            
-            const part1 = randomString(4);
-            const part2 = randomString(4);
-            const newKey = `DAT-${part1}-${part2}`;
-            
-            document.getElementById('keyDisplay').innerText = newKey;
-            document.getElementById('resultArea').style.display = 'block';
-
-            // Đẩy Key mới lên Firebase
-            db.ref('vip_ff_keys/' + newKey).set({ 
-                valid: true, 
-                createdAt: Date.now() 
+            db.ref('vip_ff_keys/' + newKey).set({
+                createdAt: now,
+                durationRaw: duration,
+                expiresAt: expiresAt,
+                maxDevices: devices,
+                devicesUsed: {}, // Lưu các Device ID
+                activationsCount: 0
             }).then(() => {
-                console.log("Đã lưu Key lên Firebase");
-            }).catch((error) => {
-                showToast("Lỗi kết nối Server");
+                closeModal();
+                showToast("Đã tạo Key: " + newKey);
             });
         }
 
-        function copyKey(e) {
-            createRipple(e);
-            const keyText = document.getElementById('keyDisplay').innerText;
-            const tempInput = document.createElement("input");
-            tempInput.value = keyText;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            document.execCommand("copy");
-            document.body.removeChild(tempInput);
-            showToast("Đã copy Key");
+        function deleteKey(key) {
+            if(confirm("Xóa vĩnh viễn Key này?")) {
+                db.ref('vip_ff_keys/' + key).remove();
+                showToast("Đã xóa Key!");
+            }
         }
 
-        function createRipple(event) {
-            const button = event.currentTarget;
-            const circle = document.createElement("span");
-            const diameter = Math.max(button.clientWidth, button.clientHeight);
-            const radius = diameter / 2;
-            circle.style.width = circle.style.height = `${diameter}px`;
-            circle.style.left = `${event.clientX - button.getBoundingClientRect().left - radius}px`;
-            circle.style.top = `${event.clientY - button.getBoundingClientRect().top - radius}px`;
-            circle.classList.add("ripple");
-            const ripple = button.getElementsByClassName("ripple")[0];
-            if (ripple) { ripple.remove(); }
-            button.appendChild(circle);
+        function renderTable() {
+            const tbody = document.getElementById('keyTableBody');
+            tbody.innerHTML = '';
+            
+            const search = document.getElementById('searchInput').value.toUpperCase();
+            const filter = document.getElementById('filterStatus').value;
+
+            // Sort by new
+            const sortedKeys = Object.entries(allKeys).sort((a, b) => b[1].createdAt - a[1].createdAt);
+
+            sortedKeys.forEach(([keyName, data]) => {
+                const now = Date.now();
+                const isExpired = data.expiresAt !== "unlimited" && now > data.expiresAt;
+                const status = isExpired ? 'expired' : 'active';
+                const statusText = isExpired ? 'Hết hạn' : 'Còn hạn';
+
+                if(search && !keyName.includes(search)) return;
+                if(filter !== 'all' && filter !== status) return;
+
+                const cDate = new Date(data.createdAt).toLocaleDateString('vi-VN');
+                const eDate = data.expiresAt === "unlimited" ? "Vĩnh viễn" : new Date(data.expiresAt).toLocaleDateString('vi-VN');
+                const devsUsed = data.devicesUsed ? Object.keys(data.devicesUsed).length : 0;
+                const maxDevs = data.maxDevices === "unlimited" ? "∞" : data.maxDevices;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="font-family: monospace; color: var(--blue); font-weight:bold; cursor:pointer;" onclick="copyTxt('${keyName}')">${keyName}</td>
+                        <td><span class="badge ${status}">${statusText}</span></td>
+                        <td>${devsUsed} / ${maxDevs}</td>
+                        <td>${cDate}</td>
+                        <td>${eDate}</td>
+                        <td>
+                            <button class="btn btn-red" style="padding: 6px 12px; font-size: 12px; border-radius:8px;" onclick="deleteKey('${keyName}')">Xóa</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function updateStats() {
+            let total = 0, active = 0, expired = 0, acts = 0;
+            const now = Date.now();
+            Object.values(allKeys).forEach(k => {
+                total++;
+                if (k.expiresAt !== "unlimited" && now > k.expiresAt) expired++; else active++;
+                acts += (k.activationsCount || 0);
+            });
+            document.getElementById('sTotal').innerText = total;
+            document.getElementById('sActive').innerText = active;
+            document.getElementById('sExpired').innerText = expired;
+            document.getElementById('sActivations').innerText = acts;
+        }
+
+        function filterTable() { renderTable(); }
+        function openModal() { document.getElementById('createModal').classList.add('show'); }
+        function closeModal() { document.getElementById('createModal').classList.remove('show'); }
+        
+        function copyTxt(txt) {
+            navigator.clipboard.writeText(txt);
+            showToast("Đã copy: " + txt);
         }
 
         function showToast(msg) {
-            const toast = document.getElementById('toast');
-            toast.innerText = msg;
-            toast.classList.add('show');
-            setTimeout(() => { toast.classList.remove('show'); }, 2500);
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
         }
     </script>
 </body>
