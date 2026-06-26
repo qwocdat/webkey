@@ -4,177 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Free Fire Key Generator</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
     <style>
-        /* Cài đặt cơ bản & Font hiện đại */
-        :root {
-            --bg-color: #0b0c10;
-            --primary-blue: #0078ff;
-            --primary-purple: #8a2be2;
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Roboto, Helvetica, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background: linear-gradient(135deg, #000000, #0a0a2a, #1a0b2e);
-            color: #fff;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-
-        /* Hiệu ứng Fade In và Trượt lên cho toàn bộ form */
-        .container {
-            width: 90%;
-            max-width: 400px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 30px;
-            padding: 40px 20px;
-            text-align: center;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(255,255,255,0.05);
-            animation: slideUpFade 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
-        }
-
-        @keyframes slideUpFade {
-            from { opacity: 0; transform: translateY(40px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        /* Logo và Tiêu đề */
-        .logo {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(45deg, var(--primary-blue), var(--primary-purple));
-            border-radius: 50%;
-            margin: 0 auto 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 32px;
-            font-weight: bold;
-            box-shadow: 0 0 20px rgba(0, 120, 255, 0.4);
-            animation: pulseGlow 2s infinite alternate;
-        }
-
-        @keyframes pulseGlow {
-            from { box-shadow: 0 0 15px rgba(0, 120, 255, 0.4); }
-            to { box-shadow: 0 0 30px rgba(138, 43, 226, 0.6); }
-        }
-
-        h1 {
-            font-size: 24px;
-            margin-bottom: 30px;
-            background: linear-gradient(to right, #00c6ff, #0072ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 10px rgba(0, 198, 255, 0.3);
-        }
-
-        /* Nút bấm có Ripple & Glow */
-        .btn {
-            position: relative;
-            width: 100%;
-            padding: 16px;
-            border: none;
-            border-radius: 20px;
-            background: linear-gradient(90deg, var(--primary-blue), var(--primary-purple));
-            color: #fff;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            overflow: hidden;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            box-shadow: 0 5px 15px rgba(0, 120, 255, 0.3);
-            margin-bottom: 15px;
-        }
-
-        .btn:active {
-            transform: scale(0.96);
-            box-shadow: 0 2px 10px rgba(138, 43, 226, 0.5);
-        }
-
-        .btn:hover {
-            box-shadow: 0 8px 25px rgba(0, 120, 255, 0.6);
-        }
-
-        /* Khu vực hiển thị Key */
-        .result-area {
-            display: none;
-            margin-top: 25px;
-            animation: fadeIn 0.4s ease forwards;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .key-display {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--glass-border);
-            border-radius: 15px;
-            padding: 15px;
-            font-size: 18px;
-            letter-spacing: 2px;
-            font-family: monospace;
-            margin-bottom: 15px;
-            color: #00e5ff;
-            text-shadow: 0 0 8px rgba(0, 229, 255, 0.5);
-        }
-
-        /* Nút Copy */
-        .btn-copy {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid var(--glass-border);
-            box-shadow: none;
-        }
+        /* GIỮ NGUYÊN CSS */
+        :root { --bg-color: #0b0c10; --primary-blue: #0078ff; --primary-purple: #8a2be2; --glass-bg: rgba(255, 255, 255, 0.05); --glass-border: rgba(255, 255, 255, 0.1); }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: linear-gradient(135deg, #000000, #0a0a2a, #1a0b2e); color: #fff; min-height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        .container { width: 90%; max-width: 400px; background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 30px; padding: 40px 20px; text-align: center; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(255,255,255,0.05); animation: slideUpFade 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) forwards; }
+        @keyframes slideUpFade { from { opacity: 0; transform: translateY(40px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .logo { width: 80px; height: 80px; background: linear-gradient(45deg, var(--primary-blue), var(--primary-purple)); border-radius: 50%; margin: 0 auto 20px; display: flex; justify-content: center; align-items: center; font-size: 32px; font-weight: bold; box-shadow: 0 0 20px rgba(0, 120, 255, 0.4); animation: pulseGlow 2s infinite alternate; }
+        @keyframes pulseGlow { from { box-shadow: 0 0 15px rgba(0, 120, 255, 0.4); } to { box-shadow: 0 0 30px rgba(138, 43, 226, 0.6); } }
+        h1 { font-size: 24px; margin-bottom: 30px; background: linear-gradient(to right, #00c6ff, #0072ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 10px rgba(0, 198, 255, 0.3); }
+        .btn { position: relative; width: 100%; padding: 16px; border: none; border-radius: 20px; background: linear-gradient(90deg, var(--primary-blue), var(--primary-purple)); color: #fff; font-size: 16px; font-weight: bold; cursor: pointer; overflow: hidden; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 0 5px 15px rgba(0, 120, 255, 0.3); margin-bottom: 15px; }
+        .btn:active { transform: scale(0.96); box-shadow: 0 2px 10px rgba(138, 43, 226, 0.5); }
+        .btn:hover { box-shadow: 0 8px 25px rgba(0, 120, 255, 0.6); }
+        .result-area { display: none; margin-top: 25px; animation: fadeIn 0.4s ease forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .key-display { background: rgba(0, 0, 0, 0.3); border: 1px solid var(--glass-border); border-radius: 15px; padding: 15px; font-size: 18px; letter-spacing: 2px; font-family: monospace; margin-bottom: 15px; color: #00e5ff; text-shadow: 0 0 8px rgba(0, 229, 255, 0.5); }
+        .btn-copy { background: rgba(255, 255, 255, 0.1); border: 1px solid var(--glass-border); box-shadow: none; }
         .btn-copy:hover { background: rgba(255, 255, 255, 0.15); box-shadow: 0 0 15px rgba(255,255,255,0.2); }
-
-        /* Hiệu ứng Ripple JS */
-        .ripple {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.4);
-            transform: scale(0);
-            animation: ripple-anim 0.6s linear;
-            pointer-events: none;
-        }
-
-        @keyframes ripple-anim {
-            to { transform: scale(4); opacity: 0; }
-        }
-
-        /* Toast Notification */
-        .toast {
-            position: fixed;
-            bottom: -60px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            padding: 12px 25px;
-            border-radius: 30px;
-            color: #fff;
-            font-size: 14px;
-            transition: bottom 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-            z-index: 1000;
-        }
-        .toast.show {
-            bottom: 30px;
-        }
+        .ripple { position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.4); transform: scale(0); animation: ripple-anim 0.6s linear; pointer-events: none; }
+        @keyframes ripple-anim { to { transform: scale(4); opacity: 0; } }
+        .toast { position: fixed; bottom: -60px; left: 50%; transform: translateX(-50%); background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); padding: 12px 25px; border-radius: 30px; color: #fff; font-size: 14px; transition: bottom 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); z-index: 1000; }
+        .toast.show { bottom: 30px; }
     </style>
 </head>
 <body>
@@ -195,7 +50,15 @@
     <div class="toast" id="toast">Đã copy Key</div>
 
     <script>
-        // Hàm tạo chuỗi ngẫu nhiên
+        // Khởi tạo Firebase
+        const firebaseConfig = { 
+            apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE", 
+            databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app", 
+            projectId: "keyquocdat" 
+        };
+        firebase.initializeApp(firebaseConfig); 
+        const db = firebase.database();
+
         function randomString(length) {
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let result = '';
@@ -205,7 +68,6 @@
             return result;
         }
 
-        // Tạo Key mới
         function generateKey(e) {
             createRipple(e);
             
@@ -216,53 +78,48 @@
             document.getElementById('keyDisplay').innerText = newKey;
             document.getElementById('resultArea').style.display = 'block';
 
-            // Lưu Key vào mảng trong LocalStorage để menu.html có thể kiểm tra
-            let keys = JSON.parse(localStorage.getItem('valid_ff_keys')) || [];
-            keys.push(newKey);
-            localStorage.setItem('valid_ff_keys', JSON.stringify(keys));
+            // Đẩy Key mới lên Firebase
+            db.ref('vip_ff_keys/' + newKey).set({ 
+                valid: true, 
+                createdAt: Date.now() 
+            }).then(() => {
+                console.log("Đã lưu Key lên Firebase");
+            }).catch((error) => {
+                showToast("Lỗi kết nối Server");
+            });
         }
 
-        // Copy Key
         function copyKey(e) {
             createRipple(e);
             const keyText = document.getElementById('keyDisplay').innerText;
-            
-            // Xử lý copy
             const tempInput = document.createElement("input");
             tempInput.value = keyText;
             document.body.appendChild(tempInput);
             tempInput.select();
             document.execCommand("copy");
             document.body.removeChild(tempInput);
-
             showToast("Đã copy Key");
         }
 
-        // Hiệu ứng Ripple cho Nút
         function createRipple(event) {
             const button = event.currentTarget;
             const circle = document.createElement("span");
             const diameter = Math.max(button.clientWidth, button.clientHeight);
             const radius = diameter / 2;
-
             circle.style.width = circle.style.height = `${diameter}px`;
             circle.style.left = `${event.clientX - button.getBoundingClientRect().left - radius}px`;
             circle.style.top = `${event.clientY - button.getBoundingClientRect().top - radius}px`;
             circle.classList.add("ripple");
-
             const ripple = button.getElementsByClassName("ripple")[0];
             if (ripple) { ripple.remove(); }
             button.appendChild(circle);
         }
 
-        // Hiện Toast
         function showToast(msg) {
             const toast = document.getElementById('toast');
             toast.innerText = msg;
             toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 2500);
+            setTimeout(() => { toast.classList.remove('show'); }, 2500);
         }
     </script>
 </body>
