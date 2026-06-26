@@ -137,6 +137,18 @@
         <div class="loading-text" id="splash-text">0%</div>
     </div>
 
+    <div id="user-verification-modal" class="modal-overlay" style="z-index: 99999;">
+        <div class="modal-content glass-card" style="text-align: center; border-color: var(--soon-blue); box-shadow: 0 0 30px rgba(0,212,255,0.3);">
+            <h2 style="margin-bottom: 15px; color: var(--soon-blue); font-size: 1.6rem;"><i class="fa-solid fa-shield-halved"></i> Xác Minh Người Dùng</h2>
+            <p style="font-size: 0.95rem; color: var(--text-light); margin-bottom: 20px; line-height: 1.6;">
+                Vui lòng tham gia nhóm Zalo hỗ trợ để xác minh bạn không phải là robot trước khi tiếp tục truy cập vào <strong>AppHub Store</strong>.
+            </p>
+            <button class="btn-primary ripple" id="btn-verify-zalo" onclick="handleUserVerification()" style="background: linear-gradient(45deg, #007aff, var(--soon-blue)); box-shadow: 0 5px 15px rgba(0,212,255,0.4); padding: 16px;">
+                <i class="fa-solid fa-right-to-bracket"></i> Xác Minh Ngay
+            </button>
+        </div>
+    </div>
+
     <div id="app-container">
         <div id="tab-home" class="tab-content active">
             <div class="header-stats glass-card">
@@ -297,6 +309,10 @@
                         splash.style.opacity = '0'; splash.style.transform = 'scale(1.1)'; splash.style.filter = 'blur(20px)';
                         document.getElementById('app-container').style.display = 'block';
                         setTimeout(() => splash.remove(), 800);
+                        
+                        // Hiển thị Popup xác minh ngay sau khi Splash Screen biến mất
+                        openModal('user-verification-modal');
+                        
                         initCoreData();
                     }, 400);
                 }
@@ -304,6 +320,21 @@
             }, 40);
             initCanvasBg();
         });
+
+        // XỬ LÝ XÁC MINH NGƯỜI DÙNG - CHUYỂN HƯỚNG SANG ZALO
+        function handleUserVerification() {
+            triggerHaptic();
+            const btn = document.getElementById('btn-verify-zalo');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang chuyển trang...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                window.open('https://zalo.me/g/cilgretbzmsxk0mmv334', '_blank');
+                // Trở lại trạng thái bình thường nếu họ quay lại tab cũ
+                btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Xác Minh Ngay';
+                btn.disabled = false;
+            }, 1000);
+        }
 
         function switchTab(tabId, index) {
             triggerHaptic();
