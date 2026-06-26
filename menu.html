@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Free Fire Key Generator</title>
+    <title>DAT FF PANEL</title>
     <style>
-        /* Cài đặt cơ bản & Font hiện đại */
+        /* CSS Dùng chung */
         :root {
-            --bg-color: #0b0c10;
             --primary-blue: #0078ff;
             --primary-purple: #8a2be2;
             --glass-bg: rgba(255, 255, 255, 0.05);
@@ -23,7 +22,7 @@
         }
 
         body {
-            background: linear-gradient(135deg, #000000, #0a0a2a, #1a0b2e);
+            background: linear-gradient(135deg, #050505, #0d0d26, #120524);
             color: #fff;
             min-height: 100vh;
             display: flex;
@@ -32,237 +31,343 @@
             overflow: hidden;
         }
 
-        /* Hiệu ứng Fade In và Trượt lên cho toàn bộ form */
-        .container {
+        /* Container kính */
+        .glass-panel {
             width: 90%;
-            max-width: 400px;
+            max-width: 420px;
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
             border-radius: 30px;
-            padding: 40px 20px;
-            text-align: center;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(255,255,255,0.05);
-            animation: slideUpFade 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+            padding: 35px 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), inset 0 0 15px rgba(255,255,255,0.03);
+            animation: scaleFadeIn 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+            position: relative;
         }
 
-        @keyframes slideUpFade {
-            from { opacity: 0; transform: translateY(40px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+        @keyframes scaleFadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
         }
 
-        /* Logo và Tiêu đề */
-        .logo {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(45deg, var(--primary-blue), var(--primary-purple));
+        /* ---------------- VIEW ĐĂNG NHẬP ---------------- */
+        #loginView { display: none; text-align: center; }
+        
+        .logo-login {
+            width: 70px; height: 70px;
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-purple));
             border-radius: 50%;
             margin: 0 auto 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 32px;
-            font-weight: bold;
-            box-shadow: 0 0 20px rgba(0, 120, 255, 0.4);
-            animation: pulseGlow 2s infinite alternate;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 28px; font-weight: bold;
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.5);
         }
 
-        @keyframes pulseGlow {
-            from { box-shadow: 0 0 15px rgba(0, 120, 255, 0.4); }
-            to { box-shadow: 0 0 30px rgba(138, 43, 226, 0.6); }
+        h2.title {
+            font-size: 22px; margin-bottom: 25px; letter-spacing: 1px;
+            text-transform: uppercase;
         }
 
-        h1 {
-            font-size: 24px;
-            margin-bottom: 30px;
-            background: linear-gradient(to right, #00c6ff, #0072ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 10px rgba(0, 198, 255, 0.3);
+        .input-group { position: relative; margin-bottom: 20px; }
+        .input-group input {
+            width: 100%; padding: 18px 20px;
+            background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border);
+            border-radius: 18px; color: #fff; font-size: 16px;
+            outline: none; transition: 0.3s;
+        }
+        .input-group input:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 15px rgba(0, 120, 255, 0.3);
         }
 
-        /* Nút bấm có Ripple & Glow */
+        /* Nút chung */
         .btn {
-            position: relative;
-            width: 100%;
-            padding: 16px;
-            border: none;
-            border-radius: 20px;
+            position: relative; width: 100%; padding: 18px;
+            border: none; border-radius: 18px;
             background: linear-gradient(90deg, var(--primary-blue), var(--primary-purple));
-            color: #fff;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            overflow: hidden;
+            color: #fff; font-size: 16px; font-weight: bold;
+            cursor: pointer; overflow: hidden;
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             box-shadow: 0 5px 15px rgba(0, 120, 255, 0.3);
-            margin-bottom: 15px;
+        }
+        .btn:active { transform: scale(0.96); }
+        .btn:hover { box-shadow: 0 8px 25px rgba(138, 43, 226, 0.6); }
+
+        /* ---------------- VIEW PANEL CHÍNH ---------------- */
+        #panelView { display: none; }
+        
+        .panel-header {
+            display: flex; align-items: center; margin-bottom: 30px;
+            padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .avatar {
+            width: 50px; height: 50px; border-radius: 50%;
+            background: url('https://api.dicebear.com/7.x/avataaars/svg?seed=DatFF') center/cover;
+            border: 2px solid var(--primary-purple);
+            margin-right: 15px; box-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
         }
 
-        .btn:active {
-            transform: scale(0.96);
-            box-shadow: 0 2px 10px rgba(138, 43, 226, 0.5);
+        .header-info h1 { font-size: 20px; margin-bottom: 5px; }
+        .premium-badge {
+            font-size: 12px; color: #00ffcc;
+            text-shadow: 0 0 8px rgba(0, 255, 204, 0.6);
+            display: inline-block; padding: 2px 8px;
+            background: rgba(0, 255, 204, 0.1); border-radius: 10px;
         }
 
-        .btn:hover {
-            box-shadow: 0 8px 25px rgba(0, 120, 255, 0.6);
+        /* Danh sách chức năng & Toggle */
+        .feature-item {
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(0,0,0,0.2); padding: 18px 20px;
+            border-radius: 20px; margin-bottom: 15px;
+            border: 1px solid transparent; transition: 0.3s;
+        }
+        .feature-item:hover {
+            background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1);
+        }
+        .feature-name {
+            font-size: 16px; display: flex; align-items: center;
         }
 
-        /* Khu vực hiển thị Key */
-        .result-area {
-            display: none;
-            margin-top: 25px;
-            animation: fadeIn 0.4s ease forwards;
+        /* Nút hỏi chấm ? */
+        .info-btn {
+            display: inline-flex; justify-content: center; align-items: center;
+            width: 20px; height: 20px; border-radius: 50%;
+            background: rgba(255,255,255,0.1); font-size: 12px;
+            margin-left: 10px; cursor: pointer; border: 1px solid rgba(255,255,255,0.2);
+            transition: 0.2s;
+        }
+        .info-btn:hover { background: var(--primary-blue); color: #fff; }
+
+        /* Nút Gạt (Toggle Switch) mượt mà */
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(255,255,255,0.1); border-radius: 34px;
+            transition: .4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 20px; width: 20px;
+            left: 3px; bottom: 3px; background-color: #aaa; border-radius: 50%;
+            transition: .4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        input:checked + .slider {
+            background: linear-gradient(90deg, var(--primary-blue), var(--primary-purple));
+            box-shadow: 0 0 15px rgba(138, 43, 226, 0.4);
+        }
+        input:checked + .slider:before {
+            transform: translateX(24px); background-color: white;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* ---------------- GLASS POPUP (THÔNG BÁO 120FPS) ---------------- */
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(5px);
+            display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; z-index: 100;
+            transition: opacity 0.4s ease;
         }
-
-        .key-display {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--glass-border);
-            border-radius: 15px;
-            padding: 15px;
-            font-size: 18px;
-            letter-spacing: 2px;
-            font-family: monospace;
-            margin-bottom: 15px;
-            color: #00e5ff;
-            text-shadow: 0 0 8px rgba(0, 229, 255, 0.5);
+        .overlay.active { opacity: 1; pointer-events: auto; }
+        
+        .popup-glass {
+            width: 85%; max-width: 350px; background: rgba(20,20,30,0.7);
+            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border); border-radius: 25px;
+            padding: 30px 25px; text-align: center;
+            transform: translateY(30px) scale(0.9); opacity: 0;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
         }
-
-        /* Nút Copy */
-        .btn-copy {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid var(--glass-border);
-            box-shadow: none;
+        .overlay.active .popup-glass { transform: translateY(0) scale(1); opacity: 1; }
+        
+        .popup-glass h3 { font-size: 20px; margin-bottom: 15px; color: var(--primary-blue); }
+        .popup-glass p { font-size: 14px; line-height: 1.6; color: #ddd; margin-bottom: 25px; }
+        
+        .btn-close {
+            background: rgba(255,255,255,0.1); color: #fff; padding: 12px 30px;
+            border-radius: 15px; border: 1px solid var(--glass-border);
+            font-weight: bold; cursor: pointer; transition: 0.3s;
         }
-        .btn-copy:hover { background: rgba(255, 255, 255, 0.15); box-shadow: 0 0 15px rgba(255,255,255,0.2); }
+        .btn-close:hover { background: rgba(255,255,255,0.2); }
+        .btn-close:active { transform: scale(0.95); }
 
-        /* Hiệu ứng Ripple JS */
-        .ripple {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.4);
-            transform: scale(0);
-            animation: ripple-anim 0.6s linear;
-            pointer-events: none;
-        }
-
-        @keyframes ripple-anim {
-            to { transform: scale(4); opacity: 0; }
-        }
-
-        /* Toast Notification */
+        /* ---------------- TOAST THÔNG BÁO ---------------- */
         .toast {
-            position: fixed;
-            bottom: -60px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            padding: 12px 25px;
-            border-radius: 30px;
-            color: #fff;
-            font-size: 14px;
-            transition: bottom 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-            z-index: 1000;
+            position: fixed; top: -60px; left: 50%; transform: translateX(-50%);
+            background: rgba(255, 50, 50, 0.2); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 50, 50, 0.4); padding: 15px 30px;
+            border-radius: 30px; color: #ff6b6b; font-weight: bold;
+            transition: top 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); z-index: 1000;
         }
-        .toast.show {
-            bottom: 30px;
+        .toast.success {
+            background: rgba(50, 255, 50, 0.2); border-color: rgba(50, 255, 50, 0.4);
+            color: #6bff80;
         }
+        .toast.show { top: 40px; }
+
+        /* Ripple JS (Dùng chung) */
+        .ripple {
+            position: absolute; border-radius: 50%; background: rgba(255,255,255,0.3);
+            transform: scale(0); animation: ripple-anim 0.6s linear; pointer-events: none;
+        }
+        @keyframes ripple-anim { to { transform: scale(4); opacity: 0; } }
+
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="logo">FF</div>
-        <h1>Free Fire Key Generator</h1>
+    <div class="glass-panel" id="mainPanel">
         
-        <button class="btn" onclick="generateKey(event)">TẠO KEY</button>
+        <div id="loginView">
+            <div class="logo-login">FF</div>
+            <h2 class="title">ĐĂNG NHẬP KEY</h2>
+            <div class="input-group">
+                <input type="text" id="keyInput" placeholder="Nhập Key..." autocomplete="off">
+            </div>
+            <button class="btn" onclick="verifyKey(event)">XÁC NHẬN</button>
+        </div>
 
-        <div class="result-area" id="resultArea">
-            <div style="font-size: 14px; margin-bottom: 10px; color: #aaa;">Key của bạn:</div>
-            <div class="key-display" id="keyDisplay">DAT-XXXX-XXXX</div>
-            <button class="btn btn-copy" onclick="copyKey(event)">COPY KEY</button>
+        <div id="panelView">
+            <div class="panel-header">
+                <div class="avatar"></div>
+                <div class="header-info">
+                    <h1>DAT FF PANEL</h1>
+                    <span class="premium-badge">Đã kích hoạt Premium</span>
+                </div>
+            </div>
+
+            <div class="feature-list">
+                <div class="feature-item">
+                    <div class="feature-name">Tối ưu RAM</div>
+                    <label class="switch">
+                        <input type="checkbox" onchange="toggleFeature(this)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="feature-item">
+                    <div class="feature-name">Hỗ trợ kéo tâm</div>
+                    <label class="switch">
+                        <input type="checkbox" onchange="toggleFeature(this)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-name">
+                        Unlock 120 FPS
+                        <span class="info-btn" onclick="openPopup()">?</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" onchange="toggleFeature(this)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="toast" id="toast">Đã copy Key</div>
+    <div class="overlay" id="infoOverlay">
+        <div class="popup-glass">
+            <h3>Thông báo</h3>
+            <p>Khi vào game tuy không hiện 120 FPS trong cài đặt, nhưng nếu thiết bị và trò chơi hỗ trợ thì trải nghiệm có thể mượt hơn sau khi tối ưu.</p>
+            <button class="btn-close" onclick="closePopup()">Đã hiểu</button>
+        </div>
+    </div>
+
+    <div class="toast" id="toastMsg">Key không hợp lệ</div>
 
     <script>
-        // Hàm tạo chuỗi ngẫu nhiên
-        function randomString(length) {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let result = '';
-            for (let i = 0; i < length; i++) {
-                result += chars.charAt(Math.floor(Math.random() * chars.length));
+        // KIỂM TRA TRẠNG THÁI ĐĂNG NHẬP KHI MỞ TRANG
+        window.onload = function() {
+            const isLogged = localStorage.getItem('key premium login');
+            if (isLogged === 'true') {
+                document.getElementById('loginView').style.display = 'none';
+                document.getElementById('panelView').style.display = 'block';
+            } else {
+                document.getElementById('loginView').style.display = 'block';
+                document.getElementById('panelView').style.display = 'none';
             }
-            return result;
-        }
+        };
 
-        // Tạo Key mới
-        function generateKey(e) {
+        // HÀM XÁC THỰC KEY
+        function verifyKey(e) {
             createRipple(e);
+            const inputVal = document.getElementById('keyInput').value.trim();
             
-            const part1 = randomString(4);
-            const part2 = randomString(4);
-            const newKey = `DAT-${part1}-${part2}`;
-            
-            document.getElementById('keyDisplay').innerText = newKey;
-            document.getElementById('resultArea').style.display = 'block';
+            // Lấy danh sách key hợp lệ tạo từ admenu.html
+            const validKeys = JSON.parse(localStorage.getItem('valid_ff_keys')) || [];
 
-            // Lưu Key vào mảng trong LocalStorage để menu.html có thể kiểm tra
-            let keys = JSON.parse(localStorage.getItem('valid_ff_keys')) || [];
-            keys.push(newKey);
-            localStorage.setItem('valid_ff_keys', JSON.stringify(keys));
+            if (validKeys.includes(inputVal)) {
+                // Đăng nhập thành công
+                showToast('Đăng nhập thành công!', 'success');
+                localStorage.setItem('key premium login', 'true');
+                
+                // Hiệu ứng Loading mượt trước khi reload
+                document.querySelector('#loginView .btn').innerText = "Đang tải...";
+                setTimeout(() => {
+                    location.reload();
+                }, 800);
+            } else {
+                // Sai Key
+                showToast('Key không hợp lệ', 'error');
+            }
         }
 
-        // Copy Key
-        function copyKey(e) {
-            createRipple(e);
-            const keyText = document.getElementById('keyDisplay').innerText;
-            
-            // Xử lý copy
-            const tempInput = document.createElement("input");
-            tempInput.value = keyText;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            document.execCommand("copy");
-            document.body.removeChild(tempInput);
-
-            showToast("Đã copy Key");
+        // BẬT / TẮT CHỨC NĂNG CÓ ANIMATION RUNG NHẸ
+        function toggleFeature(checkbox) {
+            const item = checkbox.closest('.feature-item');
+            // Thêm hiệu ứng rung nhẹ khi gạt switch
+            item.style.transform = "scale(0.98)";
+            setTimeout(() => {
+                item.style.transform = "scale(1)";
+            }, 150);
         }
 
-        // Hiệu ứng Ripple cho Nút
+        // MỞ POPUP THÔNG BÁO 120FPS
+        function openPopup() {
+            document.getElementById('infoOverlay').classList.add('active');
+        }
+
+        // ĐÓNG POPUP MƯỢT MÀ
+        function closePopup() {
+            document.getElementById('infoOverlay').classList.remove('active');
+        }
+
+        // HIỆU ỨNG RIPPLE CHO NÚT (Click gợn sóng)
         function createRipple(event) {
             const button = event.currentTarget;
             const circle = document.createElement("span");
             const diameter = Math.max(button.clientWidth, button.clientHeight);
             const radius = diameter / 2;
-
             circle.style.width = circle.style.height = `${diameter}px`;
             circle.style.left = `${event.clientX - button.getBoundingClientRect().left - radius}px`;
             circle.style.top = `${event.clientY - button.getBoundingClientRect().top - radius}px`;
             circle.classList.add("ripple");
-
             const ripple = button.getElementsByClassName("ripple")[0];
             if (ripple) { ripple.remove(); }
             button.appendChild(circle);
         }
 
-        // Hiện Toast
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
+        // HIỂN THỊ TOAST (THÔNG BÁO TRƯỢT TỪ TRÊN XUỐNG)
+        function showToast(msg, type = 'error') {
+            const toast = document.getElementById('toastMsg');
             toast.innerText = msg;
+            
+            if(type === 'success') {
+                toast.classList.add('success');
+            } else {
+                toast.classList.remove('success');
+            }
+
             toast.classList.add('show');
             setTimeout(() => {
                 toast.classList.remove('show');
-            }, 2500);
+            }, 3000);
         }
     </script>
 </body>
