@@ -2,153 +2,165 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nhận Key VIP</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Xác Thực Lấy Key VIP</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
     <style>
-        :root { --bg: #000; --glass-bg: rgba(30, 30, 40, 0.45); --glass-border: rgba(255, 255, 255, 0.1); --primary: #0A84FF; --text: #FFF; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-        body { background: var(--bg); color: var(--text); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; background-image: radial-gradient(circle at top, rgba(10, 132, 255, 0.15), transparent 60%); }
+        :root {
+            --bg: #0b0b12; --glass-bg: rgba(30, 30, 45, 0.6); --glass-border: rgba(255, 255, 255, 0.08);
+            --primary: #30D158; --accent: #0A84FF; --text: #FFF; --subtext: #8E8E93;
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; overflow: hidden; background-image: radial-gradient(circle at top right, rgba(48, 209, 88, 0.12), transparent 50%), radial-gradient(circle at bottom left, rgba(10, 132, 255, 0.12), transparent 50%); }
         
-        .glass-panel { background: var(--glass-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid var(--glass-border); border-radius: 24px; padding: 35px 25px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
-        
-        h2 { font-size: 22px; margin-bottom: 10px; color: #fff; }
-        p.desc { color: #8E8E93; font-size: 14px; margin-bottom: 25px; line-height: 1.5; }
-        
-        .key-box { background: rgba(0,0,0,0.5); border: 1px dashed #30D158; border-radius: 15px; padding: 20px; margin-bottom: 20px; }
-        .key-value { font-size: 20px; font-weight: bold; color: #30D158; letter-spacing: 1px; user-select: all; }
-        
-        .btn-copy { width: 100%; background: linear-gradient(90deg, #0A84FF, #5E5CE6); border: none; color: white; padding: 16px; border-radius: 15px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .btn-copy:active { transform: scale(0.96); }
-        
-        .countdown { margin-top: 20px; font-size: 13px; color: #FF453A; font-weight: 600; display: flex; justify-content: center; align-items: center; gap: 5px; }
-        
-        .error-icon { font-size: 45px; margin-bottom: 15px; }
-        
-        /* Loading Spinner */
-        .spinner { width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.1); border-left-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        .container { width: 100%; max-width: 400px; text-align: center; z-index: 10; }
+        .glass { background: var(--glass-bg); backdrop-filter: saturate(180%) blur(25px); -webkit-backdrop-filter: saturate(180%) blur(25px); border: 1px solid var(--glass-border); border-radius: 28px; padding: 35px 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); }
+
+        /* Màn hình Loading */
+        #loadingStage { display: flex; flex-direction: column; align-items: center; justify-content: center; animation: fadeIn 0.4s ease; }
+        .spinner { width: 55px; height: 55px; border: 4px solid rgba(255,255,255,0.1); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 25px; }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Màn hình kết quả */
+        #successStage { display: none; animation: scaleUp 0.5s var(--spring); }
+        .icon-box { width: 65px; height: 65px; background: rgba(48, 209, 88, 0.15); border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 20px; }
+        .checkmark { width: 35px; height: 35px; stroke: var(--primary); stroke-width: 4; fill: none; stroke-dasharray: 50; stroke-dashoffset: 50; animation: drawCheck 0.4s ease forwards 0.3s; }
+        @keyframes drawCheck { to { stroke-dashoffset: 0; } }
+
+        .key-display-box { background: rgba(0,0,0,0.4); border: 1px dashed rgba(48, 209, 88, 0.4); border-radius: 16px; padding: 18px; margin: 25px 0; position: relative; cursor: pointer; transition: 0.3s; }
+        .key-display-box:active { transform: scale(0.98); background: rgba(0,0,0,0.6); }
+        
+        /* Style ô input để bôi xanh text */
+        .key-text-input { width: 100%; background: transparent; border: none; color: var(--primary); font-size: 20px; font-weight: 800; text-align: center; letter-spacing: 1px; outline: none; cursor: pointer; font-family: monospace; }
+        /* Tùy chỉnh màu khi bôi xanh (Selection) */
+        .key-text-input::selection { background: rgba(48, 209, 88, 0.3); color: #fff; }
+        .key-text-input::-moz-selection { background: rgba(48, 209, 88, 0.3); color: #fff; }
+
+        .hint { font-size: 13px; color: var(--subtext); line-height: 1.5; }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes scaleUp { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+        .toast { position: fixed; top: -60px; left: 50%; transform: translateX(-50%); background: #30D158; color: #fff; border-radius: 30px; padding: 12px 25px; font-size: 14px; font-weight: bold; z-index: 1000; transition: 0.5s var(--spring); box-shadow: 0 5px 15px rgba(48,209,88,0.3); }
+        .toast.show { top: 25px; }
     </style>
 </head>
 <body>
 
-    <div class="glass-panel" id="mainContainer">
-        <div class="spinner" id="loadingSpinner"></div>
-        <h2 id="titleStatus">Đang kiểm tra bảo mật...</h2>
-        <p class="desc" id="descStatus">Vui lòng đợi trong giây lát.</p>
-        
-        <div id="successSection" style="display: none;">
-            <div class="key-box">
-                <div class="key-value" id="theKey">DAT-XXXX-XXXX-XXXX</div>
+    <div class="toast" id="toast">📋 Đã tự động sao chép Key!</div>
+
+    <div class="container">
+        <div class="glass" id="loadingStage">
+            <div class="spinner"></div>
+            <h3 style="margin-bottom: 8px;">Đang Xác Thực</h3>
+            <p style="color: var(--subtext); font-size: 14px;">Vui lòng chờ trong giây lát...</p>
+        </div>
+
+        <div class="glass" id="successStage">
+            <div class="icon-box">
+                <svg viewBox="0 0 52 52" style="width:35px; height:35px;">
+                    <path class="checkmark" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                </svg>
             </div>
-            <button class="btn-copy" onclick="copyMyKey()">📋 Sao chép Key</button>
-            <div class="countdown">
-                ⏳ <span id="timerText">05:00</span> - Trang sẽ tự hủy
+            <h2>Lấy Key Thành Công!</h2>
+            <p style="color: var(--subtext); font-size: 13px; margin-top: 5px;">Key VIP có thời hạn sử dụng trong 6 giờ.</p>
+
+            <div class="key-display-box" onclick="selectAndCopyKey()">
+                <input type="text" id="keyOutput" class="key-text-input" readonly value="DAT-LOADING...">
             </div>
+
+            <p class="hint">💡 Hệ thống đã tự động bôi xanh và sao chép. Bạn chỉ cần quay lại Panel và dán vào để đăng nhập.</p>
         </div>
     </div>
 
     <script>
-        // Phải cấu hình GIỐNG HỆT file index
+        // Cấu hình Firebase đồng bộ với Panel chính
         const firebaseConfig = { apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE", databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "keyquocdat" };
-        firebase.initializeApp(firebaseConfig); 
+        firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let destructTimer;
+        let targetKey = "";
 
         window.onload = () => {
+            // Lấy tham số ?k= từ URL
             const urlParams = new URLSearchParams(window.location.search);
-            const keyParam = urlParams.get('k');
+            targetKey = urlParams.get('k');
 
-            if(!keyParam) return showError("Truy cập từ chối", "Không tìm thấy dữ liệu Key hợp lệ. Vui lòng quay lại bảng điều khiển để lấy link.");
-            
-            verifyAndShowKey(keyParam);
+            if (!targetKey) {
+                document.getElementById('loadingStage').innerHTML = `
+                    <h3 style="color:#FF453A;">⚠️ Lỗi Đường Dẫn</h3>
+                    <p style="color: var(--subtext); font-size: 14px; margin-top:10px;">Không tìm thấy mã dữ liệu key hợp lệ.</p>
+                `;
+                return;
+            }
+
+            // Tạo hiệu ứng load xác thực giả lập 2.5 giây cho mượt mà giống hệ thống lớn
+            setTimeout(() => {
+                verifyAndFetchKey();
+            }, 2500);
         };
 
-        function verifyAndShowKey(keyStr) {
-            const keyRef = db.ref('vip_ff_keys/' + keyStr);
-            
-            keyRef.once('value').then(snap => {
-                if(!snap.exists()) {
-                    return showError("Key không tồn tại", "Đường link này không hợp lệ hoặc đã bị hệ thống xóa bỏ.");
-                }
+        function verifyAndFetchKey() {
+            db.ref('vip_ff_keys/' + targetKey).once('value').then(snap => {
+                if (snap.exists()) {
+                    // Cập nhật trạng thái đã xem (tùy chọn điều kiện nếu cần)
+                    db.ref('vip_ff_keys/' + targetKey).update({ viewed: true });
 
-                const data = snap.val();
-                const now = Date.now();
+                    // Hiển thị key lên ô input
+                    const inputEl = document.getElementById('keyOutput');
+                    inputEl.value = targetKey;
 
-                // 1. Kiểm tra thời hạn 5 phút của Link
-                if(data.linkExpiresAt && now > data.linkExpiresAt) {
-                    return showError("Link đã hết hạn", "Mỗi link chỉ có hiệu lực tối đa 5 phút sau khi tạo.");
-                }
+                    // Chuyển đổi màn hình loading sang màn hình thành công
+                    document.getElementById('loadingStage').style.display = 'none';
+                    document.getElementById('successStage').style.display = 'block';
 
-                // 2. Kiểm tra xem đã có người xem chưa (Mỗi link mở 1 lần)
-                if(data.viewed === true) {
-                    return showError("Đã được sử dụng", "Key này đã được hiển thị trước đó. Nhằm bảo mật, mỗi link vượt chỉ được mở 1 lần.");
-                }
-
-                // 3. Hợp lệ -> Đánh dấu là đã xem và hiển thị
-                keyRef.update({ viewed: true }).then(() => {
-                    document.getElementById('loadingSpinner').style.display = 'none';
-                    document.getElementById('titleStatus').innerText = "Thành công!";
-                    document.getElementById('titleStatus').style.color = "#30D158";
-                    document.getElementById('descStatus').innerText = "Đây là Key VIP 6 Tiếng của bạn. Vui lòng sao chép ngay.";
-                    
-                    document.getElementById('theKey').innerText = keyStr;
-                    document.getElementById('successSection').style.display = 'block';
-
-                    startSelfDestruct(data.linkExpiresAt);
-                });
-            }).catch(error => {
-                showError("Lỗi kết nối", "Không thể kết nối đến máy chủ xác thực.");
-            });
-        }
-
-        function showError(title, desc) {
-            document.getElementById('loadingSpinner').style.display = 'none';
-            document.getElementById('titleStatus').innerHTML = `<div class="error-icon">❌</div>${title}`;
-            document.getElementById('titleStatus').style.color = "#FF453A";
-            document.getElementById('descStatus').innerText = desc;
-            document.getElementById('successSection').style.display = 'none';
-        }
-
-        function startSelfDestruct(expireTime) {
-            destructTimer = setInterval(() => {
-                const diff = expireTime - Date.now();
-                if(diff <= 0) {
-                    clearInterval(destructTimer);
-                    triggerSelfDestruct();
+                    // Tự động bôi xanh văn bản và copy ngay khi vừa hiện ra
+                    setTimeout(() => {
+                        selectAndCopyKey();
+                    }, 400);
                 } else {
-                    const m = Math.floor(diff / 60000);
-                    const s = Math.floor((diff % 60000) / 1000);
-                    document.getElementById('timerText').innerText = `0${m}:${s < 10 ? '0' : ''}${s}`;
+                    document.getElementById('loadingStage').innerHTML = `
+                        <h3 style="color:#FF453A;">❌ Key Không Tồn Tại</h3>
+                        <p style="color: var(--subtext); font-size: 14px; margin-top:10px;">Mã Key này chưa được khởi tạo hoặc đã bị xóa khỏi hệ thống.</p>
+                    `;
                 }
-            }, 1000);
-        }
-
-        function triggerSelfDestruct() {
-            document.body.innerHTML = `
-                <div class="glass-panel" style="border-color: #FF453A;">
-                    <div class="error-icon" style="color: #FF453A;">⚠️</div>
-                    <h2 style="color: #FF453A;">Trang Đã Tự Hủy</h2>
-                    <p style="color: #8E8E93; font-size: 14px; line-height: 1.5;">Thời gian xem Key đã kết thúc vì lý do bảo mật. Vui lòng quay lại Panel và tạo link mới nếu bạn chưa kịp lưu.</p>
-                </div>
-            `;
-        }
-
-        function copyMyKey() {
-            const k = document.getElementById('theKey').innerText;
-            navigator.clipboard.writeText(k).then(() => {
-                const btn = document.querySelector('.btn-copy');
-                btn.innerText = "✅ Đã sao chép thành công!";
-                btn.style.background = "#30D158";
-                setTimeout(() => { 
-                    btn.innerText = "📋 Sao chép Key"; 
-                    btn.style.background = "linear-gradient(90deg, #0A84FF, #5E5CE6)"; 
-                }, 2000);
+            }).catch(err => {
+                document.getElementById('loadingStage').innerHTML = `
+                    <h3 style="color:#FF453A;">❌ Lỗi Hệ Thống</h3>
+                    <p style="color: var(--subtext); font-size: 14px; margin-top:10px;">Không thể kết nối tới cơ sở dữ liệu Firebase.</p>
+                `;
             });
+        }
+
+        // Hàm xử lý bôi xanh (Highlight) và sao chép văn bản
+        function selectAndCopyKey() {
+            const inputEl = document.getElementById('keyOutput');
+            
+            // Thực hiện bôi xanh vùng text trong ô input
+            inputEl.focus();
+            inputEl.setSelectionRange(0, inputEl.value.length); // Cho iOS thiết bị di động
+            inputEl.select();                                    // Cho Android/PC
+
+            // Tiến hành copy lệnh
+            navigator.clipboard.writeText(inputEl.value).then(() => {
+                showToast();
+            }).catch(() => {
+                // Phương án dự phòng nếu trình duyệt cũ không hỗ trợ Clipboard API
+                document.execCommand('copy');
+                showToast();
+            });
+        }
+
+        function showToast() {
+            const t = document.getElementById('toast');
+            t.classList.add('show');
+            // Tạo một độ rung nhẹ khi copy thành công (nếu thiết bị hỗ trợ)
+            if(navigator.vibrate) navigator.vibrate(40);
+            setTimeout(() => t.classList.remove('show'), 2500);
         }
     </script>
 </body>
