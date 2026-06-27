@@ -92,9 +92,27 @@
         .fid-check { transform-origin: 50% 50%; stroke-dasharray: 48; stroke-dashoffset: 48; stroke-width: 4; stroke: #FFF; fill: none; animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.6s forwards; }
         @keyframes stroke { 100% { stroke-dashoffset: 0; } }
 
-        /* SỬA LỖI THÔNG BÁO BỊ CHE: tăng z-index lên 100000 */
-        .toast { position: fixed; top: -60px; left: 50%; transform: translateX(-50%); background: #000; border: 1px solid rgba(255,255,255,0.2); border-radius: 30px; padding: 12px 25px; font-size: 14px; font-weight: bold; z-index: 100000; transition: 0.5s var(--spring); pointer-events: none; }
-        .toast.show { top: max(15px, env(safe-area-inset-top)); }
+        /* TOAST – lùi xuống, z-index cực cao */
+        .toast {
+            position: fixed;
+            top: 80px; /* lùi xuống so với trước */
+            left: 50%;
+            transform: translateX(-50%);
+            background: #000;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 30px;
+            padding: 12px 25px;
+            font-size: 14px;
+            font-weight: bold;
+            z-index: 9999999;
+            transition: 0.5s var(--spring);
+            pointer-events: none;
+            opacity: 0;
+        }
+        .toast.show {
+            top: 80px;
+            opacity: 1;
+        }
         
         #shortLinkInput { background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border); color: #fff; padding: 12px; border-radius: 12px; text-align: center; width: 100%; margin-top: 10px; font-size: 14px; outline: none; }
     </style>
@@ -354,17 +372,15 @@
                     return showToast('❌ Key của bạn đã hết hạn sử dụng!'); 
                 }
                 
-                // SỬA LỖI: Chỉ kiểm tra viewed nếu link chưa hết hạn
+                // Chỉ kiểm tra viewed nếu link chưa hết hạn
                 if (keyData.hasOwnProperty('linkExpiresAt')) {
                     const now = Date.now();
                     if (now < keyData.linkExpiresAt) {
-                        // Link còn hiệu lực => yêu cầu viewed
                         if (keyData.viewed !== true) {
                             logout();
                             return showToast('⚠️ Lỗi: Bạn cần vượt link liên kết để kích hoạt key này!');
                         }
                     }
-                    // Nếu link đã hết hạn thì bỏ qua kiểm tra viewed
                 }
 
                 localStorage.setItem('ff_saved_key', key);
