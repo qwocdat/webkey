@@ -455,20 +455,22 @@
             document.getElementById('keyPopup').classList.remove('show'); 
         }
 
-        // --- HÀM TẠO LINK RÚT GỌN ĐÃ FIX LỖI CORS ---
+        // --- CƠ CHẾ GHÉP LINK QUICKLINK KHÔNG SỬ DỤNG API FETCH (FIX HOÀN TOÀN KHÔNG TREO) ---
         async function generateLink() {
             const btn = document.getElementById('btnGenerate');
             btn.disabled = true;
-            btn.innerText = 'Đang tạo dữ liệu...';
+            btn.innerText = 'Đang xử lý dữ liệu...';
             
             try {
+                // Khởi tạo key DAT ngẫu nhiên
                 const ranHex = () => Math.random().toString(36).substring(2, 6).toUpperCase();
                 const newKey = `DAT-${ranHex()}-${ranHex()}-${ranHex()}`;
                 
                 const now = Date.now();
-                const expiresAt = now + (6 * 60 * 60 * 1000); 
-                const linkExpiresAt = now + (5 * 60 * 1000); 
+                const expiresAt = now + (6 * 60 * 60 * 1000); // Key sống 6 tiếng
+                const linkExpiresAt = now + (5 * 60 * 1000);  // Link sống 5 phút
                 
+                // Lưu thông tin Key lên Firebase Realtime Database
                 await db.ref('vip_ff_keys/' + newKey).set({
                     expiresAt: expiresAt,
                     linkExpiresAt: linkExpiresAt,
@@ -476,33 +478,29 @@
                     createdAt: now
                 });
                 
+                // Định vị thư mục của web hiện tại để trỏ đúng file view.html
                 let currentPath = window.location.pathname;
                 let directoryPath = currentPath.substring(0, currentPath.lastIndexOf('/')) + '/';
                 if (directoryPath === '/') directoryPath = '/';
                 
+                // Tạo link view.html hoàn chỉnh
                 const targetUrl = `${window.location.origin}${directoryPath}view.html?k=${newKey}`;
                 
-                // Sử dụng Proxy allorigins để vượt rào cản CORS bảo mật của trình duyệt
-                const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent('https://api.taplayma.com/st?token=b5c38921-be67-4200-aa50-b136641033c2&url=' + encodeURIComponent(targetUrl));
+                // Sử dụng định dạng Quicklink (Liên kết nhanh) của Taplayma bằng cách ghép chuỗi trực tiếp
+                const shortLink = 'https://taplayma.com/st?token=b5c38921-be67-4200-aa50-b136641033c2&url=' + encodeURIComponent(targetUrl);
                 
-                const response = await fetch(proxyUrl);
-                if (!response.ok) throw new Error('Yêu cầu qua Proxy thất bại');
-                const rawData = await response.json();
-                
-                // Giải mã chuỗi JSON phản hồi từ server gốc nằm bên trong contents
-                const data = JSON.parse(rawData.contents);
-                
-                let shortLink = data.short_url || (data.data && data.data.short_url) || data.shortifiedUrl || targetUrl;
-                
-                document.getElementById('shortLinkInput').value = shortLink;
-                document.getElementById('shortLinkInput').style.display = 'block';
-                document.getElementById('copyBtn').style.display = 'inline-block';
-                btn.style.display = 'none';
-                
-                showToast('✅ Đã tạo link thành công!');
+                // Giả lập hiệu ứng xử lý UI trong 0.8 giây cho mượt mà chuyên nghiệp
+                setTimeout(() => {
+                    document.getElementById('shortLinkInput').value = shortLink;
+                    document.getElementById('shortLinkInput').style.display = 'block';
+                    document.getElementById('copyBtn').style.display = 'inline-block';
+                    btn.style.display = 'none';
+                    showToast('✅ Đã tạo link thành công!');
+                }, 800);
+
             } catch (error) {
                 console.error(error);
-                showToast('❌ Lỗi kết nối hệ thống, vui lòng thử lại.');
+                showToast('❌ Lỗi lưu cơ sở dữ liệu Firebase.');
                 btn.disabled = false;
                 btn.innerText = '🔗 Lấy link nhận Key';
             }
