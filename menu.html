@@ -95,8 +95,7 @@
         .toast { position: fixed; top: -60px; left: 50%; transform: translateX(-50%); background: #000; border: 1px solid rgba(255,255,255,0.2); border-radius: 30px; padding: 12px 25px; font-size: 14px; font-weight: bold; z-index: 1000; transition: 0.5s var(--spring); }
         .toast.show { top: max(15px, env(safe-area-inset-top)); }
         
-        /* Style cho popup nhận key */
-        #shortLinkInput { background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border); color: #fff; padding: 12px; border-radius: 12px; text-align: center; width: 100%; margin-top: 10px; font-size: 14px; }
+        #shortLinkInput { background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border); color: #fff; padding: 12px; border-radius: 12px; text-align: center; width: 100%; margin-top: 10px; font-size: 14px; outline: none; }
     </style>
 </head>
 <body>
@@ -183,7 +182,6 @@
         </div>
     </div>
 
-    <!-- Modal Kích Hoạt -->
     <div class="overlay" id="actModal">
         <div class="action-modal">
             <div id="actProcess">
@@ -207,30 +205,25 @@
         </div>
     </div>
 
-    <!-- Popup Nhận Key Miễn Phí -->
     <div class="overlay" id="keyPopup">
         <div class="action-modal">
             <h3 style="margin-bottom:15px;">🔓 Nhận Key VIP 6 Giờ</h3>
-            <p style="color: var(--subtext); margin-bottom:20px; font-size:14px;">Xác thực nhanh để nhận link key dùng thử.</p>
-            <div id="verifySection">
-                <button class="btn btn-primary" onclick="goToVerify()">📱 Xác thực ngay</button>
+            <p style="color: var(--subtext); margin-bottom:20px; font-size:14px;">Nhấn nút bên dưới để tạo link lấy Key dùng thử miễn phí.</p>
+            <div id="getLinkSection">
+                <button class="btn btn-primary" id="btnGenerate" onclick="generateLink()">🔗 Lấy link nhận Key</button>
+                <input type="text" id="shortLinkInput" style="display:none;" readonly>
+                <button class="btn btn-logout" id="copyBtn" style="display:none; margin-top:10px; border-color: #0A84FF; color: #0A84FF;" onclick="copyShortLink()">📋 Sao chép link</button>
             </div>
-            <div id="getLinkSection" style="display:none;">
-                <p style="color:#30D158; margin-bottom:15px;">✅ Xác thực thành công! Nhấn nút dưới để lấy link.</p>
-                <button class="btn btn-primary" onclick="generateLink()">🔗 Lấy link vượt 1 lần</button>
-                <input type="text" id="shortLinkInput" placeholder="Link sẽ hiện ở đây..." readonly>
-                <button class="btn btn-copy" style="margin-top:8px; padding:10px; font-size:14px;" onclick="copyShortLink()">📋 Sao chép link</button>
-            </div>
-            <button class="btn btn-logout" style="margin-top:15px;" onclick="closeKeyPopup()">Đóng</button>
+            <button class="btn btn-logout" style="margin-top:15px; border:none;" onclick="closeKeyPopup()">Đóng</button>
         </div>
     </div>
 
     <script>
         const firebaseConfig = { apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE", databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "keyquocdat" };
-        firebase.initializeApp(firebaseConfig); const db = firebase.database();
+        firebase.initializeApp(firebaseConfig); 
+        const db = firebase.database();
 
         let checkInterval;
-        // Biến toàn cục cho FPS
         let fpsMode = false;
         let currentFps = 60;
         let fpsInterval;
@@ -285,7 +278,7 @@
             document.getElementById('panelView').style.display = id === 'panelView' ? 'block' : 'none';
         }
 
-        // --- TOGGLE CỤC TRẮNG ---
+        // --- TOGGLE CHỨC NĂNG ---
         function setupToggles() {
             document.querySelectorAll('.ios-toggle').forEach(toggle => {
                 let isDragging = false;
@@ -310,7 +303,7 @@
                 toggle.addEventListener('click', () => {
                     toggle.classList.toggle('on');
                     triggerFeedback();
-                    // Nếu là toggle FPS thì cập nhật fpsMode
+                    
                     if (toggle.id === 'fpsToggle') {
                         fpsMode = toggle.classList.contains('on');
                         updateFpsDisplay();
@@ -319,24 +312,25 @@
             });
         }
 
-        // --- CẬP NHẬT FPS (KÍCH 120) ---
+        // --- CẬP NHẬT FPS TỪ TỪ LÊN 120 ---
         function updateFpsDisplay() {
             const fpsValEl = document.getElementById('fpsVal');
             if (fpsMode) {
-                // Bắt đầu tăng dần lên 120
                 if (fpsInterval) clearInterval(fpsInterval);
-                currentFps = 60; // bắt đầu từ 60
+                currentFps = 60; 
                 fpsInterval = setInterval(() => {
-                    if (!fpsMode || currentFps >= 120) {
+                    if (!fpsMode) return;
+                    if (currentFps >= 120) {
+                        currentFps = 120;
+                        fpsValEl.innerText = '120 FPS';
                         clearInterval(fpsInterval);
-                        if (currentFps >= 120) fpsValEl.innerText = '120 FPS';
-                        return;
+                    } else {
+                        currentFps += Math.floor(Math.random() * 3) + 1;
+                        if(currentFps > 120) currentFps = 120;
+                        fpsValEl.innerText = currentFps + ' FPS';
                     }
-                    currentFps += 2; // tăng 2 FPS mỗi lần
-                    fpsValEl.innerText = currentFps + ' FPS';
-                }, 150);
+                }, 80);
             } else {
-                // Quay về random 59-61
                 if (fpsInterval) clearInterval(fpsInterval);
                 fpsValEl.innerText = Math.floor(Math.random() * (61 - 59 + 1) + 59) + ' FPS';
             }
@@ -381,7 +375,11 @@
             checkInterval = setInterval(() => {
                 const diff = expiresAt - Date.now();
                 if(diff <= 0) { showToast("❌ Key hết hạn!"); logout(); }
-                else { document.getElementById('keyExpText').innerText = `- Còn ${Math.floor(diff/86400000)}d`; }
+                else { 
+                    const hours = Math.floor(diff / 3600000);
+                    const minutes = Math.floor((diff % 3600000) / 60000);
+                    document.getElementById('keyExpText').innerText = `- Còn ${hours}h ${minutes}m`; 
+                }
             }, 60000);
         }
         function logout() { triggerFeedback(); localStorage.removeItem('ff_saved_key'); showView('loginView'); if (checkInterval) clearInterval(checkInterval); }
@@ -398,15 +396,10 @@
                 document.getElementById('cpuBar').style.width = cpu + '%';
             }, 2000);
 
-            // FPS được quản lý riêng bởi updateFpsDisplay
-            // Cập nhật ping
             setInterval(() => {
-                const ping = Math.floor(Math.random() * (45 - 32 + 1)) + 32;
-                document.getElementById('pingVal').innerText = ping + ' ms';
+                if(!fpsMode) { document.getElementById('fpsVal').innerText = Math.floor(Math.random() * 3 + 59) + ' FPS'; }
+                document.getElementById('pingVal').innerText = Math.floor(Math.random() * 14 + 32) + ' ms';
             }, 1000);
-            
-            // Khởi tạo FPS ban đầu
-            updateFpsDisplay();
         }
 
         function startActivation() {
@@ -454,86 +447,67 @@
         // --- POPUP NHẬN KEY MIỄN PHÍ ---
         function openKeyPopup() {
             document.getElementById('keyPopup').classList.add('show');
-            // Reset trạng thái
-            document.getElementById('verifySection').style.display = 'block';
-            document.getElementById('getLinkSection').style.display = 'none';
+            
+            // Reset UI popup
+            const btnGenerate = document.getElementById('btnGenerate');
+            btnGenerate.style.display = 'block';
+            btnGenerate.disabled = false;
+            btnGenerate.innerText = '🔗 Lấy link nhận Key';
+            
+            document.getElementById('shortLinkInput').style.display = 'none';
             document.getElementById('shortLinkInput').value = '';
+            document.getElementById('copyBtn').style.display = 'none';
         }
 
-        function closeKeyPopup() {
-            document.getElementById('keyPopup').classList.remove('show');
+        function closeKeyPopup() { 
+            document.getElementById('keyPopup').classList.remove('show'); 
         }
-
-        function goToVerify() {
-            // Lưu trạng thái để khi quay lại biết
-            sessionStorage.setItem('waitingForVerify', 'true');
-            window.location.href = 'https://novaturbo.vercel.app/';
-        }
-
-        // Kiểm tra khi trang được focus trở lại (từ novaturbo)
-        window.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible' && sessionStorage.getItem('waitingForVerify') === 'true') {
-                sessionStorage.removeItem('waitingForVerify');
-                // Hiển thị phần lấy link
-                document.getElementById('verifySection').style.display = 'none';
-                document.getElementById('getLinkSection').style.display = 'block';
-                // Đảm bảo popup vẫn mở (nếu chưa đóng)
-                if (!document.getElementById('keyPopup').classList.contains('show')) {
-                    openKeyPopup();
-                    // Cập nhật lại trạng thái
-                    document.getElementById('verifySection').style.display = 'none';
-                    document.getElementById('getLinkSection').style.display = 'block';
-                }
-            }
-        });
 
         async function generateLink() {
-            const btn = event.target;
+            const btn = document.getElementById('btnGenerate');
             btn.disabled = true;
-            btn.innerText = 'Đang tạo...';
+            btn.innerText = 'Đang tạo dữ liệu...';
             
             try {
-                // 1. Tạo key mới trên Firebase với hạn 6 tiếng
-                const newKeyRef = db.ref('temp_keys').push();
-                const newKey = newKeyRef.key;
-                const expiresAt = Date.now() + (6 * 60 * 60 * 1000); // 6 giờ
+                // Tạo format key: DAT-XXXX-XXXX-XXXX
+                const ranHex = () => Math.random().toString(36).substring(2, 6).toUpperCase();
+                const newKey = `DAT-${ranHex()}-${ranHex()}-${ranHex()}`;
                 
-                await newKeyRef.set({
-                    key: newKey, // hoặc bạn có thể tạo key đẹp hơn
+                const now = Date.now();
+                const expiresAt = now + (6 * 60 * 60 * 1000); // Hạn Key: 6 giờ
+                const linkExpiresAt = now + (5 * 60 * 1000); // Hạn Link Nhận Key: 5 phút
+                
+                // Lưu thẳng vào vip_ff_keys
+                await db.ref('vip_ff_keys/' + newKey).set({
                     expiresAt: expiresAt,
-                    used: false,
-                    createdAt: Date.now()
+                    linkExpiresAt: linkExpiresAt,
+                    viewed: false, 
+                    createdAt: now
                 });
                 
-                // 2. Tạo URL đích (view.html cùng domain)
-                const targetUrl = window.location.origin + window.location.pathname.replace(/[^/]*$/, '') + 'view.html?key=' + newKey;
+                // Cấu trúc URL cho file view.html
+                let path = window.location.pathname;
+                if(path.endsWith('/')) path += 'index.html';
+                const targetUrl = window.location.origin + path.replace(/[^/]*$/, '') + 'view.html?k=' + newKey;
                 
-                // 3. Gọi API rút gọn link
+                // Gọi API Taplayma
                 const apiUrl = 'https://api.taplayma.com/st?token=b5c38921-be67-4200-aa50-b136641033c2&url=' + encodeURIComponent(targetUrl);
                 const response = await fetch(apiUrl);
                 const data = await response.json();
                 
-                // Giả định API trả về { "short_url": "..." } hoặc { "data": { "short_url": "..." } }
-                let shortLink = data.short_url || (data.data && data.data.short_url) || null;
+                let shortLink = data.short_url || (data.data && data.data.short_url) || targetUrl;
                 
-                if (!shortLink) {
-                    // Fallback nếu API không trả về đúng định dạng: dùng targetUrl trực tiếp
-                    shortLink = targetUrl;
-                    console.warn('API rút gọn không trả về short_url, dùng link gốc:', data);
-                }
-                
-                // 4. Hiển thị link
                 document.getElementById('shortLinkInput').value = shortLink;
                 document.getElementById('shortLinkInput').style.display = 'block';
+                document.getElementById('copyBtn').style.display = 'inline-block';
+                btn.style.display = 'none';
                 
                 showToast('✅ Đã tạo link thành công!');
-                
             } catch (error) {
                 console.error(error);
-                showToast('❌ Lỗi tạo link, thử lại sau.');
-            } finally {
+                showToast('❌ Lỗi hệ thống, vui lòng thử lại.');
                 btn.disabled = false;
-                btn.innerText = '🔗 Lấy link vượt 1 lần';
+                btn.innerText = '🔗 Lấy link nhận Key';
             }
         }
 
@@ -543,7 +517,9 @@
             navigator.clipboard.writeText(input.value).then(() => {
                 showToast('📋 Đã sao chép link!');
             }).catch(() => {
-                prompt('Sao chép thủ công:', input.value);
+                input.select();
+                document.execCommand('copy');
+                showToast('📋 Đã sao chép link!');
             });
         }
     </script>
