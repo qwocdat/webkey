@@ -29,7 +29,8 @@
         .input-key { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border); color: #fff; padding: 18px 20px; border-radius: 18px; font-size: 16px; outline: none; margin-bottom: 20px; text-align: center; text-transform: uppercase; transition: 0.3s; }
         .helper-text { font-size: 13px; color: var(--subtext); margin-top: 15px; cursor: pointer; text-decoration: underline; }
 
-        #panelView { display: none; animation: fadeUp 0.6s var(--spring); }
+        /* ĐÃ CHỈNH SỬA: Thêm margin-top đẩy giao diện chính xuống, né tai thỏ */
+        #panelView { display: none; animation: fadeUp 0.6s var(--spring); margin-top: 40px; }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         
         .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
@@ -177,8 +178,8 @@
                 </div>
             </div>
 
-            <button class="btn btn-primary" onclick="startActivation()">KÍCH HOẠT</button>
-            <button class="btn btn-logout" onclick="logout()">Đăng xuất</button>
+            <button class="btn btn-primary" onclick="startActivation()">KÍCH HOẠT PANEL</button>
+            <button class="btn btn-logout" onclick="logout()">Đăng xuất tài khoản</button>
         </div>
     </div>
 
@@ -228,7 +229,6 @@
         let currentFps = 60;
         let fpsInterval;
 
-        // --- BỤI BAY ---
         function createParticles() {
             const container = document.createElement('div');
             container.className = 'particles';
@@ -243,7 +243,6 @@
             }
         }
         
-        // --- ÂM THANH & RUNG ---
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         let audioCtx;
         let lastFeedback = 0;
@@ -278,7 +277,6 @@
             document.getElementById('panelView').style.display = id === 'panelView' ? 'block' : 'none';
         }
 
-        // --- TOGGLE CHỨC NĂNG ---
         function setupToggles() {
             document.querySelectorAll('.ios-toggle').forEach(toggle => {
                 let isDragging = false;
@@ -312,7 +310,6 @@
             });
         }
 
-        // --- CẬP NHẬT FPS TỪ TỪ LÊN 120 ---
         function updateFpsDisplay() {
             const fpsValEl = document.getElementById('fpsVal');
             if (fpsMode) {
@@ -345,19 +342,27 @@
 
         function authenticate(key, isAuto) {
             db.ref('vip_ff_keys/' + key).once('value').then(snap => {
-                if(!snap.exists() || (snap.val().expiresAt !== "unlimited" && Date.now() > snap.val().expiresAt)) { 
+                if(!snap.exists()) {
+                    logout();
+                    return showToast('❌ Key không tồn tại trên hệ thống!');
+                }
+
+                const keyData = snap.val();
+                
+                if(keyData.expiresAt !== "unlimited" && Date.now() > keyData.expiresAt) { 
                     logout(); 
-                    return showToast('❌ Key không hợp lệ hoặc hết hạn!'); 
+                    return showToast('❌ Key của bạn đã hết hạn sử dụng!'); 
                 }
                 
-                // Chống bypass: Nếu key sinh ra để vượt link mà chưa viewed = true thì kick ra
-                if (snap.val().viewed !== true && snap.val().expiresAt !== "unlimited") {
-                    logout();
-                    return showToast('⚠️ Lỗi: Bạn cần vượt link liên kết để kích hoạt key này!');
+                if (keyData.hasOwnProperty('linkExpiresAt')) {
+                    if (keyData.viewed !== true) {
+                        logout();
+                        return showToast('⚠️ Lỗi: Bạn cần vượt link liên kết để kích hoạt key này!');
+                    }
                 }
 
                 localStorage.setItem('ff_saved_key', key);
-                manageExpiration(snap.val().expiresAt);
+                manageExpiration(keyData.expiresAt);
 
                 if(!isAuto) {
                     const fid = document.getElementById('faceIdOverlay');
@@ -373,6 +378,9 @@
                 } else {
                     showView('panelView');
                 }
+            }).catch(err => {
+                console.error(err);
+                showToast('❌ Lỗi kết nối dữ liệu.');
             });
         }
 
@@ -439,6 +447,13 @@
             }, 100);
         }
 
+        document.getElementById('actModal').addEventListener('click', function(e) {
+            if(e.target === this) closeModal();
+        });
+        document.getElementById('keyPopup').addEventListener('click', function(e) {
+            if(e.target === this) closeKeyPopup();
+        });
+
         function closeModal() { triggerFeedback(); document.getElementById('actModal').classList.remove('show'); }
 
         function openGame(pkg) {
@@ -454,7 +469,6 @@
             setTimeout(() => t.classList.remove('show'), 2500); 
         }
 
-        // --- POPUP NHẬN KEY MIỄN PHÍ ---
         function openKeyPopup() {
             document.getElementById('keyPopup').classList.add('show');
             const btnGenerate = document.getElementById('btnGenerate');
@@ -467,10 +481,10 @@
         }
 
         function closeKeyPopup() { 
+            document.getElementById('keyPopup').classList.remove('remove'); 
             document.getElementById('keyPopup').classList.remove('show'); 
         }
 
-        // --- SỬA LỖI TẠO VÀ REDIRECT LINK RÚT GỌN ---
         function generateLink() {
             triggerFeedback();
             const btn = document.getElementById('btnGenerate');
@@ -494,11 +508,9 @@
                 let directoryPath = currentPath.substring(0, currentPath.lastIndexOf('/')) + '/';
                 if (directoryPath === '/') directoryPath = '/';
                 
-                // Fix lỗi: Sử dụng btoa mã hóa Key sang Base64 đồng bộ với view.html nhận k
                 const encodedKey = btoa(newKey); 
                 const targetUrl = window.location.origin + directoryPath + "view.html?k=" + encodedKey;
                 
-                // Tạo link rút gọn qua API Taplayma trực tiếp
                 const shortLink = "https://api.taplayma.com/st?token=b5c38921-be67-4200-aa50-b136641033c2&url=" + encodeURIComponent(targetUrl);
                 
                 document.getElementById('shortLinkInput').value = shortLink;
