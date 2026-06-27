@@ -455,22 +455,20 @@
             document.getElementById('keyPopup').classList.remove('show'); 
         }
 
-        // --- CƠ CHẾ GHÉP LINK QUICKLINK KHÔNG SỬ DỤNG API FETCH (FIX HOÀN TOÀN KHÔNG TREO) ---
+        // --- HÀM GHÉP CHUỖI THUẦN KHÔNG ENCODE - CHUẨN ĐỊNH DẠNG QUICKLINK ---
         async function generateLink() {
             const btn = document.getElementById('btnGenerate');
             btn.disabled = true;
-            btn.innerText = 'Đang xử lý dữ liệu...';
+            btn.innerText = 'Đang xử lý...';
             
             try {
-                // Khởi tạo key DAT ngẫu nhiên
                 const ranHex = () => Math.random().toString(36).substring(2, 6).toUpperCase();
                 const newKey = `DAT-${ranHex()}-${ranHex()}-${ranHex()}`;
                 
                 const now = Date.now();
-                const expiresAt = now + (6 * 60 * 60 * 1000); // Key sống 6 tiếng
-                const linkExpiresAt = now + (5 * 60 * 1000);  // Link sống 5 phút
+                const expiresAt = now + (6 * 60 * 60 * 1000); 
+                const linkExpiresAt = now + (5 * 60 * 1000); 
                 
-                // Lưu thông tin Key lên Firebase Realtime Database
                 await db.ref('vip_ff_keys/' + newKey).set({
                     expiresAt: expiresAt,
                     linkExpiresAt: linkExpiresAt,
@@ -478,29 +476,27 @@
                     createdAt: now
                 });
                 
-                // Định vị thư mục của web hiện tại để trỏ đúng file view.html
                 let currentPath = window.location.pathname;
                 let directoryPath = currentPath.substring(0, currentPath.lastIndexOf('/')) + '/';
                 if (directoryPath === '/') directoryPath = '/';
                 
-                // Tạo link view.html hoàn chỉnh
-                const targetUrl = `${window.location.origin}${directoryPath}view.html?k=${newKey}`;
+                // Khởi tạo link view.html dạng text thường (Không dùng encodeURIComponent)
+                const targetUrl = window.location.origin + directoryPath + "view.html?k=" + newKey;
                 
-                // Sử dụng định dạng Quicklink (Liên kết nhanh) của Taplayma bằng cách ghép chuỗi trực tiếp
-                const shortLink = 'https://taplayma.com/st?token=b5c38921-be67-4200-aa50-b136641033c2&url=' + encodeURIComponent(targetUrl);
+                // Nối trực tiếp chuỗi thô để hệ thống Taplayma nhận diện chuẩn xác
+                const shortLink = "https://taplayma.com/st?token=b5c38921-be67-4200-aa50-b136641033c2&url=" + targetUrl;
                 
-                // Giả lập hiệu ứng xử lý UI trong 0.8 giây cho mượt mà chuyên nghiệp
                 setTimeout(() => {
                     document.getElementById('shortLinkInput').value = shortLink;
                     document.getElementById('shortLinkInput').style.display = 'block';
                     document.getElementById('copyBtn').style.display = 'inline-block';
                     btn.style.display = 'none';
                     showToast('✅ Đã tạo link thành công!');
-                }, 800);
+                }, 400);
 
             } catch (error) {
                 console.error(error);
-                showToast('❌ Lỗi lưu cơ sở dữ liệu Firebase.');
+                showToast('❌ Lỗi lưu dữ liệu Firebase.');
                 btn.disabled = false;
                 btn.innerText = '🔗 Lấy link nhận Key';
             }
