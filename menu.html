@@ -29,7 +29,6 @@
         .input-key { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border); color: #fff; padding: 18px 20px; border-radius: 18px; font-size: 16px; outline: none; margin-bottom: 20px; text-align: center; text-transform: uppercase; transition: 0.3s; }
         .helper-text { font-size: 13px; color: var(--subtext); margin-top: 15px; cursor: pointer; text-decoration: underline; }
 
-        /* ĐÃ CHỈNH SỬA: Thêm margin-top đẩy giao diện chính xuống, né tai thỏ */
         #panelView { display: none; animation: fadeUp 0.6s var(--spring); margin-top: 40px; }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         
@@ -183,14 +182,17 @@
         </div>
     </div>
 
+    <!-- MODAL KÍCH HOẠT CHÍNH -->
     <div class="overlay" id="actModal">
         <div class="action-modal">
+            <!-- Khối tiến trình (dùng chung cho cả kích hoạt panel và mở game) -->
             <div id="actProcess">
                 <div id="actStatus">Đang khởi tạo...</div>
                 <div class="big-progress"><div class="big-bar" id="actBar"></div></div>
                 <div id="actPercent">0%</div>
             </div>
             
+            <!-- Khối nút chọn game (chỉ hiện sau khi kích hoạt panel xong) -->
             <div id="gameButtons">
                 <div id="actSuccessIcon" style="color:#30D158; margin-bottom:15px; font-size:18px; font-weight:bold;">
                     <svg class="act-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
@@ -199,13 +201,15 @@
                     </svg>
                     <div>Đã sẵn sàng!</div>
                 </div>
-                <button class="btn btn-game" onclick="openGame('com.dts.freefireth')">Mở Free Fire</button>
-                <button class="btn btn-game" onclick="openGame('com.dts.freefiremax')">Mở Free Fire MAX</button>
+                <!-- ĐÃ SỬA: gọi openGameWithLoading để hiện tiến trình trước khi mở game -->
+                <button class="btn btn-game" onclick="openGameWithLoading('com.dts.freefireth')">Mở Free Fire</button>
+                <button class="btn btn-game" onclick="openGameWithLoading('com.dts.freefiremax')">Mở Free Fire MAX</button>
                 <button class="btn btn-logout" style="border:none; margin-top:0;" onclick="closeModal()">Đóng</button>
             </div>
         </div>
     </div>
 
+    <!-- Popup lấy key -->
     <div class="overlay" id="keyPopup">
         <div class="action-modal">
             <h3 style="margin-bottom:15px;">🔓 Nhận Key VIP 6 Giờ</h3>
@@ -420,31 +424,89 @@
             }, 1000);
         }
 
+        // Kích hoạt panel (tiến trình 0-100% rồi hiện nút game)
         function startActivation() {
             triggerFeedback();
-            document.getElementById('actModal').classList.add('show');
+            const modal = document.getElementById('actModal');
+            modal.classList.add('show');
+            
+            // Reset giao diện modal về trạng thái tiến trình
             document.getElementById('actProcess').style.display = 'block';
-            const gameBtns = document.getElementById('gameButtons');
-            const successIcon = document.getElementById('actSuccessIcon');
-            gameBtns.style.display = 'none';
-            successIcon.classList.remove('animate-check');
+            document.getElementById('gameButtons').style.display = 'none';
+            document.getElementById('actSuccessIcon').classList.remove('animate-check');
+            document.getElementById('actBar').style.width = '0%';
+            document.getElementById('actPercent').innerText = '0%';
+            document.getElementById('actStatus').innerText = 'Đang khởi tạo...';
+            
             let pct = 0;
             let sim = setInterval(() => {
                 pct += 4;
                 if(pct >= 100) {
                     pct = 100; clearInterval(sim);
                     setTimeout(() => {
+                        // Ẩn tiến trình, hiện nút game
                         document.getElementById('actProcess').style.display = 'none';
-                        gameBtns.style.display = 'flex';
-                        successIcon.classList.add('animate-check');
+                        document.getElementById('gameButtons').style.display = 'flex';
+                        document.getElementById('actSuccessIcon').classList.add('animate-check');
                         triggerFeedback();
-                    }, 500);
+                    }, 400);
                 }
                 document.getElementById('actBar').style.width = pct + '%';
                 document.getElementById('actPercent').innerText = pct + '%';
                 const txt = document.getElementById('actStatus');
-                if(pct < 30) txt.innerText = "Đang kiểm tra..."; else if(pct < 70) txt.innerText = "Đang áp dụng tối ưu..."; else txt.innerText = "Đang hoàn tất...";
-            }, 100);
+                if(pct < 30) txt.innerText = "Đang kiểm tra..."; 
+                else if(pct < 70) txt.innerText = "Đang áp dụng tối ưu..."; 
+                else txt.innerText = "Đang hoàn tất...";
+            }, 80);
+        }
+
+        // Hàm mới: Mở game với tiến trình load, load xong tự mở
+        function openGameWithLoading(packageName) {
+            triggerFeedback();
+            
+            // Ẩn nút game, hiện lại khung tiến trình
+            document.getElementById('gameButtons').style.display = 'none';
+            document.getElementById('actSuccessIcon').classList.remove('animate-check');
+            document.getElementById('actProcess').style.display = 'block';
+            
+            // Reset thanh tiến trình
+            document.getElementById('actBar').style.width = '0%';
+            document.getElementById('actPercent').innerText = '0%';
+            document.getElementById('actStatus').innerText = 'Đang chuẩn bị mở game...';
+            
+            let pct = 0;
+            let loadInterval = setInterval(() => {
+                pct += 5; // Tăng nhanh hơn một chút
+                if(pct >= 100) {
+                    pct = 100;
+                    clearInterval(loadInterval);
+                    document.getElementById('actBar').style.width = '100%';
+                    document.getElementById('actPercent').innerText = '100%';
+                    document.getElementById('actStatus').innerText = 'Đang khởi động...';
+                    
+                    // Sau khi load xong, delay nhẹ rồi mở game
+                    setTimeout(() => {
+                        // Mở game bằng Intent
+                        const intentUrl = `intent://#Intent;package=${packageName};action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10000000;end`;
+                        window.location.href = intentUrl;
+                        
+                        // Sau khi chuyển hướng, không cần đóng modal, nhưng để sạch sẽ
+                        // Có thể reset modal nếu cần, nhưng không bắt buộc
+                    }, 300);
+                    return;
+                }
+                document.getElementById('actBar').style.width = pct + '%';
+                document.getElementById('actPercent').innerText = pct + '%';
+                if(pct < 50) document.getElementById('actStatus').innerText = 'Đang kiểm tra tương thích...';
+                else if(pct < 80) document.getElementById('actStatus').innerText = 'Đang tối ưu bộ nhớ game...';
+                else document.getElementById('actStatus').innerText = 'Đang hoàn tất chuẩn bị...';
+            }, 60);
+        }
+
+        // Đóng modal overlay (dùng cho nút Đóng hoặc click bên ngoài)
+        function closeModal() { 
+            triggerFeedback(); 
+            document.getElementById('actModal').classList.remove('show'); 
         }
 
         document.getElementById('actModal').addEventListener('click', function(e) {
@@ -453,14 +515,6 @@
         document.getElementById('keyPopup').addEventListener('click', function(e) {
             if(e.target === this) closeKeyPopup();
         });
-
-        function closeModal() { triggerFeedback(); document.getElementById('actModal').classList.remove('show'); }
-
-        function openGame(pkg) {
-            triggerFeedback();
-            const intentUrl = `intent://#Intent;package=${pkg};action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10000000;end`;
-            window.location.href = intentUrl;
-        }
 
         function showToast(msg) { 
             const t = document.getElementById('toast'); 
@@ -481,7 +535,6 @@
         }
 
         function closeKeyPopup() { 
-            document.getElementById('keyPopup').classList.remove('remove'); 
             document.getElementById('keyPopup').classList.remove('show'); 
         }
 
