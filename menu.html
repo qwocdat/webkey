@@ -92,7 +92,8 @@
         .fid-check { transform-origin: 50% 50%; stroke-dasharray: 48; stroke-dashoffset: 48; stroke-width: 4; stroke: #FFF; fill: none; animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.6s forwards; }
         @keyframes stroke { 100% { stroke-dashoffset: 0; } }
 
-        .toast { position: fixed; top: -60px; left: 50%; transform: translateX(-50%); background: #000; border: 1px solid rgba(255,255,255,0.2); border-radius: 30px; padding: 12px 25px; font-size: 14px; font-weight: bold; z-index: 1000; transition: 0.5s var(--spring); }
+        /* SỬA LỖI THÔNG BÁO BỊ CHE: tăng z-index lên 9999 */
+        .toast { position: fixed; top: -60px; left: 50%; transform: translateX(-50%); background: #000; border: 1px solid rgba(255,255,255,0.2); border-radius: 30px; padding: 12px 25px; font-size: 14px; font-weight: bold; z-index: 9999; transition: 0.5s var(--spring); pointer-events: none; }
         .toast.show { top: max(15px, env(safe-area-inset-top)); }
         
         #shortLinkInput { background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border); color: #fff; padding: 12px; border-radius: 12px; text-align: center; width: 100%; margin-top: 10px; font-size: 14px; outline: none; }
@@ -201,7 +202,7 @@
                     </svg>
                     <div>Đã sẵn sàng!</div>
                 </div>
-                <!-- ĐÃ SỬA: gọi openGameWithLoading để hiện tiến trình trước khi mở game -->
+                <!-- Gọi openGameWithLoading với package tương ứng -->
                 <button class="btn btn-game" onclick="openGameWithLoading('com.dts.freefireth')">Mở Free Fire</button>
                 <button class="btn btn-game" onclick="openGameWithLoading('com.dts.freefiremax')">Mở Free Fire MAX</button>
                 <button class="btn btn-logout" style="border:none; margin-top:0;" onclick="closeModal()">Đóng</button>
@@ -460,7 +461,7 @@
             }, 80);
         }
 
-        // Hàm mới: Mở game với tiến trình load, load xong tự mở
+        // SỬA HÀM MỞ GAME: dùng URL scheme thay vì intent để mở thẳng game nếu đã cài
         function openGameWithLoading(packageName) {
             triggerFeedback();
             
@@ -476,7 +477,7 @@
             
             let pct = 0;
             let loadInterval = setInterval(() => {
-                pct += 5; // Tăng nhanh hơn một chút
+                pct += 5;
                 if(pct >= 100) {
                     pct = 100;
                     clearInterval(loadInterval);
@@ -484,14 +485,19 @@
                     document.getElementById('actPercent').innerText = '100%';
                     document.getElementById('actStatus').innerText = 'Đang khởi động...';
                     
-                    // Sau khi load xong, delay nhẹ rồi mở game
+                    // Sau khi load xong, delay nhẹ rồi mở game bằng URL scheme
                     setTimeout(() => {
-                        // Mở game bằng Intent
-                        const intentUrl = `intent://#Intent;package=${packageName};action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10000000;end`;
-                        window.location.href = intentUrl;
-                        
-                        // Sau khi chuyển hướng, không cần đóng modal, nhưng để sạch sẽ
-                        // Có thể reset modal nếu cần, nhưng không bắt buộc
+                        // Xác định scheme theo package
+                        let scheme = '';
+                        if (packageName === 'com.dts.freefireth') {
+                            scheme = 'freefire://';   // Scheme thường dùng cho Free Fire
+                        } else if (packageName === 'com.dts.freefiremax') {
+                            scheme = 'freefiremax://'; // Scheme cho Free Fire MAX
+                        } else {
+                            // Fallback: dùng intent (có thể chuyển sang CH Play nếu chưa cài)
+                            scheme = 'intent://#Intent;package=' + packageName + ';action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10000000;end';
+                        }
+                        window.location.href = scheme;
                     }, 300);
                     return;
                 }
