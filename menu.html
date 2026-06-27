@@ -448,7 +448,6 @@
         function openKeyPopup() {
             document.getElementById('keyPopup').classList.add('show');
             
-            // Reset UI popup
             const btnGenerate = document.getElementById('btnGenerate');
             btnGenerate.style.display = 'block';
             btnGenerate.disabled = false;
@@ -463,21 +462,22 @@
             document.getElementById('keyPopup').classList.remove('show'); 
         }
 
+        // --- TÍCH HỢP HỆ THỐNG API VÀ ĐỊNH VỊ VIEW.HTML CHUẨN XÁC ---
         async function generateLink() {
             const btn = document.getElementById('btnGenerate');
             btn.disabled = true;
             btn.innerText = 'Đang tạo dữ liệu...';
             
             try {
-                // Tạo format key: DAT-XXXX-XXXX-XXXX
+                // 1. Khởi tạo ngẫu nhiên format key: DAT-XXXX-XXXX-XXXX
                 const ranHex = () => Math.random().toString(36).substring(2, 6).toUpperCase();
                 const newKey = `DAT-${ranHex()}-${ranHex()}-${ranHex()}`;
                 
                 const now = Date.now();
-                const expiresAt = now + (6 * 60 * 60 * 1000); // Hạn Key: 6 giờ
-                const linkExpiresAt = now + (5 * 60 * 1000); // Hạn Link Nhận Key: 5 phút
+                const expiresAt = now + (6 * 60 * 60 * 1000); // Thời gian sử dụng Key: 6 giờ
+                const linkExpiresAt = now + (5 * 60 * 1000);  // Link chờ lấy key chỉ tồn tại 5 phút
                 
-                // Lưu thẳng vào vip_ff_keys
+                // 2. Đồng bộ Key lên Firebase
                 await db.ref('vip_ff_keys/' + newKey).set({
                     expiresAt: expiresAt,
                     linkExpiresAt: linkExpiresAt,
@@ -485,18 +485,25 @@
                     createdAt: now
                 });
                 
-                // Cấu trúc URL cho file view.html
-                let path = window.location.pathname;
-                if(path.endsWith('/')) path += 'index.html';
-                const targetUrl = window.location.origin + path.replace(/[^/]*$/, '') + 'view.html?k=' + newKey;
+                // 3. Tự động định vị đường dẫn thư mục hiện tại để trỏ đúng sang view.html
+                let currentPath = window.location.pathname;
+                let directoryPath = currentPath.substring(0, currentPath.lastIndexOf('/')) + '/';
+                if (directoryPath === '/') directoryPath = '/';
                 
-                // Gọi API Taplayma
+                // Link đích cuối cùng chứa Key
+                const targetUrl = `${window.location.origin}${directoryPath}view.html?k=${newKey}`;
+                
+                // 4. Gửi request đến hệ thống rút gọn Taplayma
                 const apiUrl = 'https://api.taplayma.com/st?token=b5c38921-be67-4200-aa50-b136641033c2&url=' + encodeURIComponent(targetUrl);
+                
                 const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error('Yêu cầu API thất bại');
                 const data = await response.json();
                 
-                let shortLink = data.short_url || (data.data && data.data.short_url) || targetUrl;
+                // Phân tách link rút gọn trả về từ Object API lồng ghép
+                let shortLink = data.short_url || (data.data && data.data.short_url) || data.shortifiedUrl || targetUrl;
                 
+                // 5. Cập nhật UI
                 document.getElementById('shortLinkInput').value = shortLink;
                 document.getElementById('shortLinkInput').style.display = 'block';
                 document.getElementById('copyBtn').style.display = 'inline-block';
@@ -505,7 +512,7 @@
                 showToast('✅ Đã tạo link thành công!');
             } catch (error) {
                 console.error(error);
-                showToast('❌ Lỗi hệ thống, vui lòng thử lại.');
+                showToast('❌ Lỗi kết nối API Taplayma. Vui lòng thử lại!');
                 btn.disabled = false;
                 btn.innerText = '🔗 Lấy link nhận Key';
             }
