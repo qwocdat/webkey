@@ -92,8 +92,8 @@
         .fid-check { transform-origin: 50% 50%; stroke-dasharray: 48; stroke-dashoffset: 48; stroke-width: 4; stroke: #FFF; fill: none; animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.6s forwards; }
         @keyframes stroke { 100% { stroke-dashoffset: 0; } }
 
-        /* SỬA LỖI THÔNG BÁO BỊ CHE: tăng z-index lên 9999 */
-        .toast { position: fixed; top: -60px; left: 50%; transform: translateX(-50%); background: #000; border: 1px solid rgba(255,255,255,0.2); border-radius: 30px; padding: 12px 25px; font-size: 14px; font-weight: bold; z-index: 9999; transition: 0.5s var(--spring); pointer-events: none; }
+        /* SỬA LỖI THÔNG BÁO BỊ CHE: tăng z-index lên 100000 */
+        .toast { position: fixed; top: -60px; left: 50%; transform: translateX(-50%); background: #000; border: 1px solid rgba(255,255,255,0.2); border-radius: 30px; padding: 12px 25px; font-size: 14px; font-weight: bold; z-index: 100000; transition: 0.5s var(--spring); pointer-events: none; }
         .toast.show { top: max(15px, env(safe-area-inset-top)); }
         
         #shortLinkInput { background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border); color: #fff; padding: 12px; border-radius: 12px; text-align: center; width: 100%; margin-top: 10px; font-size: 14px; outline: none; }
@@ -186,14 +186,11 @@
     <!-- MODAL KÍCH HOẠT CHÍNH -->
     <div class="overlay" id="actModal">
         <div class="action-modal">
-            <!-- Khối tiến trình (dùng chung cho cả kích hoạt panel và mở game) -->
             <div id="actProcess">
                 <div id="actStatus">Đang khởi tạo...</div>
                 <div class="big-progress"><div class="big-bar" id="actBar"></div></div>
                 <div id="actPercent">0%</div>
             </div>
-            
-            <!-- Khối nút chọn game (chỉ hiện sau khi kích hoạt panel xong) -->
             <div id="gameButtons">
                 <div id="actSuccessIcon" style="color:#30D158; margin-bottom:15px; font-size:18px; font-weight:bold;">
                     <svg class="act-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
@@ -202,7 +199,6 @@
                     </svg>
                     <div>Đã sẵn sàng!</div>
                 </div>
-                <!-- Gọi openGameWithLoading với package tương ứng -->
                 <button class="btn btn-game" onclick="openGameWithLoading('com.dts.freefireth')">Mở Free Fire</button>
                 <button class="btn btn-game" onclick="openGameWithLoading('com.dts.freefiremax')">Mở Free Fire MAX</button>
                 <button class="btn btn-logout" style="border:none; margin-top:0;" onclick="closeModal()">Đóng</button>
@@ -210,7 +206,6 @@
         </div>
     </div>
 
-    <!-- Popup lấy key -->
     <div class="overlay" id="keyPopup">
         <div class="action-modal">
             <h3 style="margin-bottom:15px;">🔓 Nhận Key VIP 6 Giờ</h3>
@@ -359,11 +354,17 @@
                     return showToast('❌ Key của bạn đã hết hạn sử dụng!'); 
                 }
                 
+                // SỬA LỖI: Chỉ kiểm tra viewed nếu link chưa hết hạn
                 if (keyData.hasOwnProperty('linkExpiresAt')) {
-                    if (keyData.viewed !== true) {
-                        logout();
-                        return showToast('⚠️ Lỗi: Bạn cần vượt link liên kết để kích hoạt key này!');
+                    const now = Date.now();
+                    if (now < keyData.linkExpiresAt) {
+                        // Link còn hiệu lực => yêu cầu viewed
+                        if (keyData.viewed !== true) {
+                            logout();
+                            return showToast('⚠️ Lỗi: Bạn cần vượt link liên kết để kích hoạt key này!');
+                        }
                     }
+                    // Nếu link đã hết hạn thì bỏ qua kiểm tra viewed
                 }
 
                 localStorage.setItem('ff_saved_key', key);
@@ -425,13 +426,11 @@
             }, 1000);
         }
 
-        // Kích hoạt panel (tiến trình 0-100% rồi hiện nút game)
         function startActivation() {
             triggerFeedback();
             const modal = document.getElementById('actModal');
             modal.classList.add('show');
             
-            // Reset giao diện modal về trạng thái tiến trình
             document.getElementById('actProcess').style.display = 'block';
             document.getElementById('gameButtons').style.display = 'none';
             document.getElementById('actSuccessIcon').classList.remove('animate-check');
@@ -445,7 +444,6 @@
                 if(pct >= 100) {
                     pct = 100; clearInterval(sim);
                     setTimeout(() => {
-                        // Ẩn tiến trình, hiện nút game
                         document.getElementById('actProcess').style.display = 'none';
                         document.getElementById('gameButtons').style.display = 'flex';
                         document.getElementById('actSuccessIcon').classList.add('animate-check');
@@ -461,16 +459,13 @@
             }, 80);
         }
 
-        // SỬA HÀM MỞ GAME: dùng URL scheme thay vì intent để mở thẳng game nếu đã cài
         function openGameWithLoading(packageName) {
             triggerFeedback();
             
-            // Ẩn nút game, hiện lại khung tiến trình
             document.getElementById('gameButtons').style.display = 'none';
             document.getElementById('actSuccessIcon').classList.remove('animate-check');
             document.getElementById('actProcess').style.display = 'block';
             
-            // Reset thanh tiến trình
             document.getElementById('actBar').style.width = '0%';
             document.getElementById('actPercent').innerText = '0%';
             document.getElementById('actStatus').innerText = 'Đang chuẩn bị mở game...';
@@ -485,16 +480,13 @@
                     document.getElementById('actPercent').innerText = '100%';
                     document.getElementById('actStatus').innerText = 'Đang khởi động...';
                     
-                    // Sau khi load xong, delay nhẹ rồi mở game bằng URL scheme
                     setTimeout(() => {
-                        // Xác định scheme theo package
                         let scheme = '';
                         if (packageName === 'com.dts.freefireth') {
-                            scheme = 'freefire://';   // Scheme thường dùng cho Free Fire
+                            scheme = 'freefire://';
                         } else if (packageName === 'com.dts.freefiremax') {
-                            scheme = 'freefiremax://'; // Scheme cho Free Fire MAX
+                            scheme = 'freefiremax://';
                         } else {
-                            // Fallback: dùng intent (có thể chuyển sang CH Play nếu chưa cài)
                             scheme = 'intent://#Intent;package=' + packageName + ';action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10000000;end';
                         }
                         window.location.href = scheme;
@@ -509,7 +501,6 @@
             }, 60);
         }
 
-        // Đóng modal overlay (dùng cho nút Đóng hoặc click bên ngoài)
         function closeModal() { 
             triggerFeedback(); 
             document.getElementById('actModal').classList.remove('show'); 
