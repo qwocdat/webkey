@@ -17,7 +17,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; background-image: radial-gradient(circle at top right, rgba(10, 132, 255, 0.15), transparent 50%), radial-gradient(circle at bottom left, rgba(138, 43, 226, 0.15), transparent 50%); user-select: none; }
         
-        /* HIỆU ỨNG BỤI BAY */
         .particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden; }
         .particle { position: absolute; bottom: -10px; width: 3px; height: 3px; background: rgba(255, 255, 255, 0.35); border-radius: 50%; animation: floatUp linear infinite; }
         @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(-100vh) scale(0.5); opacity: 0; } }
@@ -25,10 +24,10 @@
         .app-container { position: relative; z-index: 10; width: 100%; max-width: 500px; margin: 0 auto; padding: max(20px, env(safe-area-inset-top)) 20px 40px; }
         .glass { background: var(--glass-bg); backdrop-filter: saturate(180%) blur(25px); -webkit-backdrop-filter: saturate(180%) blur(25px); border: 1px solid var(--glass-border); border-radius: 24px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
 
-        /* Login View & Animation */
         #loginView { display: none; text-align: center; margin-top: 30vh; animation: fadeUp 0.6s var(--spring); }
         .logo-login { width: 80px; height: 80px; background: linear-gradient(135deg, #0A84FF, #5E5CE6); border-radius: 22px; margin: 0 auto 20px; display: flex; justify-content: center; align-items: center; font-size: 30px; font-weight: bold; }
         .input-key { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border); color: #fff; padding: 18px 20px; border-radius: 18px; font-size: 16px; outline: none; margin-bottom: 20px; text-align: center; text-transform: uppercase; transition: 0.3s; }
+        .helper-text { font-size: 13px; color: var(--subtext); margin-top: 15px; cursor: pointer; text-decoration: underline; }
 
         #panelView { display: none; animation: fadeUp 0.6s var(--spring); }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
@@ -51,7 +50,6 @@
         .feature-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 30px; }
         .feature-item { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border-radius: 20px; }
         
-        /* TOGGLE IOS */
         .ios-toggle { position: relative; width: 52px; height: 32px; border-radius: 32px; background: rgba(255,255,255,0.15); cursor: pointer; transition: background 0.3s ease; touch-action: none; }
         .ios-toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 28px; height: 28px; background: #fff; border-radius: 50%; box-shadow: 0 3px 8px rgba(0,0,0,0.15); transition: transform 0.3s var(--spring), background 0.3s, backdrop-filter 0.3s; }
         .ios-toggle.on { background: #30D158; }
@@ -76,14 +74,12 @@
         #gameButtons { display: none; margin-top: 15px; flex-direction: column; gap: 10px; }
         .btn-game { background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); color: #fff; padding: 15px; border-radius: 16px; cursor: pointer; font-size: 15px; font-weight: 600; }
 
-        /* --- HIỆU ỨNG VẼ DẤU TÍCH TRONG BẢNG KÍCH HOẠT --- */
         .act-icon { width: 45px; height: 45px; margin: 0 auto 10px; }
         .act-circle { stroke-dasharray: 166; stroke-dashoffset: 166; stroke-width: 4; stroke-miterlimit: 10; stroke: #30D158; fill: none; }
         .act-check { transform-origin: 50% 50%; stroke-dasharray: 48; stroke-dashoffset: 48; stroke-width: 4; stroke: #30D158; fill: none; }
         .animate-check .act-circle { animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards; }
         .animate-check .act-check { animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.4s forwards; }
 
-        /* --- HIỆU ỨNG FACE ID --- */
         #faceIdOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 9999; opacity: 0; transition: opacity 0.3s ease; }
         #faceIdOverlay.show { opacity: 1; }
         .face-id-box { width: 160px; height: 160px; background: rgba(40,40,40,0.7); border-radius: 30px; display: flex; justify-content: center; align-items: center; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transform: scale(0.8); transition: transform 0.4s var(--spring); }
@@ -98,14 +94,15 @@
 
         .toast { position: fixed; top: -60px; left: 50%; transform: translateX(-50%); background: #000; border: 1px solid rgba(255,255,255,0.2); border-radius: 30px; padding: 12px 25px; font-size: 14px; font-weight: bold; z-index: 1000; transition: 0.5s var(--spring); }
         .toast.show { top: max(15px, env(safe-area-inset-top)); }
+        
+        /* Style cho popup nhận key */
+        #shortLinkInput { background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border); color: #fff; padding: 12px; border-radius: 12px; text-align: center; width: 100%; margin-top: 10px; font-size: 14px; }
     </style>
 </head>
 <body>
 
-    <!-- Thông báo lỗi -->
     <div class="toast" id="toast">Thông báo</div>
 
-    <!-- Overlay Face ID Thành Công -->
     <div id="faceIdOverlay">
         <div class="face-id-box">
             <svg class="fid-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
@@ -123,6 +120,7 @@
             <p style="color: var(--subtext); font-size: 14px; margin-bottom: 30px;">Vui lòng nhập Key để sử dụng Panel</p>
             <input type="text" id="keyInput" class="input-key" placeholder="DAT-XXXX-XXXX-XXXX" autocomplete="off">
             <button class="btn btn-primary" onclick="verifyKey()">ĐĂNG NHẬP</button>
+            <p class="helper-text" onclick="openKeyPopup()">🔑 Bạn chưa có key? Nhận miễn phí</p>
         </div>
 
         <div id="panelView">
@@ -171,8 +169,8 @@
                     <div class="ios-toggle"></div>
                 </div>
                 <div class="glass feature-item">
-                    <div class="f-name">Ổn định FPS (60)</div>
-                    <div class="ios-toggle"></div>
+                    <div class="f-name">Kích 120 FPS</div>
+                    <div class="ios-toggle" id="fpsToggle"></div>
                 </div>
                 <div class="glass feature-item">
                     <div class="f-name">Xóa Cache Game</div>
@@ -196,7 +194,6 @@
             
             <div id="gameButtons">
                 <div id="actSuccessIcon" style="color:#30D158; margin-bottom:15px; font-size:18px; font-weight:bold;">
-                    <!-- SVG Tích xanh kích hoạt -->
                     <svg class="act-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
                         <circle class="act-circle" cx="26" cy="26" r="25"/>
                         <path class="act-check" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
@@ -210,13 +207,35 @@
         </div>
     </div>
 
+    <!-- Popup Nhận Key Miễn Phí -->
+    <div class="overlay" id="keyPopup">
+        <div class="action-modal">
+            <h3 style="margin-bottom:15px;">🔓 Nhận Key VIP 6 Giờ</h3>
+            <p style="color: var(--subtext); margin-bottom:20px; font-size:14px;">Xác thực nhanh để nhận link key dùng thử.</p>
+            <div id="verifySection">
+                <button class="btn btn-primary" onclick="goToVerify()">📱 Xác thực ngay</button>
+            </div>
+            <div id="getLinkSection" style="display:none;">
+                <p style="color:#30D158; margin-bottom:15px;">✅ Xác thực thành công! Nhấn nút dưới để lấy link.</p>
+                <button class="btn btn-primary" onclick="generateLink()">🔗 Lấy link vượt 1 lần</button>
+                <input type="text" id="shortLinkInput" placeholder="Link sẽ hiện ở đây..." readonly>
+                <button class="btn btn-copy" style="margin-top:8px; padding:10px; font-size:14px;" onclick="copyShortLink()">📋 Sao chép link</button>
+            </div>
+            <button class="btn btn-logout" style="margin-top:15px;" onclick="closeKeyPopup()">Đóng</button>
+        </div>
+    </div>
+
     <script>
         const firebaseConfig = { apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE", databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "keyquocdat" };
         firebase.initializeApp(firebaseConfig); const db = firebase.database();
 
         let checkInterval;
-        
-        // --- TẠO HẠT BỤI BAY ---
+        // Biến toàn cục cho FPS
+        let fpsMode = false;
+        let currentFps = 60;
+        let fpsInterval;
+
+        // --- BỤI BAY ---
         function createParticles() {
             const container = document.createElement('div');
             container.className = 'particles';
@@ -231,39 +250,31 @@
             }
         }
         
-        // --- ÂM THANH BÍP & RUNG (Sửa lỗi lặp tiếng) ---
+        // --- ÂM THANH & RUNG ---
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         let audioCtx;
-        let lastFeedback = 0; // Bộ lọc thời gian
-
+        let lastFeedback = 0;
         function triggerFeedback() {
             const now = Date.now();
-            if (now - lastFeedback < 300) return; // Nếu chạm liên tục dưới 0.3s thì bỏ qua không kêu lặp lại
+            if (now - lastFeedback < 300) return;
             lastFeedback = now;
-
             if(navigator.vibrate) navigator.vibrate([60]);
-            
             if(!audioCtx) audioCtx = new AudioContext();
             if(audioCtx.state === 'suspended') audioCtx.resume();
-            
             const oscillator = audioCtx.createOscillator();
             const gainNode = audioCtx.createGain();
-            
             oscillator.type = 'sine';
             oscillator.frequency.setValueAtTime(800, audioCtx.currentTime); 
-            
             gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-            
             oscillator.connect(gainNode);
             gainNode.connect(audioCtx.destination);
-            
             oscillator.start();
             oscillator.stop(audioCtx.currentTime + 0.1);
         }
 
         window.onload = () => {
-            createParticles(); // Kích hoạt bụi bay
+            createParticles();
             startClock(); startWidgets(); setupToggles();
             const savedKey = localStorage.getItem('ff_saved_key');
             if(savedKey) authenticate(savedKey, true); else showView('loginView');
@@ -274,38 +285,61 @@
             document.getElementById('panelView').style.display = id === 'panelView' ? 'block' : 'none';
         }
 
-        // --- TOGGLE CỤC TRẮNG KÈM FEEDBACK ---
+        // --- TOGGLE CỤC TRẮNG ---
         function setupToggles() {
             document.querySelectorAll('.ios-toggle').forEach(toggle => {
                 let isDragging = false;
-                
                 toggle.addEventListener('touchstart', (e) => {
                     isDragging = true;
                     toggle.classList.add('pressing'); 
                     triggerFeedback();
                 });
-
                 toggle.addEventListener('touchmove', (e) => {
                     if(!isDragging) return;
                     e.preventDefault();
                     const touch = e.touches[0];
                     const rect = toggle.getBoundingClientRect();
                     const x = touch.clientX - rect.left;
-                    
                     if(x > rect.width / 2) { toggle.classList.add('on'); } 
                     else { toggle.classList.remove('on'); }
                 });
-
                 toggle.addEventListener('touchend', () => {
                     isDragging = false;
                     toggle.classList.remove('pressing');
                 });
-                
                 toggle.addEventListener('click', () => {
                     toggle.classList.toggle('on');
                     triggerFeedback();
+                    // Nếu là toggle FPS thì cập nhật fpsMode
+                    if (toggle.id === 'fpsToggle') {
+                        fpsMode = toggle.classList.contains('on');
+                        updateFpsDisplay();
+                    }
                 });
             });
+        }
+
+        // --- CẬP NHẬT FPS (KÍCH 120) ---
+        function updateFpsDisplay() {
+            const fpsValEl = document.getElementById('fpsVal');
+            if (fpsMode) {
+                // Bắt đầu tăng dần lên 120
+                if (fpsInterval) clearInterval(fpsInterval);
+                currentFps = 60; // bắt đầu từ 60
+                fpsInterval = setInterval(() => {
+                    if (!fpsMode || currentFps >= 120) {
+                        clearInterval(fpsInterval);
+                        if (currentFps >= 120) fpsValEl.innerText = '120 FPS';
+                        return;
+                    }
+                    currentFps += 2; // tăng 2 FPS mỗi lần
+                    fpsValEl.innerText = currentFps + ' FPS';
+                }, 150);
+            } else {
+                // Quay về random 59-61
+                if (fpsInterval) clearInterval(fpsInterval);
+                fpsValEl.innerText = Math.floor(Math.random() * (61 - 59 + 1) + 59) + ' FPS';
+            }
         }
 
         function verifyKey() { 
@@ -328,7 +362,6 @@
                     const fid = document.getElementById('faceIdOverlay');
                     fid.style.display = 'flex';
                     setTimeout(() => fid.classList.add('show'), 10);
-                    
                     setTimeout(() => {
                         fid.classList.remove('show');
                         setTimeout(() => {
@@ -344,13 +377,14 @@
 
         function manageExpiration(expiresAt) {
             if(expiresAt === "unlimited") return document.getElementById('keyExpText').innerText = "- Vĩnh viễn";
+            if (checkInterval) clearInterval(checkInterval);
             checkInterval = setInterval(() => {
                 const diff = expiresAt - Date.now();
                 if(diff <= 0) { showToast("❌ Key hết hạn!"); logout(); }
                 else { document.getElementById('keyExpText').innerText = `- Còn ${Math.floor(diff/86400000)}d`; }
             }, 60000);
         }
-        function logout() { triggerFeedback(); localStorage.removeItem('ff_saved_key'); showView('loginView'); }
+        function logout() { triggerFeedback(); localStorage.removeItem('ff_saved_key'); showView('loginView'); if (checkInterval) clearInterval(checkInterval); }
 
         function startClock() { setInterval(() => { const now = new Date(); document.getElementById('time').innerText = now.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}); document.getElementById('date').innerText = now.toLocaleDateString('vi-VN'); }, 1000); }
 
@@ -359,33 +393,30 @@
                 const ram = (4.5 + Math.random()*2).toFixed(1);
                 document.getElementById('ramVal').innerText = ram + ' / 8 GB';
                 document.getElementById('ramBar').style.width = (ram / 8 * 100) + '%';
-                
                 const cpu = Math.floor(20 + Math.random()*40);
                 document.getElementById('cpuVal').innerText = cpu + '%';
                 document.getElementById('cpuBar').style.width = cpu + '%';
             }, 2000);
 
-            setInterval(() => {
-                const fps = Math.floor(Math.random() * (61 - 59 + 1)) + 59;
-                document.getElementById('fpsVal').innerText = fps + ' FPS';
-            }, 600);
-
+            // FPS được quản lý riêng bởi updateFpsDisplay
+            // Cập nhật ping
             setInterval(() => {
                 const ping = Math.floor(Math.random() * (45 - 32 + 1)) + 32;
                 document.getElementById('pingVal').innerText = ping + ' ms';
             }, 1000);
+            
+            // Khởi tạo FPS ban đầu
+            updateFpsDisplay();
         }
 
         function startActivation() {
             triggerFeedback();
             document.getElementById('actModal').classList.add('show');
             document.getElementById('actProcess').style.display = 'block';
-            
             const gameBtns = document.getElementById('gameButtons');
             const successIcon = document.getElementById('actSuccessIcon');
             gameBtns.style.display = 'none';
-            successIcon.classList.remove('animate-check'); // Reset hiệu ứng vẽ
-            
+            successIcon.classList.remove('animate-check');
             let pct = 0;
             let sim = setInterval(() => {
                 pct += 4;
@@ -394,8 +425,8 @@
                     setTimeout(() => {
                         document.getElementById('actProcess').style.display = 'none';
                         gameBtns.style.display = 'flex';
-                        successIcon.classList.add('animate-check'); // Thêm class để vẽ dấu tích
-                        triggerFeedback(); // Rung báo hiệu đã load xong 100%
+                        successIcon.classList.add('animate-check');
+                        triggerFeedback();
                     }, 500);
                 }
                 document.getElementById('actBar').style.width = pct + '%';
@@ -405,10 +436,7 @@
             }, 100);
         }
 
-        function closeModal() { 
-            triggerFeedback();
-            document.getElementById('actModal').classList.remove('show'); 
-        }
+        function closeModal() { triggerFeedback(); document.getElementById('actModal').classList.remove('show'); }
 
         function openGame(pkg) {
             triggerFeedback();
@@ -421,6 +449,102 @@
             t.innerText = msg; 
             t.classList.add('show'); 
             setTimeout(() => t.classList.remove('show'), 2500); 
+        }
+
+        // --- POPUP NHẬN KEY MIỄN PHÍ ---
+        function openKeyPopup() {
+            document.getElementById('keyPopup').classList.add('show');
+            // Reset trạng thái
+            document.getElementById('verifySection').style.display = 'block';
+            document.getElementById('getLinkSection').style.display = 'none';
+            document.getElementById('shortLinkInput').value = '';
+        }
+
+        function closeKeyPopup() {
+            document.getElementById('keyPopup').classList.remove('show');
+        }
+
+        function goToVerify() {
+            // Lưu trạng thái để khi quay lại biết
+            sessionStorage.setItem('waitingForVerify', 'true');
+            window.location.href = 'https://novaturbo.vercel.app/';
+        }
+
+        // Kiểm tra khi trang được focus trở lại (từ novaturbo)
+        window.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && sessionStorage.getItem('waitingForVerify') === 'true') {
+                sessionStorage.removeItem('waitingForVerify');
+                // Hiển thị phần lấy link
+                document.getElementById('verifySection').style.display = 'none';
+                document.getElementById('getLinkSection').style.display = 'block';
+                // Đảm bảo popup vẫn mở (nếu chưa đóng)
+                if (!document.getElementById('keyPopup').classList.contains('show')) {
+                    openKeyPopup();
+                    // Cập nhật lại trạng thái
+                    document.getElementById('verifySection').style.display = 'none';
+                    document.getElementById('getLinkSection').style.display = 'block';
+                }
+            }
+        });
+
+        async function generateLink() {
+            const btn = event.target;
+            btn.disabled = true;
+            btn.innerText = 'Đang tạo...';
+            
+            try {
+                // 1. Tạo key mới trên Firebase với hạn 6 tiếng
+                const newKeyRef = db.ref('temp_keys').push();
+                const newKey = newKeyRef.key;
+                const expiresAt = Date.now() + (6 * 60 * 60 * 1000); // 6 giờ
+                
+                await newKeyRef.set({
+                    key: newKey, // hoặc bạn có thể tạo key đẹp hơn
+                    expiresAt: expiresAt,
+                    used: false,
+                    createdAt: Date.now()
+                });
+                
+                // 2. Tạo URL đích (view.html cùng domain)
+                const targetUrl = window.location.origin + window.location.pathname.replace(/[^/]*$/, '') + 'view.html?key=' + newKey;
+                
+                // 3. Gọi API rút gọn link
+                const apiUrl = 'https://api.taplayma.com/st?token=b5c38921-be67-4200-aa50-b136641033c2&url=' + encodeURIComponent(targetUrl);
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                
+                // Giả định API trả về { "short_url": "..." } hoặc { "data": { "short_url": "..." } }
+                let shortLink = data.short_url || (data.data && data.data.short_url) || null;
+                
+                if (!shortLink) {
+                    // Fallback nếu API không trả về đúng định dạng: dùng targetUrl trực tiếp
+                    shortLink = targetUrl;
+                    console.warn('API rút gọn không trả về short_url, dùng link gốc:', data);
+                }
+                
+                // 4. Hiển thị link
+                document.getElementById('shortLinkInput').value = shortLink;
+                document.getElementById('shortLinkInput').style.display = 'block';
+                
+                showToast('✅ Đã tạo link thành công!');
+                
+            } catch (error) {
+                console.error(error);
+                showToast('❌ Lỗi tạo link, thử lại sau.');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = '🔗 Lấy link vượt 1 lần';
+            }
+        }
+
+        function copyShortLink() {
+            const input = document.getElementById('shortLinkInput');
+            if (!input.value) return;
+            navigator.clipboard.writeText(input.value).then(() => {
+                showToast('📋 Đã sao chép link!');
+            }).catch(() => {
+                prompt('Sao chép thủ công:', input.value);
+            });
         }
     </script>
 </body>
