@@ -228,7 +228,6 @@
         let currentFps = 60;
         let fpsInterval;
 
-        // --- BỤI BAY ---
         function createParticles() {
             const container = document.createElement('div');
             container.className = 'particles';
@@ -243,7 +242,6 @@
             }
         }
         
-        // --- ÂM THANH & RUNG ---
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         let audioCtx;
         let lastFeedback = 0;
@@ -278,7 +276,6 @@
             document.getElementById('panelView').style.display = id === 'panelView' ? 'block' : 'none';
         }
 
-        // --- TOGGLE CHỨC NĂNG ---
         function setupToggles() {
             document.querySelectorAll('.ios-toggle').forEach(toggle => {
                 let isDragging = false;
@@ -312,7 +309,6 @@
             });
         }
 
-        // --- CẬP NHẬT FPS TỪ TỪ LÊN 120 ---
         function updateFpsDisplay() {
             const fpsValEl = document.getElementById('fpsVal');
             if (fpsMode) {
@@ -444,15 +440,12 @@
             setTimeout(() => t.classList.remove('show'), 2500); 
         }
 
-        // --- POPUP NHẬN KEY MIỄN PHÍ ---
         function openKeyPopup() {
             document.getElementById('keyPopup').classList.add('show');
-            
             const btnGenerate = document.getElementById('btnGenerate');
             btnGenerate.style.display = 'block';
             btnGenerate.disabled = false;
             btnGenerate.innerText = '🔗 Lấy link nhận Key';
-            
             document.getElementById('shortLinkInput').style.display = 'none';
             document.getElementById('shortLinkInput').value = '';
             document.getElementById('copyBtn').style.display = 'none';
@@ -462,22 +455,20 @@
             document.getElementById('keyPopup').classList.remove('show'); 
         }
 
-        // --- TÍCH HỢP HỆ THỐNG API VÀ ĐỊNH VỊ VIEW.HTML CHUẨN XÁC ---
+        // --- HÀM TẠO LINK RÚT GỌN ĐÃ FIX LỖI CORS ---
         async function generateLink() {
             const btn = document.getElementById('btnGenerate');
             btn.disabled = true;
             btn.innerText = 'Đang tạo dữ liệu...';
             
             try {
-                // 1. Khởi tạo ngẫu nhiên format key: DAT-XXXX-XXXX-XXXX
                 const ranHex = () => Math.random().toString(36).substring(2, 6).toUpperCase();
                 const newKey = `DAT-${ranHex()}-${ranHex()}-${ranHex()}`;
                 
                 const now = Date.now();
-                const expiresAt = now + (6 * 60 * 60 * 1000); // Thời gian sử dụng Key: 6 giờ
-                const linkExpiresAt = now + (5 * 60 * 1000);  // Link chờ lấy key chỉ tồn tại 5 phút
+                const expiresAt = now + (6 * 60 * 60 * 1000); 
+                const linkExpiresAt = now + (5 * 60 * 1000); 
                 
-                // 2. Đồng bộ Key lên Firebase
                 await db.ref('vip_ff_keys/' + newKey).set({
                     expiresAt: expiresAt,
                     linkExpiresAt: linkExpiresAt,
@@ -485,25 +476,24 @@
                     createdAt: now
                 });
                 
-                // 3. Tự động định vị đường dẫn thư mục hiện tại để trỏ đúng sang view.html
                 let currentPath = window.location.pathname;
                 let directoryPath = currentPath.substring(0, currentPath.lastIndexOf('/')) + '/';
                 if (directoryPath === '/') directoryPath = '/';
                 
-                // Link đích cuối cùng chứa Key
                 const targetUrl = `${window.location.origin}${directoryPath}view.html?k=${newKey}`;
                 
-                // 4. Gửi request đến hệ thống rút gọn Taplayma
-                const apiUrl = 'https://api.taplayma.com/st?token=b5c38921-be67-4200-aa50-b136641033c2&url=' + encodeURIComponent(targetUrl);
+                // Sử dụng Proxy allorigins để vượt rào cản CORS bảo mật của trình duyệt
+                const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent('https://api.taplayma.com/st?token=b5c38921-be67-4200-aa50-b136641033c2&url=' + encodeURIComponent(targetUrl));
                 
-                const response = await fetch(apiUrl);
-                if (!response.ok) throw new Error('Yêu cầu API thất bại');
-                const data = await response.json();
+                const response = await fetch(proxyUrl);
+                if (!response.ok) throw new Error('Yêu cầu qua Proxy thất bại');
+                const rawData = await response.json();
                 
-                // Phân tách link rút gọn trả về từ Object API lồng ghép
+                // Giải mã chuỗi JSON phản hồi từ server gốc nằm bên trong contents
+                const data = JSON.parse(rawData.contents);
+                
                 let shortLink = data.short_url || (data.data && data.data.short_url) || data.shortifiedUrl || targetUrl;
                 
-                // 5. Cập nhật UI
                 document.getElementById('shortLinkInput').value = shortLink;
                 document.getElementById('shortLinkInput').style.display = 'block';
                 document.getElementById('copyBtn').style.display = 'inline-block';
@@ -512,7 +502,7 @@
                 showToast('✅ Đã tạo link thành công!');
             } catch (error) {
                 console.error(error);
-                showToast('❌ Lỗi kết nối API Taplayma. Vui lòng thử lại!');
+                showToast('❌ Lỗi kết nối hệ thống, vui lòng thử lại.');
                 btn.disabled = false;
                 btn.innerText = '🔗 Lấy link nhận Key';
             }
