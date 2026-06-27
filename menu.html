@@ -48,25 +48,11 @@
         
         /* TOGGLE IOS - CỤC TRẮNG TRONG SUỐT VÀ PHÌNH TO */
         .ios-toggle { position: relative; width: 52px; height: 32px; border-radius: 32px; background: rgba(255,255,255,0.15); cursor: pointer; transition: background 0.3s ease; touch-action: none; }
-        
-        /* Cục màu trắng mặc định */
         .ios-toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 28px; height: 28px; background: #fff; border-radius: 50%; box-shadow: 0 3px 8px rgba(0,0,0,0.15); transition: transform 0.3s var(--spring), background 0.3s, backdrop-filter 0.3s; }
-        
-        /* Trạng thái bật */
         .ios-toggle.on { background: #30D158; }
         .ios-toggle.on::after { transform: translateX(20px); }
-        
-        /* Trạng thái GIỮ (Pressing) - Chỉ cục trắng biến thành kính phình to */
-        .ios-toggle.pressing::after { 
-            transform: scale(1.3); 
-            background: rgba(255, 255, 255, 0.4); 
-            backdrop-filter: blur(6px); 
-            -webkit-backdrop-filter: blur(6px); 
-            box-shadow: none; 
-        }
-        .ios-toggle.on.pressing::after { 
-            transform: translateX(20px) scale(1.3); 
-        }
+        .ios-toggle.pressing::after { transform: scale(1.3); background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); box-shadow: none; }
+        .ios-toggle.on.pressing::after { transform: translateX(20px) scale(1.3); }
 
         .btn { width: 100%; padding: 18px; border: none; border-radius: 18px; font-size: 17px; font-weight: 700; color: #fff; cursor: pointer; transition: all 0.3s; }
         .btn-primary { background: linear-gradient(90deg, #0A84FF, #5E5CE6); }
@@ -85,18 +71,36 @@
         #gameButtons { display: none; margin-top: 15px; flex-direction: column; gap: 10px; }
         .btn-game { background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); color: #fff; padding: 15px; border-radius: 16px; cursor: pointer; font-size: 15px; font-weight: 600; }
 
-        /* SVG CHECKMARK (DẤU TÍCH THẬT) */
-        .checkmark-wrapper { display: flex; justify-content: center; align-items: center; gap: 10px; color: #30D158; margin-bottom: 15px; font-size: 18px; font-weight: bold; }
-        .checkmark { width: 35px; height: 35px; border-radius: 50%; stroke-width: 3; stroke: #30D158; stroke-miterlimit: 10; animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both; }
-        .checkmark__circle { stroke-dasharray: 166; stroke-dashoffset: 166; stroke-width: 3; stroke-miterlimit: 10; stroke: #30D158; fill: none; animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards; }
-        .checkmark__check { transform-origin: 50% 50%; stroke-dasharray: 48; stroke-dashoffset: 48; animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards; }
-        @keyframes stroke { 100% { stroke-dashoffset: 0; } }
+        /* --- HIỆU ỨNG FACE ID --- */
+        #faceIdOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 9999; opacity: 0; transition: opacity 0.3s ease; }
+        #faceIdOverlay.show { opacity: 1; }
+        .face-id-box { width: 160px; height: 160px; background: rgba(40,40,40,0.7); border-radius: 30px; display: flex; justify-content: center; align-items: center; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transform: scale(0.8); transition: transform 0.4s var(--spring); }
+        #faceIdOverlay.show .face-id-box { transform: scale(1); }
         
-        .toast { position: fixed; top: -60px; left: 50%; transform: translateX(-50%); background: #000; border: 1px solid rgba(255,255,255,0.2); border-radius: 30px; padding: 12px 25px; font-size: 14px; font-weight: bold; z-index: 1000; transition: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); display: flex; align-items: center; gap: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .fid-icon { width: 60px; height: 60px; margin-bottom: 15px; transform-style: preserve-3d; animation: rotate3D 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes rotate3D { 0% { transform: rotateY(-180deg) scale(0.5); opacity: 0; } 100% { transform: rotateY(0deg) scale(1); opacity: 1; } }
+        
+        .fid-circle { stroke-dasharray: 166; stroke-dashoffset: 166; stroke-width: 4; stroke-miterlimit: 10; stroke: #FFF; fill: none; animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) 0.2s forwards; }
+        .fid-check { transform-origin: 50% 50%; stroke-dasharray: 48; stroke-dashoffset: 48; stroke-width: 4; stroke: #FFF; fill: none; animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.6s forwards; }
+        @keyframes stroke { 100% { stroke-dashoffset: 0; } }
+
+        .toast { position: fixed; top: -60px; left: 50%; transform: translateX(-50%); background: #000; border: 1px solid rgba(255,255,255,0.2); border-radius: 30px; padding: 12px 25px; font-size: 14px; font-weight: bold; z-index: 1000; transition: 0.5s var(--spring); }
         .toast.show { top: max(15px, env(safe-area-inset-top)); }
     </style>
 </head>
 <body>
+
+    <div class="toast" id="toast">Thông báo</div>
+
+    <div id="faceIdOverlay">
+        <div class="face-id-box">
+            <svg class="fid-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                <circle class="fid-circle" cx="26" cy="26" r="25"/>
+                <path class="fid-check" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+            </svg>
+            <div style="color: white; font-weight: bold; font-size: 16px;">Thành công</div>
+        </div>
+    </div>
 
     <div class="app-container">
         <div id="loginView">
@@ -176,27 +180,53 @@
             </div>
             
             <div id="gameButtons">
-                <div class="checkmark-wrapper">
-                    <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-                        <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
-                        <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                <div style="display:flex; justify-content:center; align-items:center; gap:10px; color:#30D158; margin-bottom:15px; font-size:18px; font-weight:bold;">
+                    <svg style="width:35px; height:35px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                        <circle cx="26" cy="26" r="25" fill="none" stroke="#30D158" stroke-width="3"/>
+                        <path fill="none" stroke="#30D158" stroke-width="3" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
                     </svg>
                     <span>Đã sẵn sàng!</span>
                 </div>
                 <button class="btn btn-game" onclick="openGame('com.dts.freefireth')">Mở Free Fire</button>
                 <button class="btn btn-game" onclick="openGame('com.dts.freefiremax')">Mở Free Fire MAX</button>
-                <button class="btn btn-logout" style="border:none; margin-top:0;" onclick="closeModal()">Đóng</button>
+                <button class="btn btn-logout" style="border:none; margin-top:0;" onclick="closeFeedback(); closeModal();">Đóng</button>
             </div>
         </div>
     </div>
-
-    <div class="toast" id="toast">Thông báo</div>
 
     <script>
         const firebaseConfig = { apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE", databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "keyquocdat" };
         firebase.initializeApp(firebaseConfig); const db = firebase.database();
 
         let checkInterval;
+        
+        // --- ÂM THANH BÍP & RUNG (HAPTIC) ---
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+
+        function triggerFeedback() {
+            // Rung mạnh
+            if(navigator.vibrate) navigator.vibrate([60]);
+            
+            // Phát tiếng Bíp
+            if(!audioCtx) audioCtx = new AudioContext();
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(800, audioCtx.currentTime); // Tần số bíp cao
+            
+            gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.1);
+        }
 
         window.onload = () => {
             startClock(); startWidgets(); setupToggles();
@@ -209,15 +239,15 @@
             document.getElementById('panelView').style.display = id === 'panelView' ? 'block' : 'none';
         }
 
-        // --- LOGIC TOGGLE CỤC TRẮNG ---
+        // --- TOGGLE CỤC TRẮNG KÈM FEEDBACK ---
         function setupToggles() {
             document.querySelectorAll('.ios-toggle').forEach(toggle => {
                 let isDragging = false;
                 
                 toggle.addEventListener('touchstart', (e) => {
                     isDragging = true;
-                    toggle.classList.add('pressing'); // Thêm class pressing để phình to cục trắng
-                    haptic();
+                    toggle.classList.add('pressing'); 
+                    triggerFeedback();
                 });
 
                 toggle.addEventListener('touchmove', (e) => {
@@ -233,21 +263,19 @@
 
                 toggle.addEventListener('touchend', () => {
                     isDragging = false;
-                    toggle.classList.remove('pressing'); // Bỏ class pressing để thu nhỏ cục trắng
-                    if(!toggle.classList.contains('swiped')) {
-                        // Kích hoạt nếu chỉ chạm nhẹ
-                    }
-                    haptic();
+                    toggle.classList.remove('pressing');
+                    triggerFeedback();
                 });
                 
                 toggle.addEventListener('click', () => {
                     toggle.classList.toggle('on');
-                    haptic();
+                    triggerFeedback();
                 });
             });
         }
 
         function verifyKey() { 
+            triggerFeedback();
             const key = document.getElementById('keyInput').value.trim().toUpperCase(); 
             if(!key) return showToast('⚠️ Vui lòng nhập Key!'); 
             authenticate(key, false); 
@@ -261,11 +289,25 @@
                 }
                 localStorage.setItem('ff_saved_key', key);
                 
-                // --- THÔNG BÁO LOGIN THÀNH CÔNG ---
-                if(!isAuto) showToast('✅ Đăng nhập thành công!');
-                
-                showView('panelView');
                 manageExpiration(snap.val().expiresAt);
+
+                if(!isAuto) {
+                    // --- HIỆU ỨNG FACE ID THÀNH CÔNG ---
+                    const fid = document.getElementById('faceIdOverlay');
+                    fid.style.display = 'flex';
+                    setTimeout(() => fid.classList.add('show'), 10);
+                    
+                    // Ẩn Face ID và vào Panel sau 1.5 giây
+                    setTimeout(() => {
+                        fid.classList.remove('show');
+                        setTimeout(() => {
+                            fid.style.display = 'none';
+                            showView('panelView');
+                        }, 300);
+                    }, 1500);
+                } else {
+                    showView('panelView');
+                }
             });
         }
 
@@ -277,7 +319,7 @@
                 else { document.getElementById('keyExpText').innerText = `- Còn ${Math.floor(diff/86400000)}d`; }
             }, 60000);
         }
-        function logout() { localStorage.removeItem('ff_saved_key'); showView('loginView'); }
+        function logout() { triggerFeedback(); localStorage.removeItem('ff_saved_key'); showView('loginView'); }
 
         function startClock() { setInterval(() => { const now = new Date(); document.getElementById('time').innerText = now.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}); document.getElementById('date').innerText = now.toLocaleDateString('vi-VN'); }, 1000); }
 
@@ -292,13 +334,11 @@
                 document.getElementById('cpuBar').style.width = cpu + '%';
             }, 2000);
 
-            // FPS nhảy từ 59-61
             setInterval(() => {
                 const fps = Math.floor(Math.random() * (61 - 59 + 1)) + 59;
                 document.getElementById('fpsVal').innerText = fps + ' FPS';
             }, 600);
 
-            // Ping mạng nhảy từ 32-45
             setInterval(() => {
                 const ping = Math.floor(Math.random() * (45 - 32 + 1)) + 32;
                 document.getElementById('pingVal').innerText = ping + ' ms';
@@ -306,7 +346,7 @@
         }
 
         function startActivation() {
-            haptic();
+            triggerFeedback();
             document.getElementById('actModal').classList.add('show');
             document.getElementById('actProcess').style.display = 'block';
             document.getElementById('gameButtons').style.display = 'none';
@@ -319,7 +359,7 @@
                     setTimeout(() => {
                         document.getElementById('actProcess').style.display = 'none';
                         document.getElementById('gameButtons').style.display = 'flex';
-                        haptic();
+                        triggerFeedback(); // Rung báo hiệu đã load xong 100%
                     }, 500);
                 }
                 document.getElementById('actBar').style.width = pct + '%';
@@ -330,12 +370,13 @@
         }
 
         function closeModal() { document.getElementById('actModal').classList.remove('show'); }
+        function closeFeedback() { triggerFeedback(); }
 
-        // --- MỞ THẲNG GAME KHÔNG QUA CH PLAY ---
+        // --- MỞ THẲNG GAME KHÔNG QUA APP STORE / CH PLAY ---
         function openGame(pkg) {
-            haptic();
-            // Cú pháp Intent ép mở App trực tiếp (Bắt buộc dùng launchFlags=0x10000000 tương đương FLAG_ACTIVITY_NEW_TASK)
-            const intentUrl = `intent://#Intent;package=${pkg};action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10000000;end;`;
+            triggerFeedback();
+            // Xóa browser_fallback_url để ngăn chuyển hướng sang Store. Chỉ ép mở App.
+            const intentUrl = `intent://#Intent;package=${pkg};action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10000000;end`;
             window.location.href = intentUrl;
         }
 
@@ -345,7 +386,6 @@
             t.classList.add('show'); 
             setTimeout(() => t.classList.remove('show'), 2500); 
         }
-        function haptic() { if(navigator.vibrate) navigator.vibrate(50); }
     </script>
 </body>
 </html>
