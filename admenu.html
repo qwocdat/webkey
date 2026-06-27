@@ -13,54 +13,44 @@
             --bg: #000000; --glass-bg: rgba(30, 30, 40, 0.6); --glass-border: rgba(255, 255, 255, 0.1);
             --blue: #0A84FF; --green: #30D158; --red: #FF453A; --orange: #FF9F0A; --text: #FFFFFF;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg); background-image: radial-gradient(circle at 50% -20%, #1a1a3a, #000); color: var(--text); min-height: 100vh; padding: 20px; padding-top: max(20px, env(safe-area-inset-top)); }
         
-        /* Glassmorphism & iOS Styles */
-        .glass { background: var(--glass-bg); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .glass { background: var(--glass-bg); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .header h1 { font-size: 24px; font-weight: 700; letter-spacing: 0.5px; }
+        .header h1 { font-size: 24px; font-weight: 700; }
         
-        /* Dashboard Stats */
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .stat-box { text-align: center; padding: 15px; border-radius: 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); }
-        .stat-box p { font-size: 13px; color: #8E8E93; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;}
+        .stat-box p { font-size: 13px; color: #8E8E93; margin-bottom: 5px; text-transform: uppercase; }
         .stat-box h2 { font-size: 28px; font-weight: 700; color: var(--blue); }
         .stat-box.green h2 { color: var(--green); } .stat-box.red h2 { color: var(--red); } .stat-box.orange h2 { color: var(--orange); }
 
-        /* Buttons & Inputs */
-        .btn { background: var(--blue); color: #fff; border: none; padding: 12px 20px; border-radius: 14px; font-weight: 600; font-size: 15px; cursor: pointer; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 4px 15px rgba(10, 132, 255, 0.3); display: inline-flex; align-items: center; justify-content: center; }
-        .btn:active { transform: scale(0.95); opacity: 0.8; }
-        .btn-red { background: var(--red); box-shadow: 0 4px 15px rgba(255, 69, 58, 0.3); }
-        .btn-green { background: var(--green); box-shadow: 0 4px 15px rgba(48, 209, 88, 0.3); }
+        .btn { background: var(--blue); color: #fff; border: none; padding: 12px 20px; border-radius: 14px; font-weight: 600; font-size: 15px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+        .btn-red { background: var(--red); }
+        .btn-green { background: var(--green); }
         
         .controls { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
-        input, select { background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); color: #fff; padding: 12px 15px; border-radius: 12px; font-size: 14px; outline: none; transition: 0.3s; width: 100%; max-width: 200px;}
-        input:focus, select:focus { border-color: var(--blue); box-shadow: 0 0 10px rgba(10,132,255,0.3); }
-        select option { background: #1c1c1e; color: #fff; }
+        input, select { background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); color: #fff; padding: 12px 15px; border-radius: 12px; font-size: 14px; outline: none; width: 100%; max-width: 200px;}
+        select option { background: #1c1c1e; }
 
-        /* Table iOS Style */
         .table-wrapper { overflow-x: auto; border-radius: 14px; }
         table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; white-space: nowrap; }
-        th { background: rgba(255,255,255,0.05); padding: 15px; font-weight: 600; color: #8E8E93; border-bottom: 1px solid var(--glass-border); }
-        td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #E5E5EA; }
-        tr:last-child td { border-bottom: none; }
+        th { background: rgba(255,255,255,0.05); padding: 15px; color: #8E8E93; border-bottom: 1px solid var(--glass-border); }
+        td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .badge { padding: 4px 10px; border-radius: 10px; font-size: 12px; font-weight: 600; }
         .badge.active { background: rgba(48,209,88,0.2); color: var(--green); }
         .badge.expired { background: rgba(255,69,58,0.2); color: var(--red); }
 
-        /* Modal iOS */
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: 0.4s ease; z-index: 100; }
         .overlay.show { opacity: 1; pointer-events: auto; }
-        .modal { background: rgba(30,30,40,0.85); backdrop-filter: blur(25px); border: 1px solid var(--glass-border); border-radius: 24px; padding: 30px; width: 90%; max-width: 400px; transform: scale(0.9) translateY(20px); transition: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
-        .overlay.show .modal { transform: scale(1) translateY(0); }
-        .modal h2 { margin-bottom: 20px; font-size: 20px; text-align: center; }
+        .modal { background: rgba(30,30,40,0.85); border: 1px solid var(--glass-border); border-radius: 24px; padding: 30px; width: 90%; max-width: 400px; transform: scale(0.9); transition: 0.4s; }
+        .overlay.show .modal { transform: scale(1); }
+        .modal h2 { margin-bottom: 20px; text-align: center; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 8px; font-size: 13px; color: #8E8E93; }
-        .form-group select { max-width: 100%; }
 
-        /* Dynamic Island Toast */
-        .toast { position: fixed; top: -60px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); backdrop-filter: blur(20px); border-radius: 30px; padding: 12px 25px; display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; color: #fff; z-index: 1000; transition: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 10px 20px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); }
+        .toast { position: fixed; top: -60px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); border-radius: 30px; padding: 12px 25px; color: #fff; z-index: 1000; transition: 0.5s; }
         .toast.show { top: max(20px, env(safe-area-inset-top)); }
     </style>
 </head>
@@ -72,18 +62,10 @@
     </div>
 
     <div class="stats-grid glass">
-        <div class="stat-box">
-            <p>Tổng Key</p><h2 id="sTotal">0</h2>
-        </div>
-        <div class="stat-box green">
-            <p>Hoạt Động</p><h2 id="sActive">0</h2>
-        </div>
-        <div class="stat-box red">
-            <p>Hết Hạn</p><h2 id="sExpired">0</h2>
-        </div>
-        <div class="stat-box orange">
-            <p>Lượt Kích Hoạt</p><h2 id="sActivations">0</h2>
-        </div>
+        <div class="stat-box"><p>Tổng Key</p><h2 id="sTotal">0</h2></div>
+        <div class="stat-box green"><p>Hoạt Động</p><h2 id="sActive">0</h2></div>
+        <div class="stat-box red"><p>Hết Hạn</p><h2 id="sExpired">0</h2></div>
+        <div class="stat-box orange"><p>Lượt Kích Hoạt</p><h2 id="sActivations">0</h2></div>
     </div>
 
     <div class="glass">
@@ -97,22 +79,13 @@
         </div>
         <div class="table-wrapper">
             <table>
-                <thead>
-                    <tr>
-                        <th>Key</th>
-                        <th>Trạng thái</th>
-                        <th>Thiết bị</th>
-                        <th>Ngày tạo</th>
-                        <th>Hết hạn</th>
-                        <th>Hành động</th>
-                    </tr>
-                </thead>
-                <tbody id="keyTableBody">
-                    </tbody>
+                <thead><tr><th>Key</th><th>Trạng thái</th><th>Thiết bị</th><th>Ngày tạo</th><th>Hết hạn</th><th>Hành động</th></tr></thead>
+                <tbody id="keyTableBody"></tbody>
             </table>
         </div>
     </div>
 
+    <!-- Modal Tạo Key -->
     <div class="overlay" id="createModal">
         <div class="modal">
             <h2>Tạo Key Mới</h2>
@@ -122,14 +95,8 @@
                     <option value="1">1 Ngày</option>
                     <option value="2">2 Ngày</option>
                     <option value="3">3 Ngày</option>
-                    <option value="5">5 Ngày</option>
                     <option value="7">7 Ngày</option>
-                    <option value="15">15 Ngày</option>
                     <option value="30">30 Ngày</option>
-                    <option value="60">60 Ngày</option>
-                    <option value="90">90 Ngày</option>
-                    <option value="180">180 Ngày</option>
-                    <option value="365">365 Ngày</option>
                     <option value="unlimited">Không giới hạn</option>
                 </select>
             </div>
@@ -139,13 +106,12 @@
                     <option value="1">1 Thiết bị</option>
                     <option value="2">2 Thiết bị</option>
                     <option value="3">3 Thiết bị</option>
-                    <option value="5">5 Thiết bị</option>
                     <option value="unlimited">Không giới hạn</option>
                 </select>
             </div>
             <div style="display: flex; gap: 10px; margin-top: 25px;">
                 <button class="btn btn-red" style="flex:1" onclick="closeModal()">Hủy</button>
-                <button class="btn btn-green" style="flex:1" onclick="generateKey()">Tạo & Lưu</button>
+                <button class="btn btn-green" style="flex:1" onclick="generateKey()">Tạo</button>
             </div>
         </div>
     </div>
@@ -156,14 +122,11 @@
         const firebaseConfig = { apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE", databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "keyquocdat" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-
         let allKeys = {};
 
-        // Lấy dữ liệu Realtime
         db.ref('vip_ff_keys').on('value', snapshot => {
             allKeys = snapshot.val() || {};
-            renderTable();
-            updateStats();
+            renderTable(); updateStats();
         });
 
         function randStr(len) { return Math.random().toString(36).substring(2, 2+len).toUpperCase(); }
@@ -173,48 +136,26 @@
             const devices = document.getElementById('keyDevices').value;
             const newKey = `DAT-${randStr(4)}-${randStr(4)}-${randStr(4)}`;
             const now = Date.now();
-            
-            let expiresAt = "unlimited";
-            if (duration !== "unlimited") {
-                expiresAt = now + (parseInt(duration) * 24 * 60 * 60 * 1000);
-            }
+            let expiresAt = duration !== "unlimited" ? now + (parseInt(duration) * 86400000) : "unlimited";
 
             db.ref('vip_ff_keys/' + newKey).set({
-                createdAt: now,
-                durationRaw: duration,
-                expiresAt: expiresAt,
-                maxDevices: devices,
-                devicesUsed: {}, // Lưu các Device ID
-                activationsCount: 0
-            }).then(() => {
-                closeModal();
-                showToast("Đã tạo Key: " + newKey);
-            });
+                createdAt: now, durationRaw: duration, expiresAt: expiresAt, maxDevices: devices, devicesUsed: {}, activationsCount: 0
+            }).then(() => { closeModal(); showToast("Đã tạo Key: " + newKey); });
         }
 
         function deleteKey(key) {
-            if(confirm("Xóa vĩnh viễn Key này?")) {
-                db.ref('vip_ff_keys/' + key).remove();
-                showToast("Đã xóa Key!");
-            }
+            if(confirm("Xóa vĩnh viễn Key này?")) { db.ref('vip_ff_keys/' + key).remove(); showToast("Đã xóa!"); }
         }
 
         function renderTable() {
             const tbody = document.getElementById('keyTableBody');
             tbody.innerHTML = '';
-            
             const search = document.getElementById('searchInput').value.toUpperCase();
             const filter = document.getElementById('filterStatus').value;
 
-            // Sort by new
-            const sortedKeys = Object.entries(allKeys).sort((a, b) => b[1].createdAt - a[1].createdAt);
-
-            sortedKeys.forEach(([keyName, data]) => {
-                const now = Date.now();
-                const isExpired = data.expiresAt !== "unlimited" && now > data.expiresAt;
+            Object.entries(allKeys).sort((a,b)=>b[1].createdAt - a[1].createdAt).forEach(([keyName, data]) => {
+                const isExpired = data.expiresAt !== "unlimited" && Date.now() > data.expiresAt;
                 const status = isExpired ? 'expired' : 'active';
-                const statusText = isExpired ? 'Hết hạn' : 'Còn hạn';
-
                 if(search && !keyName.includes(search)) return;
                 if(filter !== 'all' && filter !== status) return;
 
@@ -223,18 +164,12 @@
                 const devsUsed = data.devicesUsed ? Object.keys(data.devicesUsed).length : 0;
                 const maxDevs = data.maxDevices === "unlimited" ? "∞" : data.maxDevices;
 
-                tbody.innerHTML += `
-                    <tr>
-                        <td style="font-family: monospace; color: var(--blue); font-weight:bold; cursor:pointer;" onclick="copyTxt('${keyName}')">${keyName}</td>
-                        <td><span class="badge ${status}">${statusText}</span></td>
-                        <td>${devsUsed} / ${maxDevs}</td>
-                        <td>${cDate}</td>
-                        <td>${eDate}</td>
-                        <td>
-                            <button class="btn btn-red" style="padding: 6px 12px; font-size: 12px; border-radius:8px;" onclick="deleteKey('${keyName}')">Xóa</button>
-                        </td>
-                    </tr>
-                `;
+                tbody.innerHTML += `<tr>
+                    <td style="color:var(--blue); font-weight:bold; cursor:pointer;" onclick="copyTxt('${keyName}')">${keyName}</td>
+                    <td><span class="badge ${status}">${isExpired ? 'Hết hạn' : 'Còn hạn'}</span></td>
+                    <td>${devsUsed} / ${maxDevs}</td><td>${cDate}</td><td>${eDate}</td>
+                    <td><button class="btn btn-red" style="padding: 6px 12px; font-size: 12px;" onclick="deleteKey('${keyName}')">Xóa</button></td>
+                </tr>`;
             });
         }
 
@@ -255,18 +190,8 @@
         function filterTable() { renderTable(); }
         function openModal() { document.getElementById('createModal').classList.add('show'); }
         function closeModal() { document.getElementById('createModal').classList.remove('show'); }
-        
-        function copyTxt(txt) {
-            navigator.clipboard.writeText(txt);
-            showToast("Đã copy: " + txt);
-        }
-
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            t.innerText = msg;
-            t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 3000);
-        }
+        function copyTxt(txt) { navigator.clipboard.writeText(txt); showToast("Đã copy!"); }
+        function showToast(msg) { const t = document.getElementById('toast'); t.innerText = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
     </script>
 </body>
 </html>
