@@ -17,7 +17,12 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; background-image: radial-gradient(circle at top right, rgba(10, 132, 255, 0.15), transparent 50%), radial-gradient(circle at bottom left, rgba(138, 43, 226, 0.15), transparent 50%); user-select: none; }
         
-        .app-container { width: 100%; max-width: 500px; margin: 0 auto; padding: max(20px, env(safe-area-inset-top)) 20px 40px; }
+        /* HIỆU ỨNG BỤI BAY */
+        .particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden; }
+        .particle { position: absolute; bottom: -10px; width: 3px; height: 3px; background: rgba(255, 255, 255, 0.35); border-radius: 50%; animation: floatUp linear infinite; }
+        @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(-100vh) scale(0.5); opacity: 0; } }
+
+        .app-container { position: relative; z-index: 10; width: 100%; max-width: 500px; margin: 0 auto; padding: max(20px, env(safe-area-inset-top)) 20px 40px; }
         .glass { background: var(--glass-bg); backdrop-filter: saturate(180%) blur(25px); -webkit-backdrop-filter: saturate(180%) blur(25px); border: 1px solid var(--glass-border); border-radius: 24px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
 
         /* Login View & Animation */
@@ -46,7 +51,7 @@
         .feature-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 30px; }
         .feature-item { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border-radius: 20px; }
         
-        /* TOGGLE IOS - CỤC TRẮNG TRONG SUỐT VÀ PHÌNH TO */
+        /* TOGGLE IOS */
         .ios-toggle { position: relative; width: 52px; height: 32px; border-radius: 32px; background: rgba(255,255,255,0.15); cursor: pointer; transition: background 0.3s ease; touch-action: none; }
         .ios-toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 28px; height: 28px; background: #fff; border-radius: 50%; box-shadow: 0 3px 8px rgba(0,0,0,0.15); transition: transform 0.3s var(--spring), background 0.3s, backdrop-filter 0.3s; }
         .ios-toggle.on { background: #30D158; }
@@ -71,6 +76,13 @@
         #gameButtons { display: none; margin-top: 15px; flex-direction: column; gap: 10px; }
         .btn-game { background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); color: #fff; padding: 15px; border-radius: 16px; cursor: pointer; font-size: 15px; font-weight: 600; }
 
+        /* --- HIỆU ỨNG VẼ DẤU TÍCH TRONG BẢNG KÍCH HOẠT --- */
+        .act-icon { width: 45px; height: 45px; margin: 0 auto 10px; }
+        .act-circle { stroke-dasharray: 166; stroke-dashoffset: 166; stroke-width: 4; stroke-miterlimit: 10; stroke: #30D158; fill: none; }
+        .act-check { transform-origin: 50% 50%; stroke-dasharray: 48; stroke-dashoffset: 48; stroke-width: 4; stroke: #30D158; fill: none; }
+        .animate-check .act-circle { animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards; }
+        .animate-check .act-check { animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.4s forwards; }
+
         /* --- HIỆU ỨNG FACE ID --- */
         #faceIdOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 9999; opacity: 0; transition: opacity 0.3s ease; }
         #faceIdOverlay.show { opacity: 1; }
@@ -90,8 +102,10 @@
 </head>
 <body>
 
+    <!-- Thông báo lỗi -->
     <div class="toast" id="toast">Thông báo</div>
 
+    <!-- Overlay Face ID Thành Công -->
     <div id="faceIdOverlay">
         <div class="face-id-box">
             <svg class="fid-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
@@ -171,6 +185,7 @@
         </div>
     </div>
 
+    <!-- Modal Kích Hoạt -->
     <div class="overlay" id="actModal">
         <div class="action-modal">
             <div id="actProcess">
@@ -180,16 +195,17 @@
             </div>
             
             <div id="gameButtons">
-                <div style="display:flex; justify-content:center; align-items:center; gap:10px; color:#30D158; margin-bottom:15px; font-size:18px; font-weight:bold;">
-                    <svg style="width:35px; height:35px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-                        <circle cx="26" cy="26" r="25" fill="none" stroke="#30D158" stroke-width="3"/>
-                        <path fill="none" stroke="#30D158" stroke-width="3" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                <div id="actSuccessIcon" style="color:#30D158; margin-bottom:15px; font-size:18px; font-weight:bold;">
+                    <!-- SVG Tích xanh kích hoạt -->
+                    <svg class="act-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                        <circle class="act-circle" cx="26" cy="26" r="25"/>
+                        <path class="act-check" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
                     </svg>
-                    <span>Đã sẵn sàng!</span>
+                    <div>Đã sẵn sàng!</div>
                 </div>
                 <button class="btn btn-game" onclick="openGame('com.dts.freefireth')">Mở Free Fire</button>
                 <button class="btn btn-game" onclick="openGame('com.dts.freefiremax')">Mở Free Fire MAX</button>
-                <button class="btn btn-logout" style="border:none; margin-top:0;" onclick="closeFeedback(); closeModal();">Đóng</button>
+                <button class="btn btn-logout" style="border:none; margin-top:0;" onclick="closeModal()">Đóng</button>
             </div>
         </div>
     </div>
@@ -200,15 +216,33 @@
 
         let checkInterval;
         
-        // --- ÂM THANH BÍP & RUNG (HAPTIC) ---
+        // --- TẠO HẠT BỤI BAY ---
+        function createParticles() {
+            const container = document.createElement('div');
+            container.className = 'particles';
+            document.body.appendChild(container);
+            for(let i=0; i<35; i++) {
+                let p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random() * 100 + 'vw';
+                p.style.animationDuration = (Math.random() * 6 + 4) + 's';
+                p.style.animationDelay = (Math.random() * 5) + 's';
+                container.appendChild(p);
+            }
+        }
+        
+        // --- ÂM THANH BÍP & RUNG (Sửa lỗi lặp tiếng) ---
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         let audioCtx;
+        let lastFeedback = 0; // Bộ lọc thời gian
 
         function triggerFeedback() {
-            // Rung mạnh
+            const now = Date.now();
+            if (now - lastFeedback < 300) return; // Nếu chạm liên tục dưới 0.3s thì bỏ qua không kêu lặp lại
+            lastFeedback = now;
+
             if(navigator.vibrate) navigator.vibrate([60]);
             
-            // Phát tiếng Bíp
             if(!audioCtx) audioCtx = new AudioContext();
             if(audioCtx.state === 'suspended') audioCtx.resume();
             
@@ -216,7 +250,7 @@
             const gainNode = audioCtx.createGain();
             
             oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(800, audioCtx.currentTime); // Tần số bíp cao
+            oscillator.frequency.setValueAtTime(800, audioCtx.currentTime); 
             
             gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
@@ -229,6 +263,7 @@
         }
 
         window.onload = () => {
+            createParticles(); // Kích hoạt bụi bay
             startClock(); startWidgets(); setupToggles();
             const savedKey = localStorage.getItem('ff_saved_key');
             if(savedKey) authenticate(savedKey, true); else showView('loginView');
@@ -264,7 +299,6 @@
                 toggle.addEventListener('touchend', () => {
                     isDragging = false;
                     toggle.classList.remove('pressing');
-                    triggerFeedback();
                 });
                 
                 toggle.addEventListener('click', () => {
@@ -288,16 +322,13 @@
                     return showToast('❌ Key không hợp lệ hoặc hết hạn!'); 
                 }
                 localStorage.setItem('ff_saved_key', key);
-                
                 manageExpiration(snap.val().expiresAt);
 
                 if(!isAuto) {
-                    // --- HIỆU ỨNG FACE ID THÀNH CÔNG ---
                     const fid = document.getElementById('faceIdOverlay');
                     fid.style.display = 'flex';
                     setTimeout(() => fid.classList.add('show'), 10);
                     
-                    // Ẩn Face ID và vào Panel sau 1.5 giây
                     setTimeout(() => {
                         fid.classList.remove('show');
                         setTimeout(() => {
@@ -349,7 +380,11 @@
             triggerFeedback();
             document.getElementById('actModal').classList.add('show');
             document.getElementById('actProcess').style.display = 'block';
-            document.getElementById('gameButtons').style.display = 'none';
+            
+            const gameBtns = document.getElementById('gameButtons');
+            const successIcon = document.getElementById('actSuccessIcon');
+            gameBtns.style.display = 'none';
+            successIcon.classList.remove('animate-check'); // Reset hiệu ứng vẽ
             
             let pct = 0;
             let sim = setInterval(() => {
@@ -358,7 +393,8 @@
                     pct = 100; clearInterval(sim);
                     setTimeout(() => {
                         document.getElementById('actProcess').style.display = 'none';
-                        document.getElementById('gameButtons').style.display = 'flex';
+                        gameBtns.style.display = 'flex';
+                        successIcon.classList.add('animate-check'); // Thêm class để vẽ dấu tích
                         triggerFeedback(); // Rung báo hiệu đã load xong 100%
                     }, 500);
                 }
@@ -369,13 +405,13 @@
             }, 100);
         }
 
-        function closeModal() { document.getElementById('actModal').classList.remove('show'); }
-        function closeFeedback() { triggerFeedback(); }
+        function closeModal() { 
+            triggerFeedback();
+            document.getElementById('actModal').classList.remove('show'); 
+        }
 
-        // --- MỞ THẲNG GAME KHÔNG QUA APP STORE / CH PLAY ---
         function openGame(pkg) {
             triggerFeedback();
-            // Xóa browser_fallback_url để ngăn chuyển hướng sang Store. Chỉ ép mở App.
             const intentUrl = `intent://#Intent;package=${pkg};action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;launchFlags=0x10000000;end`;
             window.location.href = intentUrl;
         }
