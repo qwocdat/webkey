@@ -1,7 +1,6 @@
 {
   "rewrites": [
-    { "source": "/trangchu", "destination": "/index.html" },
-    { "source": "/gioithieu", "destination": "/about.html" }
+    { "source": "/trangchu", "destination": "/public/index.html" }
   ],
   "cleanUrls": true
 }
