@@ -1,0 +1,7 @@
+{
+  "rewrites": [
+    { "source": "/trangchu", "destination": "/index.html" },
+    { "source": "/gioithieu", "destination": "/about.html" }
+  ],
+  "cleanUrls": true
+}
