@@ -400,7 +400,8 @@
             const email = document.getElementById('auth-email').value; const pass = document.getElementById('auth-password').value;
             if(!email || !pass) return alert('Nhập đầy đủ thông tin');
             auth.signInWithEmailAndPassword(email, pass).catch(err => {
-                if(err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
+                // Bổ sung thêm mã lỗi mới để nhận diện khi tài khoản chưa được tạo
+                if(err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential' || err.code === 'auth/invalid-login-credentials') {
                     auth.createUserWithEmailAndPassword(email, pass).then(() => alert('Tạo tài khoản thành công!')).catch(e => alert(e.message));
                 } else alert(err.message);
             });
