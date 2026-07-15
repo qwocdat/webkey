@@ -1,0 +1,4 @@
+selenium==4.21.0
+webdriver-manager==4.0.1
+urllib3==2.2.1
+requests==2.32.3
