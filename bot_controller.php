@@ -37,18 +37,16 @@ switch ($action) {
             echo json_encode(['status' => 'error', 'error' => 'Khong tim thay file upload.']);
             exit;
         }
-
         $file = $_FILES['cookie_file'];
         if ($file['error'] !== UPLOAD_ERR_OK) {
-            echo json_encode(['status' => 'error', 'error' => 'Loi trong qua trinh upload file.']);
+            echo json_encode(['status' => 'error', 'error' => 'Loi upload.']);
             exit;
         }
-
         if (move_uploaded_file($file['tmp_name'], $cookieTarget)) {
             chmod($cookieTarget, 0777);
-            echo json_encode(['status' => 'ok', 'message' => 'Upload thanh cong! Cookie da luu.']);
+            echo json_encode(['status' => 'ok', 'message' => 'Upload thanh cong!']);
         } else {
-            echo json_encode(['status' => 'error', 'error' => 'Khong the ghi file vao he thong.']);
+            echo json_encode(['status' => 'error', 'error' => 'Khong the ghi file.']);
         }
         break;
 
@@ -67,12 +65,13 @@ switch ($action) {
 
     case 'start':
         if (isBotRunning()) {
-            echo json_encode(['status' => 'error', 'error' => 'Bot hien tai dang chay roi.']);
+            echo json_encode(['status' => 'error', 'error' => 'Bot dang chay roi.']);
             exit;
         }
-        
         file_put_contents($logFile, "Khoi tao tien trinh bot...\n");
-        $cmd = "nohup $pythonPath $botScript --mode auto > $logFile 2>&1 & echo $!";
+        
+        // FIX: Cấu hình biến môi trường ép Selenium ghi cache vào thư mục /tmp công khai
+        $cmd = "export SE_CACHE_PATH=/tmp/selenium && nohup $pythonPath $botScript --mode auto > $logFile 2>&1 & echo $!";
         $pid = trim(shell_exec($cmd));
         file_put_contents($pidFile, $pid);
         
@@ -85,15 +84,14 @@ switch ($action) {
             echo json_encode(['status' => 'error', 'error' => 'Bot dang khong chay.']);
             exit;
         }
-        
         shell_exec("kill -9 $pid");
         if (file_exists($pidFile)) unlink($pidFile);
-        
         echo json_encode(['status' => 'ok', 'message' => 'Da dung tien trinh bot.']);
         break;
 
     case 'scan':
-        $cmd = "$pythonPath $botScript --mode scan 2>&1";
+        // FIX: Thêm biến môi trường cho cả lệnh quét nhanh
+        $cmd = "export SE_CACHE_PATH=/tmp/selenium && $pythonPath $botScript --mode scan 2>&1";
         $output = shell_exec($cmd);
         echo json_encode(['status' => 'ok', 'message' => empty($output) ? "Quet hoan tat." : trim($output)]);
         break;
