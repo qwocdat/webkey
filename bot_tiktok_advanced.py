@@ -1,34 +1,10 @@
 import os
 import sys
 import time
-import subprocess
-
-# --- BỘ TỰ ĐỘNG KIỂM TRA VÀ CÀI ĐẶT THƯ VIỆN KHÔNG CẦN SETTINGS RENDER ---
-def auto_install_packages():
-    required_packages = {
-        "requests": "requests",
-        "selenium": "selenium==4.21.0",
-        "webdriver_manager": "webdriver-manager==4.0.1"
-    }
-    
-    for module_name, package_name in required_packages.items():
-        try:
-            __import__(module_name)
-        except ImportError:
-            print(f"[HỆ THỐNG] Thiếu thư viện '{module_name}'. Đang tự động cài đặt...")
-            try:
-                subprocess.check_call([sys.executable, "-m", "pip", "install", package_name])
-                print(f"[HỆ THỐNG] Cài đặt thành công '{package_name}'.")
-            except Exception as e:
-                print(f"[HỆ THỐNG] Lỗi khi tự cài '{package_name}': {e}")
-
-# Kích hoạt cài đặt tự động trước khi nạp module chính
-auto_install_packages()
-
-# Nạp các thư viện chính thức sau khi đảm bảo đã cài đặt
 import json
 import random
-import requests
+
+# CHỈ IMPORT CÁC THƯ VIỆN CÓ SẴN TRONG PYTHON VÀ SELENIUM MẶC ĐỊNH
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -37,12 +13,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
-
-try:
-    from webdriver_manager.chrome import ChromeDriverManager
-    HAS_WDM = True
-except ImportError:
-    HAS_WDM = False
 
 # --- CẤU HÌNH ĐƯỜNG DẪN HỆ THỐNG RENDER ---
 COOKIE_PATH = "/sdcard/bottiktok/tiktok_cookies.json"
@@ -60,7 +30,7 @@ def write_log(message):
         pass
 
 def get_driver():
-    """ Khởi tạo driver tối ưu hóa tuyệt đối, chống crash bộ nhớ trên Render """
+    """ Khởi tạo driver bằng Chrome + Chromedriver mặc định của Render, bỏ qua WDM """
     options = Options()
     options.add_argument('--headless=new')
     options.add_argument('--no-sandbox')
@@ -71,31 +41,25 @@ def get_driver():
     options.add_argument('--window-size=1920,1080')
     options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
     
-    os.environ['WDM_LOCAL'] = '1'
+    # Ép buộc Selenium dùng thư mục /tmp công khai để tránh lỗi Permission denied khi tạo cache
     os.environ['SE_CACHE_PATH'] = '/tmp/selenium'
 
+    # Chỉ định vị trí Chrome trên Render
     if os.path.exists("/usr/bin/google-chrome"):
         options.binary_location = "/usr/bin/google-chrome"
 
+    # Chạy trực tiếp bằng driver mặc định của hệ thống
     try:
         driver = webdriver.Chrome(options=options)
         return driver
     except Exception as e:
         write_log(f"[LOG Dự Phòng 1] Khởi động trực tiếp lỗi: {e}")
 
-    if HAS_WDM:
-        try:
-            service = Service(ChromeDriverManager().install())
-            driver = webdriver.Chrome(service=service, options=options)
-            return driver
-        except Exception as e2:
-            write_log(f"[LOG Dự Phòng 2] Tải driver tự động lỗi: {e2}")
-
     try:
         driver = webdriver.Chrome(service=Service(), options=options)
         return driver
-    except Exception as e3:
-        write_log(f"Lỗi hệ thống nghiêm trọng: {e3}")
+    except Exception as e2:
+        write_log(f"Lỗi hệ thống nghiêm trọng (Không tìm thấy Chromedriver): {e2}")
         return None
 
 def load_cookies(driver):
@@ -122,6 +86,13 @@ def load_cookies(driver):
         return False
 
 def main():
+    # Làm sạch file log cũ khi bắt đầu bật
+    try:
+        if os.path.exists(LOG_FILE):
+            os.remove(LOG_FILE)
+    except:
+        pass
+
     write_log("[PROGRESS] 10 - Khởi động hệ thống...")
     driver = get_driver()
     if not driver:
