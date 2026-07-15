@@ -11,7 +11,6 @@ $pidFile = "/var/www/html/bot_screenshots/bot.pid";
 $cookieDir = "/sdcard/bottiktok";
 $cookieTarget = $cookieDir . "/tiktok_cookies.json";
 
-// Tu dong tao cac thu muc can thiet neu chua co
 if (!file_exists('/var/www/html/bot_screenshots')) {
     mkdir('/var/www/html/bot_screenshots', 0777, true);
 }
@@ -45,12 +44,11 @@ switch ($action) {
             exit;
         }
 
-        // Di chuyen file vao dung duong dan he thong bot can dung
         if (move_uploaded_file($file['tmp_name'], $cookieTarget)) {
             chmod($cookieTarget, 0777);
             echo json_encode(['status' => 'ok', 'message' => 'Upload thanh cong! Cookie da luu.']);
         } else {
-            echo json_encode(['status' => 'error', 'error' => 'Khong the ghi file vao he thong thu muc.']);
+            echo json_encode(['status' => 'error', 'error' => 'Khong the ghi file vao he thong.']);
         }
         break;
 
@@ -74,10 +72,8 @@ switch ($action) {
         }
         
         file_put_contents($logFile, "Khoi tao tien trinh bot...\n");
-        
         $cmd = "nohup $pythonPath $botScript --mode auto > $logFile 2>&1 & echo $!";
         $pid = trim(shell_exec($cmd));
-        
         file_put_contents($pidFile, $pid);
         
         echo json_encode(['status' => 'ok', 'message' => "Kich hoat bot thanh cong."]);
