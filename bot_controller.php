@@ -3,27 +3,28 @@ header('Content-Type: application/json; charset=utf-8');
 
 $action = isset($_GET['action']) ? $_GET['action'] : '';
 
-// ĐƯỜNG DẪN PYTHON CHUẨN TRÊN RENDER CLOUD (BỎ QUA TERMUX CŨ)
 $pythonPath = "python3";
 $botScript = "bot_tiktok_advanced.py";
 
-// Các đường dẫn lưu trữ log và tiến trình trong Docker
 $logFile = "/var/www/html/bot_screenshots/bot_output.log";
 $pidFile = "/var/www/html/bot_screenshots/bot.pid";
+$cookieDir = "/sdcard/bottiktok";
+$cookieTarget = $cookieDir . "/tiktok_cookies.json";
 
-// Đảm bảo thư mục lưu log tồn tại
+// Tu dong tao cac thu muc can thiet neu chua co
 if (!file_exists('/var/www/html/bot_screenshots')) {
     mkdir('/var/www/html/bot_screenshots', 0777, true);
 }
+if (!file_exists($cookieDir)) {
+    mkdir($cookieDir, 0777, true);
+}
 
-// Hàm kiểm tra xem tiến trình Bot Python còn sống hay không
 function isBotRunning() {
     global $pidFile;
     if (!file_exists($pidFile)) return false;
     $pid = trim(file_get_contents($pidFile));
     if (empty($pid)) return false;
     
-    // Kiểm tra xem tiến trình PID đó có đang hoạt động trên Linux không
     $res = shell_exec("ps -p $pid");
     if (strpos($res, $pid) !== false) {
         return $pid;
@@ -32,12 +33,32 @@ function isBotRunning() {
 }
 
 switch ($action) {
+    case 'upload_cookie':
+        if (!isset($_FILES['cookie_file'])) {
+            echo json_encode(['status' => 'error', 'error' => 'Khong tim thay file upload.']);
+            exit;
+        }
+
+        $file = $_FILES['cookie_file'];
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            echo json_encode(['status' => 'error', 'error' => 'Loi trong qua trinh upload file.']);
+            exit;
+        }
+
+        // Di chuyen file vao dung duong dan he thong bot can dung
+        if (move_uploaded_file($file['tmp_name'], $cookieTarget)) {
+            chmod($cookieTarget, 0777);
+            echo json_encode(['status' => 'ok', 'message' => 'Upload thanh cong! Cookie da luu.']);
+        } else {
+            echo json_encode(['status' => 'error', 'error' => 'Khong the ghi file vao he thong thu muc.']);
+        }
+        break;
+
     case 'status':
         $pid = isBotRunning();
-        $logContent = file_exists($logFile) ? file_get_contents($logFile) : "Chưa có dữ liệu hoạt động.";
-        // Chỉ lấy 10 dòng cuối cùng của log để hiển thị cho nhẹ mượt
+        $logContent = file_exists($logFile) ? file_get_contents($logFile) : "";
         $logLines = explode("\n", trim($logContent));
-        $lastLines = array_slice($logLines, -8);
+        $lastLines = array_slice($logLines, -5);
         
         echo json_encode([
             'running' => ($pid !== false),
@@ -48,45 +69,40 @@ switch ($action) {
 
     case 'start':
         if (isBotRunning()) {
-            echo json_encode(['status' => 'error', 'error' => 'Bot hiện tại đang chạy rồi!']);
+            echo json_encode(['status' => 'error', 'error' => 'Bot hien tai dang chay roi.']);
             exit;
         }
         
-        // Làm sạch file log trước khi chạy phiên mới
-        file_put_contents($logFile, "--- Khởi tạo tiến trình Bot mới ---\n");
+        file_put_contents($logFile, "Khoi tao tien trinh bot...\n");
         
-        // Lệnh chạy ngầm nohup bằng python3 gốc của máy chủ Linux Render
         $cmd = "nohup $pythonPath $botScript --mode auto > $logFile 2>&1 & echo $!";
         $pid = trim(shell_exec($cmd));
         
-        // Ghi lại PID để quản lý
         file_put_contents($pidFile, $pid);
         
-        echo json_encode(['status' => 'ok', 'message' => "Kích hoạt Bot thành công độc lập trên đám mây! (PID: $pid)"]);
+        echo json_encode(['status' => 'ok', 'message' => "Kich hoat bot thanh cong."]);
         break;
 
     case 'stop':
         $pid = isBotRunning();
         if (!$pid) {
-            echo json_encode(['status' => 'error', 'error' => 'Bot hiện tại đang không chạy.']);
+            echo json_encode(['status' => 'error', 'error' => 'Bot dang khong chay.']);
             exit;
         }
         
-        // Kill tiến trình chạy ngầm trên Linux
         shell_exec("kill -9 $pid");
         if (file_exists($pidFile)) unlink($pidFile);
         
-        echo json_encode(['status' => 'ok', 'message' => 'Đã gửi tín hiệu dừng (Kill) tiến trình Bot thành công!']);
+        echo json_encode(['status' => 'ok', 'message' => 'Da dung tien trinh bot.']);
         break;
 
     case 'scan':
-        // Chạy quét thử nhanh trực tiếp, trả kết quả ngay lập tức lên màn hình console
         $cmd = "$pythonPath $botScript --mode scan 2>&1";
         $output = shell_exec($cmd);
-        echo json_encode(['status' => 'ok', 'message' => empty($output) ? "Quét hoàn tất (Không có phản hồi lỗi)." : $output]);
+        echo json_encode(['status' => 'ok', 'message' => empty($output) ? "Quet hoan tat." : trim($output)]);
         break;
 
     default:
-        echo json_encode(['status' => 'error', 'error' => 'Hành động không hợp lệ']);
+        echo json_encode(['status' => 'error', 'error' => 'Hanh dong khong hop le.']);
         break;
 }
