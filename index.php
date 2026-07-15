@@ -6,32 +6,41 @@
     <title>TikTok Bot Control Panel</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f5f5f7; margin: 0; padding: 20px; display: flex; justify-content: center; }
-        .container { max-width: 450px; width: 100%; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: center; }
+        .container { max-width: 450px; width: 100%; background: #fff; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; position: relative; }
         h2 { margin: 10px 0 5px 0; color: #1d1d1f; font-size: 22px; }
         .sub-title { color: #86868b; font-size: 13px; margin-bottom: 20px; }
         
-        .upload-section { border: 2px dashed #ddd; padding: 20px; border-radius: 8px; margin-bottom: 20px; background: #fafafa; }
-        .file-input-label { display: inline-block; padding: 8px 16px; background: #007aff; color: #fff; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; margin-bottom: 10px; }
+        .upload-section { border: 2px dashed #e5e5ea; padding: 20px; border-radius: 12px; margin-bottom: 20px; background: #fafafa; }
+        .file-input-label { display: inline-block; padding: 10px 20px; background: #007aff; color: #fff; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; margin-bottom: 10px; transition: background 0.2s; }
+        .file-input-label:hover { background: #0062cc; }
         .file-input { display: none; }
-        .file-name { font-size: 13px; color: #666; display: block; margin-bottom: 10px; }
-        .btn-upload { background: #34c759; color: white; border: none; padding: 8px 20px; border-radius: 6px; font-size: 14px; cursor: pointer; font-weight: 500; }
+        .file-name { font-size: 13px; color: #86868b; display: block; margin-bottom: 12px; }
+        .btn-upload { background: #34c759; color: white; border: none; padding: 10px 24px; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: 600; }
         
-        .status-bar { display: flex; justify-content: space-between; align-items: center; background: #f5f5f7; padding: 10px 15px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; }
+        .status-bar { display: flex; justify-content: space-between; align-items: center; background: #f5f5f7; padding: 12px 15px; border-radius: 10px; margin-bottom: 20px; font-size: 14px; }
         .status-dot { display: inline-block; width: 8px; height: 8px; background: #ff3b30; border-radius: 50%; margin-right: 6px; }
         .status-dot.active { background: #34c759; }
         
         .control-btns { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .btn { padding: 12px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; color: white; }
+        .btn { padding: 12px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; color: white; transition: opacity 0.2s; }
+        .btn:active { opacity: 0.8; }
         .btn-start { background: #34c759; }
         .btn-stop { background: #ff9500; }
         .btn-scan { background: #007aff; }
         .btn:disabled { background: #ccc; cursor: not-allowed; }
         
-        .console-log { background: #1c1c1e; color: #30d158; padding: 15px; border-radius: 8px; height: 15px; overflow-y: auto; text-align: left; font-family: monospace; font-size: 13px; white-space: pre-wrap; margin-bottom: 15px; display: none; }
-        .info-footer { font-size: 12px; color: #86868b; text-align: left; background: #f5f5f7; padding: 10px; border-radius: 6px; word-break: break-all; }
+        .console-log { background: #1c1c1e; color: #30d158; padding: 15px; border-radius: 10px; height: 80px; overflow-y: auto; text-align: left; font-family: monospace; font-size: 12px; white-space: pre-wrap; margin-bottom: 15px; display: none; }
+        .info-footer { font-size: 12px; color: #86868b; text-align: left; background: #f5f5f7; padding: 12px; border-radius: 8px; word-break: break-all; }
+
+        /* Custom Popup đẹp mắt, không làm tối đen màn hình thô thiển */
+        .custom-popup { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: #323232; color: #fff; padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: 500; box-shadow: 0 4px 15px rgba(0,0,0,0.15); transition: transform 0.3s ease, opacity 0.3s ease; opacity: 0; z-index: 9999; pointer-events: none; }
+        .custom-popup.show { transform: translateX(-50%) translateY(0); opacity: 1; }
     </style>
 </head>
 <body>
+
+<div class="custom-popup" id="customPopup">Thông báo</div>
+
 <div class="container">
     <h2>TikTok Bot</h2>
     <div class="sub-title">Upload file cookie JSON goc -> bot tu dong dung</div>
@@ -64,6 +73,15 @@
 </div>
 
 <script>
+function showNotification(msg) {
+    const popup = document.getElementById('customPopup');
+    popup.textContent = msg;
+    popup.classList.add('show');
+    setTimeout(() => {
+        popup.classList.remove('show');
+    }, 3000);
+}
+
 function displayFileName() {
     const fileInput = document.getElementById('fileCookie');
     const nameDisplay = document.getElementById('fileNameDisplay');
@@ -78,7 +96,7 @@ document.getElementById('uploadForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const fileInput = document.getElementById('fileCookie');
     if (fileInput.files.length === 0) {
-        alert("Vui long chon file JSON truoc khi upload.");
+        showNotification("Vui long chon file JSON.");
         return;
     }
 
@@ -92,12 +110,12 @@ document.getElementById('uploadForm').addEventListener('submit', function(e) {
     .then(res => res.json())
     .then(data => {
         if (data.status === 'ok') {
-            alert(data.message);
+            showNotification(data.message);
         } else {
-            alert("Loi upload: " + data.error);
+            showNotification("Loi upload: " + data.error);
         }
     })
-    .catch(err => alert("Loi ket noi: " + err));
+    .catch(err => showNotification("Loi ket noi: " + err));
 });
 
 function checkStatus() {
@@ -139,13 +157,13 @@ function controlBot(action) {
     .then(res => res.json())
     .then(data => {
         if (data.status === 'ok') {
-            alert(data.message);
+            showNotification(data.message);
         } else {
-            alert("Loi: " + data.error);
+            showNotification("Loi: " + data.error);
         }
         checkStatus();
     })
-    .catch(err => alert("Loi ket noi server: " + err));
+    .catch(err => showNotification("Loi ket noi: " + err));
 }
 
 setInterval(checkStatus, 3000);
