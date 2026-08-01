@@ -50,6 +50,99 @@
       transition: background 0.3s, color 0.3s;
     }
 
+    /* ---------- LOADING OVERLAY ---------- */
+    #loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: var(--ios-bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease;
+    }
+
+    #loading-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .loading-container {
+      width: 80%;
+      max-width: 300px;
+      text-align: center;
+    }
+
+    .loading-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--ios-text);
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 8px;
+      background-color: var(--ios-border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 8px 0;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--ios-purple), #8b5cf6);
+      border-radius: 10px;
+      transition: width 0.2s ease;
+    }
+
+    .progress-text {
+      font-size: 14px;
+      color: var(--ios-text-secondary);
+      font-weight: 500;
+    }
+
+    /* ---------- THÔNG BÁO CHỈ DÀNH CHO TELEGRAM ---------- */
+    #telegram-required {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: var(--ios-bg);
+      color: var(--ios-text);
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      text-align: center;
+      padding: 30px;
+    }
+
+    #telegram-required .icon {
+      font-size: 60px;
+      margin-bottom: 20px;
+    }
+
+    #telegram-required h2 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    #telegram-required p {
+      font-size: 15px;
+      color: var(--ios-text-secondary);
+      max-width: 320px;
+    }
+
+    /* ---------- CÁC PHẦN CÒN LẠI (GIỮ NGUYÊN) ---------- */
     .header {
       text-align: center;
       margin-bottom: 20px;
@@ -68,7 +161,6 @@
       color: var(--ios-text-secondary);
     }
 
-    /* User Profile Badge (iOS Style) */
     .user-badge {
       background: var(--ios-card);
       border-radius: var(--ios-radius);
@@ -219,7 +311,6 @@
       min-height: 90px;
     }
 
-    /* iOS Purple Button with Loading Effect */
     .btn-submit {
       width: 100%;
       background: var(--ios-purple);
@@ -250,7 +341,6 @@
       cursor: not-allowed;
     }
 
-    /* Loading Spinner */
     .spinner {
       width: 18px;
       height: 18px;
@@ -343,140 +433,162 @@
 </head>
 <body>
 
-  <div class="header">
-    <h1>ScamCheck Bot</h1>
-    <p>Hệ thống tra cứu & Cảnh báo lừa đảo an toàn</p>
-  </div>
-
-  <!-- Thẻ thông tin user & tài khoản mạng xã hội liên kết -->
-  <div class="user-badge" id="user-badge-container">
-    <div class="user-avatar" id="user-initial">U</div>
-    <div class="user-info">
-      <div class="name" id="user-fullname">Đang tải tài khoản...</div>
-      <div class="username" id="user-social-link">Đang liên kết Telegram & Instagram...</div>
-    </div>
-  </div>
-
-  <div class="grid-menu">
-    <div class="menu-card" onclick="openPanel('panel-check')">
-      <svg class="icon-svg" viewBox="0 0 24 24">
-        <circle cx="11" cy="11" r="8"></circle>
-        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-      </svg>
-      <span>Kiểm tra Scam</span>
-    </div>
-
-    <div class="menu-card" onclick="openPanel('panel-report')">
-      <svg class="icon-svg" viewBox="0 0 24 24">
-        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-      </svg>
-      <span>Gửi Báo Cáo</span>
-    </div>
-
-    <div class="menu-card" onclick="openPanel('panel-recent')">
-      <svg class="icon-svg" viewBox="0 0 24 24">
-        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-      </svg>
-      <span>Gần Đây</span>
-    </div>
-
-    <div class="menu-card" onclick="openPanel('panel-stats')">
-      <svg class="icon-svg" viewBox="0 0 24 24">
-        <line x1="18" y1="20" x2="18" y2="10"></line>
-        <line x1="12" y1="20" x2="12" y2="4"></line>
-        <line x1="6" y1="20" x2="6" y2="14"></line>
-      </svg>
-      <span>Thống Kê</span>
-    </div>
-  </div>
-
-  <!-- Panel 1: Tra cứu -->
-  <div id="panel-check" class="panel">
-    <div class="panel-title">
-      <span>Tra cứu thông tin</span>
-      <button class="btn-close" onclick="closePanel('panel-check')">Đóng</button>
-    </div>
-    <div class="form-group">
-      <label>SĐT / STK / Link / Social</label>
-      <input type="text" id="check-input" class="form-control" placeholder="Nhập số điện thoại, STK..." />
-    </div>
-    <button class="btn-submit" id="btn-check-exec" onclick="executeCheck()">
-      <div class="spinner" id="spin-check"></div>
-      <span class="btn-text">Tra Cứu Ngay</span>
-    </button>
-    <div id="check-result"></div>
-  </div>
-
-  <!-- Panel 2: Báo cáo -->
-  <div id="panel-report" class="panel">
-    <div class="panel-title">
-      <span>Tạo báo cáo lừa đảo</span>
-      <button class="btn-close" onclick="closePanel('panel-report')">Đóng</button>
-    </div>
-    <div class="form-group">
-      <label>Loại đối tượng</label>
-      <select id="report-type" class="form-control">
-        <option value="phone">Số điện thoại</option>
-        <option value="bank">Tài khoản ngân hàng</option>
-        <option value="link">Đường dẫn Website</option>
-        <option value="social">Tài khoản Social (TikTok/Tele/Instagram)</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Thông tin đối tượng</label>
-      <input type="text" id="report-value" class="form-control" placeholder="Ví dụ: 0xxxxx111 hoặc @username" />
-    </div>
-    <div class="form-group">
-      <label>Link Instagram liên kết cá nhân (Tùy chọn)</label>
-      <input type="text" id="report-instagram" class="form-control" placeholder="https://instagram.com/username_cua_ban" />
-    </div>
-    <div class="form-group">
-      <label>Chi tiết hành vi</label>
-      <textarea id="report-desc" class="form-control" placeholder="Mô tả sự việc lừa đảo..."></textarea>
-    </div>
-    <div class="form-group">
-      <label>Ảnh bằng chứng (Tùy chọn)</label>
-      <input type="file" id="report-image" class="form-control" accept="image/*" />
-    </div>
-    <button class="btn-submit" id="btn-submit-report" onclick="submitReport()">
-      <div class="spinner" id="spin-report"></div>
-      <span class="btn-text">Gửi Báo Cáo</span>
-    </button>
-  </div>
-
-  <!-- Panel 3: Gần đây -->
-  <div id="panel-recent" class="panel">
-    <div class="panel-title">
-      <span>Báo cáo mới cập nhật</span>
-      <button class="btn-close" onclick="closePanel('panel-recent')">Đóng</button>
-    </div>
-    <div id="recent-list">
-      <div class="alert-box alert-success">Đang tải dữ liệu...</div>
-    </div>
-  </div>
-
-  <!-- Panel 4: Thống kê -->
-  <div id="panel-stats" class="panel">
-    <div class="panel-title">
-      <span>Thống kê hệ thống</span>
-      <button class="btn-close" onclick="closePanel('panel-stats')">Đóng</button>
-    </div>
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-value" id="stat-blacklist">--</div>
-        <div class="stat-label">Blacklist</div>
+  <!-- Loading Overlay (xuất hiện ngay khi mở, sẽ ẩn sau khi xác minh) -->
+  <div id="loading-overlay">
+    <div class="loading-container">
+      <div class="loading-title">🔐 Xác minh kết nối</div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progress-fill"></div>
       </div>
-      <div class="stat-card">
-        <div class="stat-value" id="stat-reports">--</div>
-        <div class="stat-label">Báo Cáo</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="stat-checks">--</div>
-        <div class="stat-label">Lượt Tra</div>
+      <div class="progress-text" id="progress-text">0%</div>
+    </div>
+  </div>
+
+  <!-- Thông báo nếu không phải Telegram Mini App -->
+  <div id="telegram-required">
+    <div class="icon">📱</div>
+    <h2>Chỉ dành cho Telegram</h2>
+    <p>Vui lòng mở ứng dụng này trong Telegram Mini App để trải nghiệm đầy đủ tính năng.</p>
+  </div>
+
+  <!-- Nội dung chính (sẽ ẩn nếu không phải Telegram) -->
+  <div id="main-content" style="display: none;">
+
+    <div class="header">
+      <h1>ScamCheck Bot</h1>
+      <p>Hệ thống tra cứu & Cảnh báo lừa đảo an toàn</p>
+    </div>
+
+    <div class="user-badge" id="user-badge-container">
+      <div class="user-avatar" id="user-initial">U</div>
+      <div class="user-info">
+        <div class="name" id="user-fullname">Đang tải tài khoản...</div>
+        <div class="username" id="user-social-link">Đang liên kết Telegram & Instagram...</div>
       </div>
     </div>
-  </div>
+
+    <div class="grid-menu">
+      <div class="menu-card" onclick="openPanel('panel-check')">
+        <svg class="icon-svg" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <span>Kiểm tra Scam</span>
+      </div>
+
+      <div class="menu-card" onclick="openPanel('panel-report')">
+        <svg class="icon-svg" viewBox="0 0 24 24">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+        </svg>
+        <span>Gửi Báo Cáo</span>
+      </div>
+
+      <div class="menu-card" onclick="openPanel('panel-recent')">
+        <svg class="icon-svg" viewBox="0 0 24 24">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+        </svg>
+        <span>Gần Đây</span>
+      </div>
+
+      <div class="menu-card" onclick="openPanel('panel-stats')">
+        <svg class="icon-svg" viewBox="0 0 24 24">
+          <line x1="18" y1="20" x2="18" y2="10"></line>
+          <line x1="12" y1="20" x2="12" y2="4"></line>
+          <line x1="6" y1="20" x2="6" y2="14"></line>
+        </svg>
+        <span>Thống Kê</span>
+      </div>
+    </div>
+
+    <!-- Panel 1: Tra cứu -->
+    <div id="panel-check" class="panel">
+      <div class="panel-title">
+        <span>Tra cứu thông tin</span>
+        <button class="btn-close" onclick="closePanel('panel-check')">Đóng</button>
+      </div>
+      <div class="form-group">
+        <label>SĐT / STK / Link / Social</label>
+        <input type="text" id="check-input" class="form-control" placeholder="Nhập số điện thoại, STK..." />
+      </div>
+      <button class="btn-submit" id="btn-check-exec" onclick="executeCheck()">
+        <div class="spinner" id="spin-check"></div>
+        <span class="btn-text">Tra Cứu Ngay</span>
+      </button>
+      <div id="check-result"></div>
+    </div>
+
+    <!-- Panel 2: Báo cáo -->
+    <div id="panel-report" class="panel">
+      <div class="panel-title">
+        <span>Tạo báo cáo lừa đảo</span>
+        <button class="btn-close" onclick="closePanel('panel-report')">Đóng</button>
+      </div>
+      <div class="form-group">
+        <label>Loại đối tượng</label>
+        <select id="report-type" class="form-control">
+          <option value="phone">Số điện thoại</option>
+          <option value="bank">Tài khoản ngân hàng</option>
+          <option value="link">Đường dẫn Website</option>
+          <option value="social">Tài khoản Social (TikTok/Tele/Instagram)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Thông tin đối tượng</label>
+        <input type="text" id="report-value" class="form-control" placeholder="Ví dụ: 0xxxxx111 hoặc @username" />
+      </div>
+      <div class="form-group">
+        <label>Link Instagram liên kết cá nhân (Tùy chọn)</label>
+        <input type="text" id="report-instagram" class="form-control" placeholder="https://instagram.com/username_cua_ban" />
+      </div>
+      <div class="form-group">
+        <label>Chi tiết hành vi</label>
+        <textarea id="report-desc" class="form-control" placeholder="Mô tả sự việc lừa đảo..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Ảnh bằng chứng (Tùy chọn)</label>
+        <input type="file" id="report-image" class="form-control" accept="image/*" />
+      </div>
+      <button class="btn-submit" id="btn-submit-report" onclick="submitReport()">
+        <div class="spinner" id="spin-report"></div>
+        <span class="btn-text">Gửi Báo Cáo</span>
+      </button>
+    </div>
+
+    <!-- Panel 3: Gần đây -->
+    <div id="panel-recent" class="panel">
+      <div class="panel-title">
+        <span>Báo cáo mới cập nhật</span>
+        <button class="btn-close" onclick="closePanel('panel-recent')">Đóng</button>
+      </div>
+      <div id="recent-list">
+        <div class="alert-box alert-success">Đang tải dữ liệu...</div>
+      </div>
+    </div>
+
+    <!-- Panel 4: Thống kê -->
+    <div id="panel-stats" class="panel">
+      <div class="panel-title">
+        <span>Thống kê hệ thống</span>
+        <button class="btn-close" onclick="closePanel('panel-stats')">Đóng</button>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="stat-blacklist">--</div>
+          <div class="stat-label">Blacklist</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-reports">--</div>
+          <div class="stat-label">Báo Cáo</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-checks">--</div>
+          <div class="stat-label">Lượt Tra</div>
+        </div>
+      </div>
+    </div>
+
+  </div> <!-- /main-content -->
 
   <!-- FIREBASE & TELEGRAM INTEGRATION -->
   <script type="module">
@@ -506,19 +618,60 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const IMGBB_API_KEY = "058d41ab0d2788767f41135ef36ec56"; 
+    const IMGBB_API_KEY = "058d41ab0d2788767f41135ef36ec56";
 
+    // ---------- KIỂM TRA TELEGRAM MINI APP ----------
     const tg = window.Telegram?.WebApp;
-    let currentUser = null;
+    const isTelegram = !!tg;
 
-    if (tg) {
-      tg.expand();
-      tg.ready();
-      currentUser = tg.initDataUnsafe?.user;
+    // Các phần tử DOM
+    const mainContent = document.getElementById('main-content');
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const telegramRequired = document.getElementById('telegram-required');
+    const progressFill = document.getElementById('progress-fill');
+    const progressText = document.getElementById('progress-text');
+
+    // Nếu KHÔNG phải Telegram => hiển thị thông báo, ẩn nội dung chính và loading
+    if (!isTelegram) {
+      loadingOverlay.style.display = 'none';
+      telegramRequired.style.display = 'flex';
+      mainContent.style.display = 'none';
+      // Không chạy tiếp
+      throw new Error('Không phải Telegram Mini App');
     }
 
-    // Hiển thị thông tin người dùng và tự điền Instagram nếu có lưu trữ hoặc đoán từ Telegram username
+    // Nếu là Telegram, hiển thị loading và tiến hành xác minh
+    // Bắt đầu hiệu ứng thanh tải từ 0 → 100%
+    let progress = 0;
+    const interval = setInterval(() => {
+      // Tăng ngẫu nhiên từ 1-5 mỗi lần để mô phỏng thực tế
+      const increment = Math.floor(Math.random() * 4) + 2;
+      progress = Math.min(progress + increment, 100);
+      progressFill.style.width = progress + '%';
+      progressText.innerText = progress + '%';
+
+      if (progress >= 100) {
+        clearInterval(interval);
+        // Sau khi hoàn tất, ẩn overlay và hiển thị nội dung chính
+        loadingOverlay.classList.add('hidden');
+        setTimeout(() => {
+          loadingOverlay.style.display = 'none';
+          mainContent.style.display = 'block';
+        }, 300); // chờ hiệu ứng fade
+      }
+    }, 80); // cập nhật mỗi 80ms
+
+    // Khởi tạo Telegram WebApp (mở rộng)
+    tg.expand();
+    tg.ready();
+    const currentUser = tg.initDataUnsafe?.user;
+
+    // ---------- CÁC HÀM XỬ LÝ CHÍNH (GIỮ NGUYÊN) ----------
+
+    // Hiển thị thông tin người dùng
     window.addEventListener('DOMContentLoaded', () => {
+      // Lúc này overlay vẫn đang chạy, nhưng chúng ta vẫn set user info sau khi tải
+      // Tuy nhiên do mainContent ẩn nên không sao
       const nameEl = document.getElementById('user-fullname');
       const socialEl = document.getElementById('user-social-link');
       const avatarEl = document.getElementById('user-initial');
@@ -530,8 +683,6 @@
         avatarEl.innerText = fullName.charAt(0).toUpperCase();
 
         const tgUsername = currentUser.username ? `@${currentUser.username}` : `ID: ${currentUser.id}`;
-        
-        // Tạo sẵn gợi ý link Instagram dựa theo username Telegram (nếu trùng)
         const defaultIgUrl = currentUser.username ? `https://instagram.com/${currentUser.username}` : '';
         if (defaultIgUrl && igInput) {
           igInput.value = defaultIgUrl;
@@ -545,6 +696,7 @@
       }
     });
 
+    // Các hàm mở/đóng panel
     window.openPanel = function(panelId) {
       document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
       document.getElementById(panelId).classList.add('active');
@@ -557,7 +709,6 @@
       document.getElementById(panelId).classList.remove('active');
     };
 
-    // Hàm phụ trợ quản lý hiệu ứng Loading của nút bấm
     function setButtonLoading(btnId, spinnerId, isLoading, textWhenLoading) {
       const btn = document.getElementById(btnId);
       const spinner = document.getElementById(spinnerId);
@@ -575,7 +726,7 @@
       }
     }
 
-    // 1. Tra cứu realtime có hiệu ứng loading
+    // 1. Tra cứu
     window.executeCheck = async function() {
       const input = document.getElementById('check-input').value.trim().toLowerCase();
       const resultDiv = document.getElementById('check-result');
@@ -634,7 +785,7 @@
       }
     };
 
-    // 2. Gửi Báo Cáo kèm Base64 ImgBB và Instagram liên kết
+    // 2. Gửi báo cáo
     window.submitReport = async function() {
       const type = document.getElementById('report-type').value;
       const val = document.getElementById('report-value').value.trim();
@@ -687,7 +838,7 @@
           value: val.toLowerCase(),
           description: desc,
           image_url: imageUrl,
-          instagram_link: instagramUrl, // Lưu kèm link Instagram liên kết
+          instagram_link: instagramUrl,
           submitted_by: String(currentUser?.id || 'web_user'),
           telegram_username: currentUser?.username || 'unknown',
           status: 'pending',
@@ -752,6 +903,7 @@
         recentList.innerHTML = `<div class="alert-box alert-danger">Không thể tải dữ liệu gần đây.</div>`;
       }
     }
+
   </script>
 </body>
 </html>
