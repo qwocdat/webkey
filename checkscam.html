@@ -9,53 +9,98 @@
   
   <style>
     :root {
-      --bg-color: #0f172a;
-      --card-bg: #1e293b;
-      --card-hover: #334155;
-      --accent-color: #3b82f6;
-      --accent-hover: #2563eb;
-      --danger-color: #ef4444;
-      --success-color: #10b981;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --border-color: #334155;
-      --radius: 12px;
+      --ios-bg: #f2f2f7;
+      --ios-card: #ffffff;
+      --ios-text: #000000;
+      --ios-text-secondary: #8e8e93;
+      --ios-purple: #af52de;
+      --ios-purple-hover: #9333ea;
+      --ios-red: #ff3b30;
+      --ios-green: #34c759;
+      --ios-border: #c6c6c8;
+      --ios-radius: 14px;
+      --ios-button-radius: 12px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --ios-bg: #000000;
+        --ios-card: #1c1c1e;
+        --ios-text: #ffffff;
+        --ios-text-secondary: #aeaeb2;
+        --ios-border: #38383a;
+      }
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       -webkit-tap-highlight-color: transparent;
     }
 
     body {
-      background-color: var(--bg-color);
-      color: var(--text-main);
+      background-color: var(--ios-bg);
+      color: var(--ios-text);
       padding: 16px;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      transition: background 0.3s, color 0.3s;
     }
 
     .header {
       text-align: center;
-      margin-bottom: 24px;
-      padding-top: 8px;
+      margin-bottom: 20px;
+      padding-top: 10px;
     }
 
     .header h1 {
-      font-size: 20px;
+      font-size: 22px;
       font-weight: 700;
       letter-spacing: -0.02em;
-      color: var(--text-main);
       margin-bottom: 4px;
     }
 
     .header p {
       font-size: 13px;
-      color: var(--text-muted);
+      color: var(--ios-text-secondary);
+    }
+
+    /* User Profile Badge (iOS Style) */
+    .user-badge {
+      background: var(--ios-card);
+      border-radius: var(--ios-radius);
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--ios-purple);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .user-info .name {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .user-info .username {
+      font-size: 12px;
+      color: var(--ios-text-secondary);
     }
 
     .grid-menu {
@@ -66,29 +111,29 @@
     }
 
     .menu-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius);
-      padding: 18px 14px;
+      background: var(--ios-card);
+      border-radius: var(--ios-radius);
+      padding: 20px 14px;
       text-align: center;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: transform 0.15s ease, opacity 0.15s ease;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
     }
 
     .menu-card:active {
-      transform: scale(0.98);
-      background: var(--card-hover);
+      transform: scale(0.96);
+      opacity: 0.8;
     }
 
     .icon-svg {
-      width: 24px;
-      height: 24px;
-      stroke: var(--accent-color);
-      stroke-width: 2;
+      width: 26px;
+      height: 26px;
+      stroke: var(--ios-purple);
+      stroke-width: 2.2;
       fill: none;
       stroke-linecap: round;
       stroke-linejoin: round;
@@ -97,17 +142,16 @@
     .menu-card span {
       font-size: 14px;
       font-weight: 600;
-      color: var(--text-main);
     }
 
     .panel {
       display: none;
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius);
+      background: var(--ios-card);
+      border-radius: var(--ios-radius);
       padding: 16px;
       margin-bottom: 16px;
-      animation: fadeIn 0.25s ease-in-out;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+      animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .panel.active {
@@ -115,108 +159,135 @@
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(4px); }
+      from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
     .panel-title {
-      font-size: 15px;
+      font-size: 16px;
       font-weight: 600;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid var(--border-color);
+      border-bottom: 0.5px solid var(--ios-border);
       padding-bottom: 10px;
     }
 
     .btn-close {
       background: none;
       border: none;
-      color: var(--text-muted);
-      font-size: 13px;
+      color: var(--ios-purple);
+      font-size: 14px;
+      font-weight: 600;
       cursor: pointer;
     }
 
     .form-group {
-      margin-bottom: 12px;
+      margin-bottom: 14px;
     }
 
     .form-group label {
       display: block;
       font-size: 12px;
-      color: var(--text-muted);
+      font-weight: 600;
+      color: var(--ios-text-secondary);
       margin-bottom: 6px;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.04em;
     }
 
     .form-control {
       width: 100%;
-      background: var(--bg-color);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 10px 12px;
-      color: var(--text-main);
-      font-size: 14px;
+      background: rgba(120, 120, 128, 0.08);
+      border: 0.5px solid var(--ios-border);
+      border-radius: 10px;
+      padding: 12px;
+      color: var(--ios-text);
+      font-size: 15px;
       outline: none;
       transition: border-color 0.2s;
     }
 
     .form-control:focus {
-      border-color: var(--accent-color);
+      border-color: var(--ios-purple);
+      background: var(--ios-card);
     }
 
     textarea.form-control {
       resize: vertical;
-      min-height: 80px;
+      min-height: 90px;
     }
 
+    /* iOS Purple Button with Loading Effect */
     .btn-submit {
       width: 100%;
-      background: var(--accent-color);
+      background: var(--ios-purple);
       color: #ffffff;
       border: none;
-      border-radius: 8px;
-      padding: 12px;
-      font-size: 14px;
+      border-radius: var(--ios-button-radius);
+      padding: 14px;
+      font-size: 15px;
       font-weight: 600;
       cursor: pointer;
-      margin-top: 8px;
-      transition: background 0.2s;
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.2s, transform 0.1s;
+      position: relative;
+      overflow: hidden;
     }
 
     .btn-submit:active {
-      background: var(--accent-hover);
+      transform: scale(0.98);
+      background: var(--ios-purple-hover);
     }
 
     .btn-submit:disabled {
-      background: var(--border-color);
+      background: var(--ios-text-secondary);
       cursor: not-allowed;
     }
 
+    /* Loading Spinner */
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #ffffff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
     .alert-box {
-      border-radius: 8px;
+      border-radius: 10px;
       padding: 12px;
       font-size: 13px;
       line-height: 1.5;
+      margin-top: 10px;
     }
 
     .alert-success {
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid var(--success-color);
-      color: #6ee7b7;
+      background: rgba(52, 199, 89, 0.12);
+      border: 0.5px solid var(--ios-green);
+      color: #248a3d;
     }
 
     .alert-danger {
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid var(--danger-color);
-      color: #fca5a5;
+      background: rgba(255, 59, 48, 0.12);
+      border: 0.5px solid var(--ios-red);
+      color: #d70015;
     }
 
     .list-item {
       padding: 12px 0;
-      border-bottom: 1px solid var(--border-color);
+      border-bottom: 0.5px solid var(--ios-border);
     }
 
     .list-item:last-child {
@@ -226,12 +297,11 @@
     .list-item .item-title {
       font-size: 14px;
       font-weight: 600;
-      color: var(--text-main);
     }
 
     .list-item .item-sub {
       font-size: 12px;
-      color: var(--text-muted);
+      color: var(--ios-text-secondary);
       margin-top: 4px;
     }
 
@@ -243,40 +313,48 @@
     }
 
     .stat-card {
-      background: var(--bg-color);
-      padding: 12px 8px;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
+      background: rgba(120, 120, 128, 0.06);
+      padding: 14px 6px;
+      border-radius: 10px;
+      border: 0.5px solid var(--ios-border);
     }
 
     .stat-value {
       font-size: 16px;
       font-weight: 700;
-      color: var(--accent-color);
+      color: var(--ios-purple);
     }
 
     .stat-label {
       font-size: 11px;
-      color: var(--text-muted);
+      color: var(--ios-text-secondary);
       margin-top: 4px;
     }
 
     .evidence-img {
       width: 100%;
-      max-height: 250px;
+      max-height: 220px;
       object-fit: cover;
-      border-radius: 8px;
+      border-radius: 10px;
       margin-top: 10px;
-      border: 1px solid var(--border-color);
-      cursor: pointer;
+      border: 0.5px solid var(--ios-border);
     }
   </style>
 </head>
 <body>
 
   <div class="header">
-    <h1>ScamCheck Bot</h1>
-    <p>Hệ thống tra cứu & Cảnh báo lừa đảo tự động</p>
+    <h1>ScamCheck iOS</h1>
+    <p>Hệ thống tra cứu & Cảnh báo lừa đảo an toàn</p>
+  </div>
+
+  <!-- Thẻ thông tin user & tài khoản mạng xã hội liên kết -->
+  <div class="user-badge" id="user-badge-container">
+    <div class="user-avatar" id="user-initial">U</div>
+    <div class="user-info">
+      <div class="name" id="user-fullname">Đang tải tài khoản...</div>
+      <div class="username" id="user-social-link">Đang liên kết Telegram & Instagram...</div>
+    </div>
   </div>
 
   <div class="grid-menu">
@@ -300,7 +378,7 @@
       <svg class="icon-svg" viewBox="0 0 24 24">
         <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
       </svg>
-      <span>Báo Cáo Gần Đây</span>
+      <span>Gần Đây</span>
     </div>
 
     <div class="menu-card" onclick="openPanel('panel-stats')">
@@ -309,7 +387,7 @@
         <line x1="12" y1="20" x2="12" y2="4"></line>
         <line x1="6" y1="20" x2="6" y2="14"></line>
       </svg>
-      <span>Thống Kê Chung</span>
+      <span>Thống Kê</span>
     </div>
   </div>
 
@@ -317,21 +395,24 @@
   <div id="panel-check" class="panel">
     <div class="panel-title">
       <span>Tra cứu thông tin</span>
-      <button class="btn-close" onclick="closePanel('panel-check')">Đóng [x]</button>
+      <button class="btn-close" onclick="closePanel('panel-check')">Đóng</button>
     </div>
     <div class="form-group">
-      <label>SĐT / STK / Link / Social / Tên</label>
-      <input type="text" id="check-input" class="form-control" placeholder="Nhập thông tin cần tra..." />
+      <label>SĐT / STK / Link / Social</label>
+      <input type="text" id="check-input" class="form-control" placeholder="Nhập số điện thoại, STK..." />
     </div>
-    <button class="btn-submit" onclick="executeCheck()">Tra Cứu Ngay</button>
-    <div id="check-result" style="margin-top: 14px;"></div>
+    <button class="btn-submit" id="btn-check-exec" onclick="executeCheck()">
+      <div class="spinner" id="spin-check"></div>
+      <span class="btn-text">Tra Cứu Ngay</span>
+    </button>
+    <div id="check-result"></div>
   </div>
 
   <!-- Panel 2: Báo cáo -->
   <div id="panel-report" class="panel">
     <div class="panel-title">
       <span>Tạo báo cáo lừa đảo</span>
-      <button class="btn-close" onclick="closePanel('panel-report')">Đóng [x]</button>
+      <button class="btn-close" onclick="closePanel('panel-report')">Đóng</button>
     </div>
     <div class="form-group">
       <label>Loại đối tượng</label>
@@ -339,32 +420,39 @@
         <option value="phone">Số điện thoại</option>
         <option value="bank">Tài khoản ngân hàng</option>
         <option value="link">Đường dẫn Website</option>
-        <option value="social">Tài khoản Social (TikTok/Tele/Zalo/YT)</option>
+        <option value="social">Tài khoản Social (TikTok/Tele/Instagram)</option>
       </select>
     </div>
     <div class="form-group">
       <label>Thông tin đối tượng</label>
-      <input type="text" id="report-value" class="form-control" placeholder="Ví dụ: 0xxxxx111" />
+      <input type="text" id="report-value" class="form-control" placeholder="Ví dụ: 0xxxxx111 hoặc @username" />
+    </div>
+    <div class="form-group">
+      <label>Link Instagram liên kết cá nhân (Tùy chọn)</label>
+      <input type="text" id="report-instagram" class="form-control" placeholder="https://instagram.com/username_cua_ban" />
     </div>
     <div class="form-group">
       <label>Chi tiết hành vi</label>
-      <textarea id="report-desc" class="form-control" placeholder="Mô tả lại sự việc lừa đảo..."></textarea>
+      <textarea id="report-desc" class="form-control" placeholder="Mô tả sự việc lừa đảo..."></textarea>
     </div>
     <div class="form-group">
       <label>Ảnh bằng chứng (Tùy chọn)</label>
       <input type="file" id="report-image" class="form-control" accept="image/*" />
     </div>
-    <button class="btn-submit" id="btn-submit-report" onclick="submitReport()">Gửi Báo Cáo</button>
+    <button class="btn-submit" id="btn-submit-report" onclick="submitReport()">
+      <div class="spinner" id="spin-report"></div>
+      <span class="btn-text">Gửi Báo Cáo</span>
+    </button>
   </div>
 
-  <!-- Panel 3: Báo cáo gần đây -->
+  <!-- Panel 3: Gần đây -->
   <div id="panel-recent" class="panel">
     <div class="panel-title">
       <span>Báo cáo mới cập nhật</span>
-      <button class="btn-close" onclick="closePanel('panel-recent')">Đóng [x]</button>
+      <button class="btn-close" onclick="closePanel('panel-recent')">Đóng</button>
     </div>
     <div id="recent-list">
-      <div class="alert-box alert-success">Đang tải dữ liệu từ CSDL...</div>
+      <div class="alert-box alert-success">Đang tải dữ liệu...</div>
     </div>
   </div>
 
@@ -372,7 +460,7 @@
   <div id="panel-stats" class="panel">
     <div class="panel-title">
       <span>Thống kê hệ thống</span>
-      <button class="btn-close" onclick="closePanel('panel-stats')">Đóng [x]</button>
+      <button class="btn-close" onclick="closePanel('panel-stats')">Đóng</button>
     </div>
     <div class="stats-grid">
       <div class="stat-card">
@@ -390,7 +478,7 @@
     </div>
   </div>
 
-  <!-- FIREBASE & IMGBB INTEGRATION -->
+  <!-- FIREBASE & TELEGRAM INTEGRATION -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { 
@@ -406,7 +494,6 @@
       serverTimestamp 
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyAUuV5euNNLHE2Cf6tXzUHV-ChKwNF593Y",
       authDomain: "quocdat-396fe.firebaseapp.com",
@@ -419,15 +506,44 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-
-    // ImgBB API Key của bạn
     const IMGBB_API_KEY = "058d41ab0d2788767f41135ef36ec56"; 
 
     const tg = window.Telegram?.WebApp;
+    let currentUser = null;
+
     if (tg) {
       tg.expand();
       tg.ready();
+      currentUser = tg.initDataUnsafe?.user;
     }
+
+    // Hiển thị thông tin người dùng và tự điền Instagram nếu có lưu trữ hoặc đoán từ Telegram username
+    window.addEventListener('DOMContentLoaded', () => {
+      const nameEl = document.getElementById('user-fullname');
+      const socialEl = document.getElementById('user-social-link');
+      const avatarEl = document.getElementById('user-initial');
+      const igInput = document.getElementById('report-instagram');
+
+      if (currentUser) {
+        const fullName = `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim() || 'Người dùng Telegram';
+        nameEl.innerText = fullName;
+        avatarEl.innerText = fullName.charAt(0).toUpperCase();
+
+        const tgUsername = currentUser.username ? `@${currentUser.username}` : `ID: ${currentUser.id}`;
+        
+        // Tạo sẵn gợi ý link Instagram dựa theo username Telegram (nếu trùng)
+        const defaultIgUrl = currentUser.username ? `https://instagram.com/${currentUser.username}` : '';
+        if (defaultIgUrl && igInput) {
+          igInput.value = defaultIgUrl;
+        }
+
+        socialEl.innerText = `Tele: ${tgUsername} | Đã liên kết`;
+      } else {
+        nameEl.innerText = 'Khách truy cập Web';
+        socialEl.innerText = 'Chưa đồng bộ tài khoản Telegram';
+        avatarEl.innerText = 'W';
+      }
+    });
 
     window.openPanel = function(panelId) {
       document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -441,7 +557,25 @@
       document.getElementById(panelId).classList.remove('active');
     };
 
-    // 1. Tra cứu realtime
+    // Hàm phụ trợ quản lý hiệu ứng Loading của nút bấm
+    function setButtonLoading(btnId, spinnerId, isLoading, textWhenLoading) {
+      const btn = document.getElementById(btnId);
+      const spinner = document.getElementById(spinnerId);
+      const textSpan = btn.querySelector('.btn-text');
+
+      if (isLoading) {
+        btn.disabled = true;
+        spinner.style.display = 'block';
+        textSpan.innerText = textWhenLoading;
+      } else {
+        btn.disabled = false;
+        spinner.style.display = 'none';
+        if(btnId === 'btn-check-exec') textSpan.innerText = 'Tra Cứu Ngay';
+        if(btnId === 'btn-submit-report') textSpan.innerText = 'Gửi Báo Cáo';
+      }
+    }
+
+    // 1. Tra cứu realtime có hiệu ứng loading
     window.executeCheck = async function() {
       const input = document.getElementById('check-input').value.trim().toLowerCase();
       const resultDiv = document.getElementById('check-result');
@@ -451,7 +585,8 @@
         return;
       }
 
-      resultDiv.innerHTML = `<div class="alert-box alert-success">Đang truy vấn CSDL...</div>`;
+      setButtonLoading('btn-check-exec', 'spin-check', true, 'Đang tra cứu...');
+      resultDiv.innerHTML = ``;
 
       try {
         const cleanVal = input.replace(/^@/, '');
@@ -464,7 +599,7 @@
         if (!querySnapshot.empty) {
           const docData = querySnapshot.docs[0].data();
           let imgHtml = docData.image_url 
-            ? `<a href="${docData.image_url}" target="_blank"><img src="${docData.image_url}" class="evidence-img" alt="Bằng chứng scam" /></a>` 
+            ? `<a href="${docData.image_url}" target="_blank"><img src="${docData.image_url}" class="evidence-img" alt="Bằng chứng" /></a>` 
             : '';
 
           resultDiv.innerHTML = `
@@ -480,71 +615,86 @@
           resultDiv.innerHTML = `
             <div class="alert-box alert-success">
               <b>CHƯA GHI NHẬN LỪA ĐẢO</b><br/>
-              Dữ liệu <b>${input}</b> chưa có trong CSDL đen. Hãy luôn cẩn trọng khi giao dịch!
+              Dữ liệu <b>${input}</b> chưa có trong hệ thống cảnh báo.
             </div>
           `;
         }
 
         await addDoc(collection(db, "checks_log"), {
-          user_id: tg?.initDataUnsafe?.user?.id || 'web_user',
+          user_id: currentUser?.id || 'web_user',
           query_value: input,
           timestamp: serverTimestamp()
         });
 
       } catch (err) {
         console.error(err);
-        resultDiv.innerHTML = `<div class="alert-box alert-danger">Lỗi kết nối CSDL Firebase.</div>`;
+        resultDiv.innerHTML = `<div class="alert-box alert-danger">Lỗi kết nối cơ sở dữ liệu.</div>`;
+      } finally {
+        setButtonLoading('btn-check-exec', 'spin-check', false);
       }
     };
 
-    // 2. Gửi Báo Cáo + Tải ảnh qua ImgBB
+    // 2. Gửi Báo Cáo kèm Base64 ImgBB và Instagram liên kết
     window.submitReport = async function() {
       const type = document.getElementById('report-type').value;
       const val = document.getElementById('report-value').value.trim();
       const desc = document.getElementById('report-desc').value.trim();
+      const instagramUrl = document.getElementById('report-instagram').value.trim();
       const fileInput = document.getElementById('report-image');
-      const submitBtn = document.getElementById('btn-submit-report');
 
       if (!val || !desc) {
-        alert('Vui lòng nhập đầy đủ thông tin báo cáo.');
+        alert('Vui lòng nhập đầy đủ thông tin báo cáo và chi tiết.');
         return;
       }
 
-      try {
-        submitBtn.disabled = true;
-        submitBtn.innerText = 'Đang tải ảnh lên ImgBB...';
+      setButtonLoading('btn-submit-report', 'spin-report', true, 'Đang xử lý ảnh...');
 
+      try {
         let imageUrl = '';
         if (fileInput.files.length > 0) {
           const file = fileInput.files[0];
-          const formData = new FormData();
-          formData.append('image', file);
           
-          const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+          const base64Image = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result.split(',')[1]);
+            reader.onerror = error => reject(error);
+          });
+
+          setButtonLoading('btn-submit-report', 'spin-report', true, 'Đang tải ảnh lên ImgBB...');
+
+          const formData = new URLSearchParams();
+          formData.append('key', IMGBB_API_KEY);
+          formData.append('image', base64Image);
+
+          const response = await fetch('https://api.imgbb.com/1/upload', {
             method: 'POST',
             body: formData
           });
-          
+
           const result = await response.json();
           if (result.success) {
             imageUrl = result.data.url;
           } else {
-            throw new Error('ImgBB từ chối nhận ảnh.');
+            throw new Error(result.error?.message || 'ImgBB từ chối nhận ảnh.');
           }
         }
 
-        submitBtn.innerText = 'Đang gửi báo cáo...';
+        setButtonLoading('btn-submit-report', 'spin-report', true, 'Đang gửi báo cáo...');
+        
         await addDoc(collection(db, "reports"), {
           type: type,
           value: val.toLowerCase(),
           description: desc,
           image_url: imageUrl,
-          submitted_by: String(tg?.initDataUnsafe?.user?.id || 'web_user'),
+          instagram_link: instagramUrl, // Lưu kèm link Instagram liên kết
+          submitted_by: String(currentUser?.id || 'web_user'),
+          telegram_username: currentUser?.username || 'unknown',
           status: 'pending',
           created_at: serverTimestamp()
         });
 
-        alert('Đã gửi báo cáo thành công! Báo cáo đang chờ Admin phê duyệt.');
+        alert('Gửi báo cáo thành công! Đang chờ Admin phê duyệt.');
         document.getElementById('report-value').value = '';
         document.getElementById('report-desc').value = '';
         fileInput.value = '';
@@ -553,12 +703,10 @@
         console.error("Lỗi:", err);
         alert('Lỗi khi gửi báo cáo: ' + err.message);
       } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerText = 'Gửi Báo Cáo';
+        setButtonLoading('btn-submit-report', 'spin-report', false);
       }
     };
 
-    // 3. Đếm thống kê
     async function fetchRealStats() {
       try {
         const blSnap = await getCountFromServer(collection(db, "blacklist"));
@@ -573,7 +721,6 @@
       }
     }
 
-    // 4. Lấy danh sách Scam mới nhất kèm ảnh
     async function fetchRecentScams() {
       const recentList = document.getElementById('recent-list');
       try {
