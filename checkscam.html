@@ -6,7 +6,7 @@
   <title>ScamCheck Mini App</title>
   <!-- Telegram Web App SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+  <!-- Font chữ Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -18,10 +18,9 @@
       --hint-color: var(--tg-theme-hint-color, #94a3b8);
       --primary-color: var(--tg-theme-button-color, #6366f1);
       --primary-text: var(--tg-theme-button-text-color, #ffffff);
-      --card-bg: var(--tg-theme-secondary-bg-color, rgba(30, 41, 59, 0.7));
+      --card-bg: var(--tg-theme-secondary-bg-color, rgba(30, 41, 59, 0.75));
       --danger-color: #ef4444;
       --success-color: #10b981;
-      --warning-color: #f59e0b;
       --border-color: rgba(255, 255, 255, 0.08);
     }
 
@@ -43,12 +42,11 @@
       gap: 16px;
     }
 
-    /* Header & Branding */
     .header {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 8px 4px;
+      padding: 6px 4px;
     }
 
     .brand-icon {
@@ -60,7 +58,7 @@
       align-items: center;
       justify-content: center;
       font-size: 22px;
-      box-shadow: 0 8px 16px rgba(99, 102, 241, 0.25);
+      box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
     }
 
     .brand-title h1 {
@@ -75,7 +73,6 @@
       margin-top: 2px;
     }
 
-    /* Modern Card Layout */
     .card {
       background: var(--card-bg);
       backdrop-filter: blur(12px);
@@ -83,12 +80,12 @@
       border: 1px solid var(--border-color);
       border-radius: 20px;
       padding: 18px;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
     }
 
     .card-title {
-      font-size: 14px;
-      font-weight: 600;
+      font-size: 13px;
+      font-weight: 700;
       color: var(--hint-color);
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -98,9 +95,7 @@
       gap: 6px;
     }
 
-    /* Search Input Form */
     .search-box {
-      position: relative;
       display: flex;
       flex-direction: column;
       gap: 10px;
@@ -112,7 +107,7 @@
 
     .input-wrapper input {
       width: 100%;
-      background: rgba(0, 0, 0, 0.05);
+      background: rgba(0, 0, 0, 0.15);
       border: 1.5px solid var(--border-color);
       border-radius: 14px;
       padding: 14px 16px 14px 44px;
@@ -150,17 +145,14 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
       box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-      transition: transform 0.1s ease, opacity 0.2s;
+      transition: transform 0.1s ease;
     }
 
     .btn-search:active {
       transform: scale(0.98);
-      opacity: 0.9;
     }
 
-    /* Status & Dynamic Result Display */
     .result-card {
       display: none;
       margin-top: 14px;
@@ -175,20 +167,17 @@
     }
 
     .result-card.scam {
-      background: rgba(239, 68, 68, 0.12);
-      border: 1px solid rgba(239, 68, 68, 0.3);
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
     }
 
     .result-card.safe {
-      background: rgba(16, 185, 129, 0.12);
-      border: 1px solid rgba(16, 185, 129, 0.3);
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
     }
 
     .result-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 700;
       margin-bottom: 6px;
     }
@@ -202,7 +191,6 @@
       opacity: 0.9;
     }
 
-    /* Recent Scams Feed */
     .feed-list {
       display: flex;
       flex-direction: column;
@@ -210,7 +198,7 @@
     }
 
     .feed-item {
-      background: rgba(0, 0, 0, 0.03);
+      background: rgba(0, 0, 0, 0.15);
       border: 1px solid var(--border-color);
       border-radius: 12px;
       padding: 12px 14px;
@@ -236,16 +224,15 @@
     }
 
     .badge-type {
-      background: rgba(239, 68, 68, 0.15);
+      background: rgba(239, 68, 68, 0.2);
       color: var(--danger-color);
       font-size: 11px;
       font-weight: 700;
       padding: 4px 8px;
-      border-radius: 8px;
+      border-radius: 6px;
       text-transform: uppercase;
     }
 
-    /* Shimmer Skeleton Loading */
     .skeleton {
       background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
       background-size: 200% 100%;
@@ -262,16 +249,14 @@
 </head>
 <body>
 
-  <!-- Top Header Branding -->
   <header class="header">
     <div class="brand-icon">🛡️</div>
     <div class="brand-title">
-      <h1>ScamCheck Radar</h1>
+      <h1>ScamCheck Bot</h1>
       <p>Cơ sở dữ liệu phòng chống lừa đảo</p>
     </div>
   </header>
 
-  <!-- Search Card Component -->
   <main class="card">
     <div class="card-title">🔍 Tra cứu nhanh</div>
     <div class="search-box">
@@ -284,14 +269,12 @@
       </button>
     </div>
 
-    <!-- Live Search Result -->
     <div id="resultCard" class="result-card">
       <div class="result-header" id="resultHeader"></div>
       <div class="result-body" id="resultBody"></div>
     </div>
   </main>
 
-  <!-- Recent Reports Feed -->
   <section class="card">
     <div class="card-title">🚨 Báo cáo mới cập nhật</div>
     <div id="recentFeed" class="feed-list">
@@ -300,35 +283,45 @@
     </div>
   </section>
 
-  <!-- Firebase Web SDK Integration -->
+  <!-- Firebase ESM SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, query, where, getDocs, limit, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // Cấu hình Firebase Web của bạn
+    // ✅ Đã điền sẵn Firebase Config chính xác của bạn (quocdat-396fe)
     const firebaseConfig = {
-      apiKey: "AIzaSy...",
-      authDomain: "your-app.firebaseapp.com",
-      projectId: "your-app-id",
-      storageBucket: "your-app.appspot.com",
-      messagingSenderId: "123456789",
-      appId: "1:123456789:web:abcdef"
+      apiKey: "AIzaSyAUuV5euNNLHE2Cf6tXzUHV-ChKwNF593Y",
+      authDomain: "quocdat-396fe.firebaseapp.com",
+      databaseURL: "https://quocdat-396fe-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "quocdat-396fe",
+      storageBucket: "quocdat-396fe.firebasestorage.app",
+      messagingSenderId: "685476439350",
+      appId: "1:685476439350:web:949054ecba7f0a0c383f97"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const tg = window.Telegram.WebApp;
+    const tg = window.Telegram?.WebApp;
     
-    // Tự động điều chỉnh giao diện tràn viền Telegram Mini App
-    tg.ready();
-    tg.expand();
+    if (tg) {
+      tg.ready();
+      tg.expand();
+    }
 
-    // 1. Tải danh sách báo cáo mới nhất
+    // Tải 5 báo cáo mới nhất từ Firestore
     async function loadRecentFeed() {
       const feedContainer = document.getElementById('recentFeed');
       try {
-        const q = query(collection(db, "blacklist"), orderBy("createdAt", "desc"), limit(4));
-        const querySnapshot = await getDocs(q);
+        let q = query(collection(db, "blacklist"), orderBy("createdAt", "desc"), limit(5));
+        let querySnapshot;
+
+        try {
+          querySnapshot = await getDocs(q);
+        } catch (idxError) {
+          console.warn("Dùng truy vấn mặc định (chưa tạo Index):", idxError);
+          q = query(collection(db, "blacklist"), limit(5));
+          querySnapshot = await getDocs(q);
+        }
 
         if (querySnapshot.empty) {
           feedContainer.innerHTML = '<div style="font-size:13px; text-align:center; color:var(--hint-color); padding:10px;">Chưa ghi nhận dữ liệu mới.</div>';
@@ -344,18 +337,18 @@
                 <span class="feed-target">${item.value}</span>
                 <span class="feed-desc">${item.description || 'Chưa có mô tả chi tiết'}</span>
               </div>
-              <span class="badge-type">${item.type}</span>
+              <span class="badge-type">${item.type || 'SCAM'}</span>
             </div>
           `;
         });
         feedContainer.innerHTML = html;
       } catch (err) {
         console.error("Firebase Error:", err);
-        feedContainer.innerHTML = '<div style="font-size:13px; text-align:center; color:var(--danger-color); padding:10px;">Lỗi kết nối CSDL</div>';
+        feedContainer.innerHTML = '<div style="font-size:13px; text-align:center; color:var(--danger-color); padding:10px;">Lỗi tải dữ liệu. Hãy kiểm tra Rules trên Firestore!</div>';
       }
     }
 
-    // 2. Tra cứu dữ liệu thời gian thực
+    // Tra cứu dữ liệu
     async function handleSearch() {
       const inputEl = document.getElementById('searchInput');
       const val = inputEl.value.trim();
@@ -365,11 +358,10 @@
       const resultHeader = document.getElementById('resultHeader');
       const resultBody = document.getElementById('resultBody');
 
-      // Reset giao diện
       resultCard.style.display = 'block';
       resultCard.className = 'result-card';
-      resultHeader.innerHTML = '🔄 Đang quét...';
-      resultBody.innerHTML = 'Hệ thống đang đối soát dữ liệu trên CSDL Firestore.';
+      resultHeader.innerHTML = ' Đang truy vấn...';
+      resultBody.innerHTML = 'Hệ thống đang kiểm tra trong CSDL.';
 
       try {
         const q = query(collection(db, "blacklist"), where("value", "==", val));
@@ -378,30 +370,29 @@
         if (!querySnapshot.empty) {
           const docData = querySnapshot.docs[0].data();
           resultCard.className = 'result-card scam';
-          resultHeader.innerHTML = '⚠️ CẢNH BÁO LỪA ĐẢO';
-          resultBody.innerHTML = `Đối tượng <strong>${val}</strong> đã bị tố cáo.<br><strong>Nội dung:</strong> ${docData.description || 'Nằm trong danh sách đen cảnh báo.'}`;
+          resultHeader.innerHTML = '⚠️ CẢNH BẢO LỪA ĐẢO';
+          resultBody.innerHTML = `Đối tượng <strong>${val}</strong> đã bị tố cáo.<br><strong>Nội dung:</strong> ${docData.description || 'Nằm trong danh sách đen.'}`;
           
-          if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+          if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
         } else {
           resultCard.className = 'result-card safe';
           resultHeader.innerHTML = '🛡️ AN TOÀN / CHƯA PHÁT HIỆN';
-          resultBody.innerHTML = `Chưa ghi nhận dữ liệu lừa đảo nào liên quan tới <strong>${val}</strong> trong hệ thống.`;
+          resultBody.innerHTML = `Chưa ghi nhận dữ liệu lừa đảo liên quan tới <strong>${val}</strong>.`;
           
-          if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+          if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
         }
       } catch (err) {
-        resultHeader.innerHTML = '❌ Có lỗi xảy ra';
-        resultBody.innerHTML = 'Không thể hoàn tất tra cứu. Vui lòng thử lại sau.';
+        console.error("Search Error:", err);
+        resultHeader.innerHTML = '❌ Lỗi hệ thống';
+        resultBody.innerHTML = 'Không thể tra cứu. Vui lòng thử lại sau.';
       }
     }
 
-    // Sự kiện Click & Enter
     document.getElementById('searchBtn').addEventListener('click', handleSearch);
     document.getElementById('searchInput').addEventListener('keypress', (e) => {
       if (e.key === 'Enter') handleSearch();
     });
 
-    // Chạy tải Feed ban đầu
     loadRecentFeed();
   </script>
 </body>
