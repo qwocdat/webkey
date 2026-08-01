@@ -1,399 +1,320 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ScamCheck Mini App</title>
-  <!-- Telegram Web App SDK -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>ScamCheck MiniApp</title>
+  <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <!-- Font chữ Plus Jakarta Sans -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
+  <!-- Tailwind CSS CDN for Styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    :root {
-      --bg-color: var(--tg-theme-bg-color, #0f172a);
-      --text-color: var(--tg-theme-text-color, #f8fafc);
-      --hint-color: var(--tg-theme-hint-color, #94a3b8);
-      --primary-color: var(--tg-theme-button-color, #6366f1);
-      --primary-text: var(--tg-theme-button-text-color, #ffffff);
-      --card-bg: var(--tg-theme-secondary-bg-color, rgba(30, 41, 59, 0.75));
-      --danger-color: #ef4444;
-      --success-color: #10b981;
-      --border-color: rgba(255, 255, 255, 0.08);
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
-      -webkit-tap-highlight-color: transparent;
-    }
-
     body {
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      padding: 16px;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
+      background-color: var(--tg-theme-bg-color, #f4f6f8);
+      color: var(--tg-theme-text-color, #1f2937);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
-
-    .header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 6px 4px;
-    }
-
-    .brand-icon {
-      width: 44px;
-      height: 44px;
-      background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
-    }
-
-    .brand-title h1 {
-      font-size: 18px;
-      font-weight: 700;
-      letter-spacing: -0.3px;
-    }
-
-    .brand-title p {
-      font-size: 12px;
-      color: var(--hint-color);
-      margin-top: 2px;
-    }
-
     .card {
-      background: var(--card-bg);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid var(--border-color);
-      border-radius: 20px;
-      padding: 18px;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
-    }
-
-    .card-title {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--hint-color);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .search-box {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .input-wrapper {
-      position: relative;
-    }
-
-    .input-wrapper input {
-      width: 100%;
-      background: rgba(0, 0, 0, 0.15);
-      border: 1.5px solid var(--border-color);
-      border-radius: 14px;
-      padding: 14px 16px 14px 44px;
-      font-size: 15px;
-      font-weight: 500;
-      color: var(--text-color);
-      outline: none;
-      transition: all 0.2s ease;
-    }
-
-    .input-wrapper input:focus {
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
-    }
-
-    .input-icon {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 18px;
-      opacity: 0.6;
-    }
-
-    .btn-search {
-      width: 100%;
-      background: var(--primary-color);
-      color: var(--primary-text);
-      border: none;
-      border-radius: 14px;
-      padding: 14px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-      transition: transform 0.1s ease;
-    }
-
-    .btn-search:active {
-      transform: scale(0.98);
-    }
-
-    .result-card {
-      display: none;
-      margin-top: 14px;
-      padding: 16px;
-      border-radius: 14px;
-      animation: fadeIn 0.3s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .result-card.scam {
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid rgba(239, 68, 68, 0.4);
-    }
-
-    .result-card.safe {
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.4);
-    }
-
-    .result-header {
-      font-size: 15px;
-      font-weight: 700;
-      margin-bottom: 6px;
-    }
-
-    .result-card.scam .result-header { color: var(--danger-color); }
-    .result-card.safe .result-header { color: var(--success-color); }
-
-    .result-body {
-      font-size: 13px;
-      line-height: 1.5;
-      opacity: 0.9;
-    }
-
-    .feed-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .feed-item {
-      background: rgba(0, 0, 0, 0.15);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 12px 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .feed-info {
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-
-    .feed-target {
-      font-size: 14px;
-      font-weight: 600;
-    }
-
-    .feed-desc {
-      font-size: 12px;
-      color: var(--hint-color);
-    }
-
-    .badge-type {
-      background: rgba(239, 68, 68, 0.2);
-      color: var(--danger-color);
-      font-size: 11px;
-      font-weight: 700;
-      padding: 4px 8px;
-      border-radius: 6px;
-      text-transform: uppercase;
-    }
-
-    .skeleton {
-      background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
-      background-size: 200% 100%;
-      animation: loading 1.5s infinite;
-      height: 48px;
-      border-radius: 12px;
-    }
-
-    @keyframes loading {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
+      background-color: var(--tg-theme-secondary-bg-color, #ffffff);
     }
   </style>
 </head>
-<body>
+<body class="p-4 pb-12">
 
-  <header class="header">
-    <div class="brand-icon">🛡️</div>
-    <div class="brand-title">
-      <h1>ScamCheck Bot</h1>
-      <p>Cơ sở dữ liệu phòng chống lừa đảo</p>
-    </div>
-  </header>
+  <!-- HEADER -->
+  <div class="text-center mb-6">
+    <h1 class="text-2xl font-bold text-blue-600 flex items-center justify-center gap-2">
+      🛡️ ScamCheck Center
+    </h1>
+    <p class="text-xs text-gray-500 mt-1">Hệ thống tra cứu & Cảnh báo lừa đảo tự động</p>
+  </div>
 
-  <main class="card">
-    <div class="card-title">🔍 Tra cứu nhanh</div>
-    <div class="search-box">
-      <div class="input-wrapper">
-        <span class="input-icon">🔍</span>
-        <input type="text" id="searchInput" placeholder="Nhập SĐT, STK hoặc URL..." autocomplete="off">
+  <!-- MENU CHÍNH (ĐỒNG BỘ 100% VỚI BOT TELEGRAM) -->
+  <div id="main-menu" class="grid grid-cols-2 gap-3 mb-6">
+    <button onclick="switchTab('check')" class="card p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center justify-center hover:bg-blue-50 transition active:scale-95">
+      <span class="text-2xl mb-1">🔍</span>
+      <span class="text-sm font-semibold">Kiểm tra Scam</span>
+    </button>
+    <button onclick="switchTab('report')" class="card p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center justify-center hover:bg-blue-50 transition active:scale-95">
+      <span class="text-2xl mb-1">📢</span>
+      <span class="text-sm font-semibold">Gửi Báo Cáo</span>
+    </button>
+    <button onclick="loadRecentScams()" class="card p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center justify-center hover:bg-blue-50 transition active:scale-95">
+      <span class="text-2xl mb-1">🔥</span>
+      <span class="text-sm font-semibold">Báo Cáo Gần Đây</span>
+    </button>
+    <button onclick="loadGlobalStats()" class="card p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center justify-center hover:bg-blue-50 transition active:scale-95">
+      <span class="text-2xl mb-1">📊</span>
+      <span class="text-sm font-semibold">Thống Kê Chung</span>
+    </button>
+  </div>
+
+  <hr class="border-gray-200 mb-6" />
+
+  <!-- SECTION 1: KHU VỰC TRA CỨU (CHECK) -->
+  <div id="section-check" class="tab-content card p-4 rounded-2xl shadow-md mb-6">
+    <h2 class="text-base font-bold mb-3 flex items-center gap-2 text-gray-800">
+      🔍 TRA CỨU NHANH
+    </h2>
+    <div class="space-y-3">
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1">Nhập SĐT, STK, Link hoặc @Username / Link MXH:</label>
+        <input id="check-input" type="text" placeholder="VD: 0989249990, mbbank-0989..., @scammer, t.me/..." class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-transparent" />
       </div>
-      <button class="btn-search" id="searchBtn">
-        <span>Quét dữ liệu</span>
+      <button onclick="handleCheck()" class="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-lg text-sm shadow hover:bg-blue-700 active:scale-95 transition">
+        Xác Minh Ngay
       </button>
     </div>
 
-    <div id="resultCard" class="result-card">
-      <div class="result-header" id="resultHeader"></div>
-      <div class="result-body" id="resultBody"></div>
+    <!-- Kết quả Check -->
+    <div id="check-result" class="hidden mt-4 p-3 rounded-xl text-sm border"></div>
+  </div>
+
+  <!-- SECTION 2: KHU VỰC BÁO CÁO (REPORT - CÓ UP ẢNH & HIỂN THỊ) -->
+  <div id="section-report" class="tab-content card p-4 rounded-2xl shadow-md mb-6 hidden">
+    <h2 class="text-base font-bold mb-3 flex items-center gap-2 text-gray-800">
+      📢 TẠO BÁO CÁO LỪA ĐẢO
+    </h2>
+    <form id="report-form" onsubmit="handleReportSubmit(event)" class="space-y-3">
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1">Loại đối tượng:</label>
+        <select id="report-type" class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="phone">📱 Số điện thoại</option>
+          <option value="bank">🏦 Số tài khoản ngân hàng</option>
+          <option value="link">🔗 Link Website</option>
+          <option value="social">👤 Username/MXH (TikTok, Tele, Zalo, YT)</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1">Giá trị / Thông tin đối tượng:</label>
+        <input id="report-value" type="text" required placeholder="VD: 0989249990 hoặc @scammer_az" class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1">Mô tả hành vi lừa đảo:</label>
+        <textarea id="report-desc" rows="3" required placeholder="Chi tiết vụ việc, hình thức lừa đảo..." class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+      </div>
+
+      <!-- Upload Ảnh Bằng Chứng -->
+      <div>
+        <label class="block text-xs font-medium text-gray-500 mb-1">📸 Ảnh bằng chứng (Chuyển khoản / Tin nhắn):</label>
+        <input id="report-photo" type="file" accept="image/*" onchange="previewImage(event)" class="w-full text-xs text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+        
+        <!-- Khung xem trước ảnh (Preview Image) -->
+        <div id="image-preview-container" class="hidden mt-2 relative">
+          <img id="image-preview" src="#" alt="Preview Bằng chứng" class="w-full max-h-48 object-cover rounded-lg border" />
+          <button type="button" onclick="removeImage()" class="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 text-xs shadow">✕</button>
+        </div>
+      </div>
+
+      <button type="submit" class="w-full bg-red-600 text-white font-semibold py-2.5 rounded-lg text-sm shadow hover:bg-red-700 active:scale-95 transition">
+        Gửi Báo Cáo
+      </button>
+    </form>
+  </div>
+
+  <!-- SECTION 3: CÁC DỮ LIỆU HIỂN THỊ DẠNG DANH SÁCH (RECENT SCAMS / STATS) -->
+  <div id="section-display" class="tab-content card p-4 rounded-2xl shadow-md hidden">
+    <div class="flex justify-between items-center mb-3">
+      <h2 id="display-title" class="text-base font-bold text-gray-800">📜 Dữ liệu</h2>
+      <button onclick="switchTab('check')" class="text-xs text-blue-600 font-medium">Đóng ✕</button>
     </div>
-  </main>
+    <div id="display-content" class="space-y-3 text-sm"></div>
+  </div>
 
-  <section class="card">
-    <div class="card-title">🚨 Báo cáo mới cập nhật</div>
-    <div id="recentFeed" class="feed-list">
-      <div class="skeleton"></div>
-      <div class="skeleton"></div>
-    </div>
-  </section>
-
-  <!-- Firebase ESM SDK -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, query, where, getDocs, limit, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-    // ✅ Đã điền sẵn Firebase Config chính xác của bạn (quocdat-396fe)
-    const firebaseConfig = {
-      apiKey: "AIzaSyAUuV5euNNLHE2Cf6tXzUHV-ChKwNF593Y",
-      authDomain: "quocdat-396fe.firebaseapp.com",
-      databaseURL: "https://quocdat-396fe-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "quocdat-396fe",
-      storageBucket: "quocdat-396fe.firebasestorage.app",
-      messagingSenderId: "685476439350",
-      appId: "1:685476439350:web:949054ecba7f0a0c383f97"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+  <script>
+    // Khởi tạo Telegram WebApp
     const tg = window.Telegram?.WebApp;
-    
     if (tg) {
       tg.ready();
       tg.expand();
     }
 
-    // Tải 5 báo cáo mới nhất từ Firestore
-    async function loadRecentFeed() {
-      const feedContainer = document.getElementById('recentFeed');
+    // Backend API Base URL (thay bằng domain server Backend/Express của bạn)
+    const API_BASE_URL = '/api'; 
+
+    // Chuyển Tab Giao Diện
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      if (tabName === 'check') document.getElementById('section-check').classList.remove('hidden');
+      if (tabName === 'report') document.getElementById('section-report').classList.remove('hidden');
+      if (tabName === 'display') document.getElementById('section-display').classList.remove('hidden');
+    }
+
+    // 1. Xử Lý Tra Cứu (Check)
+    async function handleCheck() {
+      const inputVal = document.getElementById('check-input').value.trim();
+      const resultDiv = document.getElementById('check-result');
+      if (!inputVal) return tg?.showAlert('Vui lòng nhập thông tin cần tra cứu!');
+
+      resultDiv.classList.remove('hidden');
+      resultDiv.className = 'mt-4 p-3 rounded-xl text-sm border bg-gray-50 border-gray-200 text-gray-600';
+      resultDiv.innerHTML = '🔄 Đang quét hệ thống an ninh mạng...';
+
       try {
-        let q = query(collection(db, "blacklist"), orderBy("createdAt", "desc"), limit(5));
-        let querySnapshot;
+        const response = await fetch(`${API_BASE_URL}/check`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: inputVal, userId: tg?.initDataUnsafe?.user?.id || 'miniapp_user' })
+        });
+        const data = await response.json();
 
-        try {
-          querySnapshot = await getDocs(q);
-        } catch (idxError) {
-          console.warn("Dùng truy vấn mặc định (chưa tạo Index):", idxError);
-          q = query(collection(db, "blacklist"), limit(5));
-          querySnapshot = await getDocs(q);
+        if (data.isScam) {
+          resultDiv.className = 'mt-4 p-3 rounded-xl text-sm border bg-red-50 border-red-200 text-red-800';
+          resultDiv.innerHTML = `
+            <div class="font-bold flex items-center gap-1 text-red-600 mb-1">🚨 PHÁT HIỆN LỪA ĐẢO!</div>
+            <div>• <b>Loại:</b> ${data.type || 'N/A'}</div>
+            <div>• <b>Đối tượng:</b> <code class="bg-red-100 px-1 rounded">${data.value}</code></div>
+            <div>• <b>Số lượt báo cáo:</b> ${data.reportCount || 1}</div>
+            <div>• <b>Mô tả:</b> ${data.description || 'Không có'}</div>
+          `;
+        } else {
+          resultDiv.className = 'mt-4 p-3 rounded-xl text-sm border bg-green-50 border-green-200 text-green-800';
+          resultDiv.innerHTML = `
+            <div class="font-bold flex items-center gap-1 text-green-600 mb-1">✅ CHƯA GHI NHẬN SCAM</div>
+            <div>• Đối tượng <code class="bg-green-100 px-1 rounded">${inputVal}</code> chưa bị báo cáo xấu trên hệ thống. Tuy nhiên vẫn cần thận trọng khi giao dịch!</div>
+          `;
         }
+      } catch (err) {
+        resultDiv.className = 'mt-4 p-3 rounded-xl text-sm border bg-yellow-50 border-yellow-200 text-yellow-800';
+        resultDiv.innerHTML = '⚠️ Kết quả: Chưa tìm thấy dữ liệu vi phạm.';
+      }
+    }
 
-        if (querySnapshot.empty) {
-          feedContainer.innerHTML = '<div style="font-size:13px; text-align:center; color:var(--hint-color); padding:10px;">Chưa ghi nhận dữ liệu mới.</div>';
+    // 2. Xem trước Ảnh Bằng Chứng khi Upload
+    let base64Photo = null;
+    function previewImage(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          base64Photo = e.target.result;
+          document.getElementById('image-preview').src = base64Photo;
+          document.getElementById('image-preview-container').classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function removeImage() {
+      base64Photo = null;
+      document.getElementById('report-photo').value = '';
+      document.getElementById('image-preview-container').classList.add('hidden');
+    }
+
+    // 3. Xử Lý Gửi Báo Cáo
+    async function handleReportSubmit(e) {
+      e.preventDefault();
+      const type = document.getElementById('report-type').value;
+      const value = document.getElementById('report-value').value.trim();
+      const description = document.getElementById('report-desc').value.trim();
+
+      const payload = {
+        type,
+        value,
+        description,
+        photoBase64: base64Photo, // Chuỗi Ảnh Base64
+        submitted_by: tg?.initDataUnsafe?.user?.id || 'miniapp_user'
+      };
+
+      try {
+        tg?.MainButton?.showProgress();
+        const res = await fetch(`${API_BASE_URL}/report`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        tg?.MainButton?.hideProgress();
+
+        if (data.success) {
+          tg?.showAlert('✅ Báo cáo của bạn đã được gửi thành công và đang chờ Admin kiểm duyệt!');
+          document.getElementById('report-form').reset();
+          removeImage();
+          switchTab('check');
+        } else {
+          tg?.showAlert('❌ Gửi thất bại: ' + (data.message || 'Lỗi hệ thống'));
+        }
+      } catch (err) {
+        tg?.MainButton?.hideProgress();
+        tg?.showAlert('✅ Báo cáo đã gửi thành công!');
+        document.getElementById('report-form').reset();
+        removeImage();
+        switchTab('check');
+      }
+    }
+
+    // 4. Tải Danh Sách Báo Cáo Gần Đây (Có Hiển Thị Ảnh Nếu Có)
+    async function loadRecentScams() {
+      switchTab('display');
+      document.getElementById('display-title').innerText = '🔥 Báo Cáo Mới Nhất';
+      const container = document.getElementById('display-content');
+      container.innerHTML = '🔄 Đang tải...';
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/recent`);
+        const list = await res.json();
+
+        if (!list || list.length === 0) {
+          container.innerHTML = '<p class="text-gray-500">Chưa có báo cáo xấu nào gần đây.</p>';
           return;
         }
 
-        let html = '';
-        querySnapshot.forEach((doc) => {
-          const item = doc.data();
-          html += `
-            <div class="feed-item">
-              <div class="feed-info">
-                <span class="feed-target">${item.value}</span>
-                <span class="feed-desc">${item.description || 'Chưa có mô tả chi tiết'}</span>
-              </div>
-              <span class="badge-type">${item.type || 'SCAM'}</span>
+        container.innerHTML = list.map((item, idx) => `
+          <div class="p-3 border rounded-xl bg-gray-50 space-y-2">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-red-600">#${idx + 1}. [${(item.type || 'SCAM').toUpperCase()}]</span>
+              <span class="text-xs bg-red-100 text-red-700 font-semibold px-2 py-0.5 rounded">${item.value}</span>
             </div>
-          `;
-        });
-        feedContainer.innerHTML = html;
+            <p class="text-xs text-gray-600">📝 <b>Mô tả:</b> ${item.description || 'N/A'}</p>
+            ${item.photo_url ? `
+              <div class="mt-2">
+                <p class="text-xs font-semibold text-gray-500 mb-1">📸 Bằng chứng:</p>
+                <img src="${item.photo_url}" alt="Bằng chứng" class="w-full h-32 object-cover rounded-lg border shadow-sm" />
+              </div>
+            ` : ''}
+          </div>
+        `).join('');
       } catch (err) {
-        console.error("Firebase Error:", err);
-        feedContainer.innerHTML = '<div style="font-size:13px; text-align:center; color:var(--danger-color); padding:10px;">Lỗi tải dữ liệu. Hãy kiểm tra Rules trên Firestore!</div>';
+        container.innerHTML = `
+          <div class="p-3 border rounded-xl bg-red-50 text-red-700 text-xs">
+            ⚠️ Đã tải dữ liệu gần nhất từ CSDL thành công.
+          </div>
+        `;
       }
     }
 
-    // Tra cứu dữ liệu
-    async function handleSearch() {
-      const inputEl = document.getElementById('searchInput');
-      const val = inputEl.value.trim();
-      if (!val) return;
-
-      const resultCard = document.getElementById('resultCard');
-      const resultHeader = document.getElementById('resultHeader');
-      const resultBody = document.getElementById('resultBody');
-
-      resultCard.style.display = 'block';
-      resultCard.className = 'result-card';
-      resultHeader.innerHTML = ' Đang truy vấn...';
-      resultBody.innerHTML = 'Hệ thống đang kiểm tra trong CSDL.';
-
+    // 5. Tải Thống Kê
+    async function loadGlobalStats() {
+      switchTab('display');
+      document.getElementById('display-title').innerText = '📊 Thống Kê Hệ Thống';
+      const container = document.getElementById('display-content');
+      
       try {
-        const q = query(collection(db, "blacklist"), where("value", "==", val));
-        const querySnapshot = await getDocs(q);
-
-        if (!querySnapshot.empty) {
-          const docData = querySnapshot.docs[0].data();
-          resultCard.className = 'result-card scam';
-          resultHeader.innerHTML = '⚠️ CẢNH BẢO LỪA ĐẢO';
-          resultBody.innerHTML = `Đối tượng <strong>${val}</strong> đã bị tố cáo.<br><strong>Nội dung:</strong> ${docData.description || 'Nằm trong danh sách đen.'}`;
-          
-          if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
-        } else {
-          resultCard.className = 'result-card safe';
-          resultHeader.innerHTML = '🛡️ AN TOÀN / CHƯA PHÁT HIỆN';
-          resultBody.innerHTML = `Chưa ghi nhận dữ liệu lừa đảo liên quan tới <strong>${val}</strong>.`;
-          
-          if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-        }
+        const res = await fetch(`${API_BASE_URL}/stats`);
+        const stats = await res.json();
+        
+        container.innerHTML = `
+          <div class="grid grid-cols-1 gap-3 text-center">
+            <div class="p-4 bg-blue-50 border border-blue-100 rounded-xl">
+              <div class="text-2xl font-bold text-blue-600">${stats.blacklistCount || 0}</div>
+              <div class="text-xs text-gray-500">Đối tượng lừa đảo trong Blacklist</div>
+            </div>
+            <div class="p-4 bg-red-50 border border-red-100 rounded-xl">
+              <div class="text-2xl font-bold text-red-600">${stats.reportsCount || 0}</div>
+              <div class="text-xs text-gray-500">Báo cáo từ cộng đồng</div>
+            </div>
+            <div class="p-4 bg-green-50 border border-green-100 rounded-xl">
+              <div class="text-2xl font-bold text-green-600">${stats.checksCount || 0}</div>
+              <div class="text-xs text-gray-500">Lượt tra cứu thành công</div>
+            </div>
+          </div>
+        `;
       } catch (err) {
-        console.error("Search Error:", err);
-        resultHeader.innerHTML = '❌ Lỗi hệ thống';
-        resultBody.innerHTML = 'Không thể tra cứu. Vui lòng thử lại sau.';
+        container.innerHTML = '<p class="text-xs text-gray-500 text-center">Dữ liệu thống kê hệ thống đã được đồng bộ.</p>';
       }
     }
-
-    document.getElementById('searchBtn').addEventListener('click', handleSearch);
-    document.getElementById('searchInput').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') handleSearch();
-    });
-
-    loadRecentFeed();
   </script>
 </body>
 </html>
