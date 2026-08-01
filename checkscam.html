@@ -371,7 +371,7 @@
     </div>
   </div>
 
-  <!-- FIREBASE WEB SDK v10 (ES Modules) -->
+  <!-- FIREBASE WEB SDK INTEGRATION -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { 
@@ -387,14 +387,15 @@
       serverTimestamp 
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // 🔴 THAY THÔNG TIN FIREBASE WEB CONFIG CỦA MÁ VÀO ĐÂY:
+    // Firebase Config từ má
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT_ID.appspot.com",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID"
+      apiKey: "AIzaSyAUuV5euNNLHE2Cf6tXzUHV-ChKwNF593Y",
+      authDomain: "quocdat-396fe.firebaseapp.com",
+      databaseURL: "https://quocdat-396fe-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "quocdat-396fe",
+      storageBucket: "quocdat-396fe.firebasestorage.app",
+      messagingSenderId: "685476439350",
+      appId: "1:685476439350:web:949054ecba7f0a0c383f97"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -418,7 +419,7 @@
       document.getElementById(panelId).classList.remove('active');
     };
 
-    // 1. CHỨC NĂNG CHECK SCAM VỚI FIRESTORE THẬT
+    // 1. Tra cứu realtime
     window.executeCheck = async function() {
       const input = document.getElementById('check-input').value.trim().toLowerCase();
       const resultDiv = document.getElementById('check-result');
@@ -457,7 +458,6 @@
           `;
         }
 
-        // Ghi log lượt check vào Firestore
         await addDoc(collection(db, "checks_log"), {
           user_id: tg?.initDataUnsafe?.user?.id || 'web_user',
           query_value: input,
@@ -466,11 +466,11 @@
 
       } catch (err) {
         console.error(err);
-        resultDiv.innerHTML = `<div class="alert-box alert-danger">Lỗi kết nối CSDL Firebase. Vui lòng thử lại.</div>`;
+        resultDiv.innerHTML = `<div class="alert-box alert-danger">Lỗi kết nối CSDL Firebase.</div>`;
       }
     };
 
-    // 2. CHỨC NĂNG GỬI BÁO CÁO THẬT VÀO FIRESTORE
+    // 2. Gửi Báo Cáo
     window.submitReport = async function() {
       const type = document.getElementById('report-type').value;
       const val = document.getElementById('report-value').value.trim();
@@ -500,7 +500,7 @@
       }
     };
 
-    // 3. THỐNG KÊ THẬT TỪ FIRESTORE
+    // 3. Đếm thống kê
     async function fetchRealStats() {
       try {
         const blSnap = await getCountFromServer(collection(db, "blacklist"));
@@ -515,7 +515,7 @@
       }
     }
 
-    // 4. LẤY DANH SÁCH SCAM MỚI NHẤT TỪ FIRESTORE
+    // 4. Lấy danh sách Scam mới nhất
     async function fetchRecentScams() {
       const recentList = document.getElementById('recent-list');
       try {
