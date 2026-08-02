@@ -392,42 +392,21 @@
 
   <!-- FIREBASE & IMGBB INTEGRATION -->
   <script type="module">
-    async function validateAuth() {
+    function validateAuth() {
       const initData = window.Telegram?.WebApp?.initData;
-      if (!initData) {
+      // Kiểm tra có dữ liệu initData và chứa hash xác thực từ Telegram không
+      if (!initData || !initData.includes('hash=')) {
         renderForbidden();
         return false;
       }
-      try {
-        const res = await fetch('/api/verify-telegram', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ initData })
-        });
-        if (!res.ok) {
-          renderForbidden();
-          return false;
-        }
-        const data = await res.json();
-        if (!data || !data.valid) {
-          renderForbidden();
-          return false;
-        }
-        return true;
-      } catch (e) {
-        renderForbidden();
-        return false;
-      }
+      return true;
     }
 
     function renderForbidden() {
       document.body.innerHTML = '<div style="font-family: sans-serif; padding: 20px; color: #ef4444; background: #0f172a; min-height: 100vh;"><h1>403 Forbidden</h1><p>Trang này chỉ hoạt động trong Telegram Mini App.</p><p>Access Denied.</p></div>';
-      if (window.Telegram?.WebApp) {
-        try { window.Telegram.WebApp.close(); } catch(e){}
-      }
     }
 
-    const isAuthorized = await validateAuth();
+    const isAuthorized = validateAuth();
     if (isAuthorized) {
       const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js");
       const { 
