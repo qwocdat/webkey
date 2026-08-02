@@ -6,6 +6,8 @@
   <title>ScamCheck Center</title>
   <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <!-- Cloudflare Turnstile API -->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   
   <style>
     :root {
@@ -37,6 +39,75 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+    }
+
+    /* SECURITY VERIFICATION OVERLAY */
+    #security-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: var(--bg-color);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .loader-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 24px;
+      width: 100%;
+      max-width: 360px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    .loader-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .loader-status {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .progress-container {
+      width: 100%;
+      background: var(--bg-color);
+      border-radius: 10px;
+      height: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+    }
+
+    .progress-bar {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #3b82f6, #10b981);
+      transition: width 0.2s ease;
+      border-radius: 10px;
+    }
+
+    .captcha-box {
+      margin-top: 10px;
+      display: none;
+    }
+
+    /* MAIN CONTENT UI */
+    #app-content {
+      display: none;
     }
 
     .header {
@@ -286,121 +357,249 @@
 </head>
 <body>
 
-  <div class="header">
-    <h1>ScamCheck Bot</h1>
-    <p>Hệ thống tra cứu & Cảnh báo lừa đảo tự động</p>
-  </div>
-
-  <div class="grid-menu">
-    <div class="menu-card" onclick="openPanel('panel-check')">
-      <svg class="icon-svg" viewBox="0 0 24 24">
-        <circle cx="11" cy="11" r="8"></circle>
-        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-      </svg>
-      <span>Kiểm tra Scam</span>
-    </div>
-
-    <div class="menu-card" onclick="openPanel('panel-report')">
-      <svg class="icon-svg" viewBox="0 0 24 24">
-        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-      </svg>
-      <span>Gửi Báo Cáo</span>
-    </div>
-
-    <div class="menu-card" onclick="openPanel('panel-recent')">
-      <svg class="icon-svg" viewBox="0 0 24 24">
-        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-      </svg>
-      <span>Báo Cáo Gần Đây</span>
-    </div>
-
-    <div class="menu-card" onclick="openPanel('panel-stats')">
-      <svg class="icon-svg" viewBox="0 0 24 24">
-        <line x1="18" y1="20" x2="18" y2="10"></line>
-        <line x1="12" y1="20" x2="12" y2="4"></line>
-        <line x1="6" y1="20" x2="6" y2="14"></line>
-      </svg>
-      <span>Thống Kê Chung</span>
-    </div>
-  </div>
-
-  <!-- Panel 1: Tra cứu -->
-  <div id="panel-check" class="panel">
-    <div class="panel-title">
-      <span>Tra cứu thông tin</span>
-      <button class="btn-close" onclick="closePanel('panel-check')">Đóng [x]</button>
-    </div>
-    <div class="form-group">
-      <label>SĐT / STK / Link / Social / Tên</label>
-      <input type="text" id="check-input" class="form-control" placeholder="Nhập thông tin cần tra..." />
-    </div>
-    <button class="btn-submit" onclick="executeCheck()">Tra Cứu Ngay</button>
-    <div id="check-result" style="margin-top: 14px;"></div>
-  </div>
-
-  <!-- Panel 2: Báo cáo -->
-  <div id="panel-report" class="panel">
-    <div class="panel-title">
-      <span>Tạo báo cáo lừa đảo</span>
-      <button class="btn-close" onclick="closePanel('panel-report')">Đóng [x]</button>
-    </div>
-    <div class="form-group">
-      <label>Loại đối tượng</label>
-      <select id="report-type" class="form-control">
-        <option value="phone">Số điện thoại</option>
-        <option value="bank">Tài khoản ngân hàng</option>
-        <option value="link">Đường dẫn Website</option>
-        <option value="social">Tài khoản Social (TikTok/Tele/Zalo/YT)</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Thông tin đối tượng</label>
-      <input type="text" id="report-value" class="form-control" placeholder="Ví dụ: 0xxxxx111" />
-    </div>
-    <div class="form-group">
-      <label>Chi tiết hành vi</label>
-      <textarea id="report-desc" class="form-control" placeholder="Mô tả lại sự việc lừa đảo..."></textarea>
-    </div>
-    <div class="form-group">
-      <label>Ảnh bằng chứng (Có thể chọn nhiều ảnh)</label>
-      <input type="file" id="report-image" class="form-control" accept="image/*" multiple />
-    </div>
-    <button class="btn-submit" id="btn-submit-report" onclick="submitReport()">Gửi Báo Cáo</button>
-  </div>
-
-  <!-- Panel 3: Báo cáo gần đây -->
-  <div id="panel-recent" class="panel">
-    <div class="panel-title">
-      <span>Báo cáo mới cập nhật</span>
-      <button class="btn-close" onclick="closePanel('panel-recent')">Đóng [x]</button>
-    </div>
-    <div id="recent-list">
-      <div class="alert-box alert-success">Đang tải dữ liệu từ CSDL...</div>
-    </div>
-  </div>
-
-  <!-- Panel 4: Thống kê -->
-  <div id="panel-stats" class="panel">
-    <div class="panel-title">
-      <span>Thống kê hệ thống</span>
-      <button class="btn-close" onclick="closePanel('panel-stats')">Đóng [x]</button>
-    </div>
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-value" id="stat-blacklist">--</div>
-        <div class="stat-label">Blacklist</div>
+  <!-- MÀN HÌNH NỀN LÊN & XÁC MINH BẢO MẬT -->
+  <div id="security-overlay">
+    <div class="loader-card">
+      <div class="loader-title">🛡️ Xác Minh Bảo Mật</div>
+      <div class="loader-status" id="loader-status">Đang khởi tạo kết nối an toàn...</div>
+      
+      <div class="progress-container" id="progress-container">
+        <div class="progress-bar" id="progress-bar"></div>
       </div>
-      <div class="stat-card">
-        <div class="stat-value" id="stat-reports">--</div>
-        <div class="stat-label">Báo Cáo</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="stat-checks">--</div>
-        <div class="stat-label">Lượt Tra</div>
+
+      <!-- Cloudflare Turnstile Widget -->
+      <div class="captcha-box" id="captcha-box">
+        <div class="cf-turnstile" 
+             data-sitekey="0x4AAAAAAEEcyYwdg4Zuwt6J" 
+             data-callback="onTurnstileSuccess" 
+             data-theme="dark">
+        </div>
       </div>
     </div>
   </div>
+
+  <!-- NỘI DUNG CHÍNH CỦA MINI APP -->
+  <div id="app-content">
+    <div class="header">
+      <h1>ScamCheck Bot</h1>
+      <p>Hệ thống tra cứu & Cảnh báo lừa đảo tự động</p>
+    </div>
+
+    <div class="grid-menu">
+      <div class="menu-card" onclick="openPanel('panel-check')">
+        <svg class="icon-svg" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <span>Kiểm tra Scam</span>
+      </div>
+
+      <div class="menu-card" onclick="openPanel('panel-report')">
+        <svg class="icon-svg" viewBox="0 0 24 24">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+        </svg>
+        <span>Gửi Báo Cáo</span>
+      </div>
+
+      <div class="menu-card" onclick="openPanel('panel-recent')">
+        <svg class="icon-svg" viewBox="0 0 24 24">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+        </svg>
+        <span>Báo Cáo Gần Đây</span>
+      </div>
+
+      <div class="menu-card" onclick="openPanel('panel-stats')">
+        <svg class="icon-svg" viewBox="0 0 24 24">
+          <line x1="18" y1="20" x2="18" y2="10"></line>
+          <line x1="12" y1="20" x2="12" y2="4"></line>
+          <line x1="6" y1="20" x2="6" y2="14"></line>
+        </svg>
+        <span>Thống Kê Chung</span>
+      </div>
+    </div>
+
+    <!-- Panel 1: Tra cứu -->
+    <div id="panel-check" class="panel">
+      <div class="panel-title">
+        <span>Tra cứu thông tin</span>
+        <button class="btn-close" onclick="closePanel('panel-check')">Đóng [x]</button>
+      </div>
+      <div class="form-group">
+        <label>SĐT / STK / Link / Social / Tên</label>
+        <input type="text" id="check-input" class="form-control" placeholder="Nhập thông tin cần tra..." />
+      </div>
+      <button class="btn-submit" onclick="executeCheck()">Tra Cứu Ngay</button>
+      <div id="check-result" style="margin-top: 14px;"></div>
+    </div>
+
+    <!-- Panel 2: Báo cáo -->
+    <div id="panel-report" class="panel">
+      <div class="panel-title">
+        <span>Tạo báo cáo lừa đảo</span>
+        <button class="btn-close" onclick="closePanel('panel-report')">Đóng [x]</button>
+      </div>
+      <div class="form-group">
+        <label>Loại đối tượng</label>
+        <select id="report-type" class="form-control">
+          <option value="phone">Số điện thoại</option>
+          <option value="bank">Tài khoản ngân hàng</option>
+          <option value="link">Đường dẫn Website</option>
+          <option value="social">Tài khoản Social (TikTok/Tele/Zalo/YT)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Thông tin đối tượng</label>
+        <input type="text" id="report-value" class="form-control" placeholder="Ví dụ: 0xxxxx111" />
+      </div>
+      <div class="form-group">
+        <label>Chi tiết hành vi</label>
+        <textarea id="report-desc" class="form-control" placeholder="Mô tả lại sự việc lừa đảo..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Ảnh bằng chứng (Có thể chọn nhiều ảnh)</label>
+        <input type="file" id="report-image" class="form-control" accept="image/*" multiple />
+      </div>
+      <button class="btn-submit" id="btn-submit-report" onclick="submitReport()">Gửi Báo Cáo</button>
+    </div>
+
+    <!-- Panel 3: Báo cáo gần đây -->
+    <div id="panel-recent" class="panel">
+      <div class="panel-title">
+        <span>Báo cáo mới cập nhật</span>
+        <button class="btn-close" onclick="closePanel('panel-recent')">Đóng [x]</button>
+      </div>
+      <div id="recent-list">
+        <div class="alert-box alert-success">Đang tải dữ liệu từ CSDL...</div>
+      </div>
+    </div>
+
+    <!-- Panel 4: Thống kê -->
+    <div id="panel-stats" class="panel">
+      <div class="panel-title">
+        <span>Thống kê hệ thống</span>
+        <button class="btn-close" onclick="closePanel('panel-stats')">Đóng [x]</button>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="stat-blacklist">--</div>
+          <div class="stat-label">Blacklist</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-reports">--</div>
+          <div class="stat-label">Báo Cáo</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-checks">--</div>
+          <div class="stat-label">Lượt Tra</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 1. CHẶN TRUY CẬP IP NƯỚC NGOÀI, PROXY, VPN & 1.1.1.1
+    async function verifyGeoLocation() {
+      const statusText = document.getElementById('loader-status');
+      statusText.innerText = "Đang kiểm tra vị trí & địa chỉ IP...";
+
+      try {
+        const res = await fetch('https://ipapi.co/json/');
+        const data = await res.json();
+
+        // Kiểm tra quốc gia (chỉ chấp nhận Việt Nam - VN)
+        if (data.country_code !== 'VN') {
+          renderAccessDenied("Hệ thống chỉ hỗ trợ truy cập từ Việt Nam (IP Việt Nam).");
+          return false;
+        }
+
+        // Kiểm tra VPN / Proxy / WARP 1.1.1.1 / Hosting Data Center
+        const orgName = (data.org || '').toLowerCase();
+        const asnName = (data.asn || '').toLowerCase();
+        
+        if (
+          data.proxy || 
+          orgName.includes('cloudflare') || 
+          asnName.includes('cloudflare') || 
+          orgName.includes('vpn') || 
+          orgName.includes('proxy')
+        ) {
+          renderAccessDenied("Phát hiện VPN/1.1.1.1/Proxy! Vui lòng TẮT WARP 1.1.1.1 hoặc phần mềm đổi IP để tiếp tục.");
+          return false;
+        }
+
+        return true;
+      } catch (err) {
+        // Dự phòng API phụ nếu ipapi bị giới hạn rate limit
+        try {
+          const resBackup = await fetch('https://ipwho.is/');
+          const dataBackup = await resBackup.json();
+
+          if (dataBackup.country_code !== 'VN') {
+            renderAccessDenied("Hệ thống chỉ hỗ trợ truy cập từ Việt Nam.");
+            return false;
+          }
+
+          if (dataBackup.security && (dataBackup.security.proxy || dataBackup.security.vpn)) {
+            renderAccessDenied("Vui lòng TẮT 1.1.1.1/VPN để truy cập.");
+            return false;
+          }
+
+          return true;
+        } catch (e) {
+          // Bỏ qua nếu lỗi mạng API phụ, cho phép tiếp tục CAPTCHA
+          return true;
+        }
+      }
+    }
+
+    function renderAccessDenied(message) {
+      document.getElementById('security-overlay').innerHTML = `
+        <div class="loader-card" style="border-color: var(--danger-color);">
+          <div class="loader-title" style="color: var(--danger-color);">⛔ TRUY CẬP BỊ BỊ CHẶN</div>
+          <div class="loader-status" style="color: #fca5a5; margin-top: 8px;">${message}</div>
+        </div>
+      `;
+    }
+
+    // 2. CHẠY HIỆU ỨNG LOADING BAR (0% -> 100%)
+    let progress = 0;
+    const progressBar = document.getElementById('progress-bar');
+    const statusText = document.getElementById('loader-status');
+
+    async function startSecurityFlow() {
+      const isAllowed = await verifyGeoLocation();
+      if (!isAllowed) return;
+
+      statusText.innerText = "Đang kiểm tra môi trường ứng dụng...";
+
+      const interval = setInterval(() => {
+        progress += Math.floor(Math.random() * 15) + 5;
+        if (progress > 100) progress = 100;
+
+        progressBar.style.width = progress + '%';
+
+        if (progress === 100) {
+          clearInterval(interval);
+          statusText.innerText = "Vui lòng hoàn thành xác minh con người bên dưới:";
+          document.getElementById('progress-container').style.display = 'none';
+          document.getElementById('captcha-box').style.display = 'block';
+        }
+      }, 150);
+    }
+
+    // Callback khi vượt qua Cloudflare Turnstile CAPTCHA
+    window.onTurnstileSuccess = function(token) {
+      statusText.innerText = "Xác minh thành công! Đang tải ứng dụng...";
+      setTimeout(() => {
+        document.getElementById('security-overlay').style.display = 'none';
+        document.getElementById('app-content').style.display = 'block';
+      }, 500);
+    };
+
+    // Khởi chạy quy trình kiểm tra ngay khi mở trang
+    window.addEventListener('DOMContentLoaded', startSecurityFlow);
+  </script>
 
   <!-- FIREBASE & IMGBB INTEGRATION -->
   <script type="module">
