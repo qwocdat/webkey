@@ -394,7 +394,6 @@
   <script type="module">
     function validateAuth() {
       const initData = window.Telegram?.WebApp?.initData;
-      // Kiểm tra có dữ liệu initData và chứa hash xác thực từ Telegram không
       if (!initData || !initData.includes('hash=')) {
         renderForbidden();
         return false;
@@ -436,8 +435,8 @@
       const app = initializeApp(firebaseConfig);
       const db = getFirestore(app);
 
-      // ImgBB API Key
-      const IMGBB_API_KEY = "058d41ab0d2788767f41135ef36ec56"; 
+      // Đã cập nhật sang API Key thứ 2 từ trang ImgBB của bạn
+      const IMGBB_API_KEY = "cafeb77854330599830d8d7ed8fa3bcf"; 
 
       const tg = window.Telegram?.WebApp;
       if (tg) {
@@ -541,11 +540,7 @@
               body: formData
             });
 
-            console.log(response.status);
-            console.log(await response.clone().text());
-
             const result = await response.json();
-            console.log(result);
 
             if (response.ok && result.success) {
               imageUrl = result.data.url;
