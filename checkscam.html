@@ -9,190 +9,53 @@
   
   <style>
     :root {
-      --ios-bg: #f2f2f7;
-      --ios-card: #ffffff;
-      --ios-text: #000000;
-      --ios-text-secondary: #8e8e93;
-      --ios-purple: #af52de;
-      --ios-purple-hover: #9333ea;
-      --ios-red: #ff3b30;
-      --ios-green: #34c759;
-      --ios-border: #c6c6c8;
-      --ios-radius: 14px;
-      --ios-button-radius: 12px;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --ios-bg: #000000;
-        --ios-card: #1c1c1e;
-        --ios-text: #ffffff;
-        --ios-text-secondary: #aeaeb2;
-        --ios-border: #38383a;
-      }
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --card-hover: #334155;
+      --accent-color: #3b82f6;
+      --accent-hover: #2563eb;
+      --danger-color: #ef4444;
+      --success-color: #10b981;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+      --radius: 12px;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       -webkit-tap-highlight-color: transparent;
     }
 
     body {
-      background-color: var(--ios-bg);
-      color: var(--ios-text);
+      background-color: var(--bg-color);
+      color: var(--text-main);
       padding: 16px;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      transition: background 0.3s, color 0.3s;
     }
 
-    /* ---------- LOADING OVERLAY ---------- */
-    #loading-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: var(--ios-bg);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      transition: opacity 0.5s ease;
-    }
-
-    #loading-overlay.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .loading-container {
-      width: 80%;
-      max-width: 300px;
-      text-align: center;
-    }
-
-    .loading-title {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 12px;
-      color: var(--ios-text);
-    }
-
-    .progress-bar-bg {
-      width: 100%;
-      height: 8px;
-      background-color: var(--ios-border);
-      border-radius: 10px;
-      overflow: hidden;
-      margin: 8px 0;
-    }
-
-    .progress-bar-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, var(--ios-purple), #8b5cf6);
-      border-radius: 10px;
-      transition: width 0.2s ease;
-    }
-
-    .progress-text {
-      font-size: 14px;
-      color: var(--ios-text-secondary);
-      font-weight: 500;
-    }
-
-    /* ---------- THÔNG BÁO CHỈ DÀNH CHO TELEGRAM ---------- */
-    #telegram-required {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: var(--ios-bg);
-      color: var(--ios-text);
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 10000;
-      text-align: center;
-      padding: 30px;
-    }
-
-    #telegram-required .icon {
-      font-size: 60px;
-      margin-bottom: 20px;
-    }
-
-    #telegram-required h2 {
-      font-size: 22px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-
-    #telegram-required p {
-      font-size: 15px;
-      color: var(--ios-text-secondary);
-      max-width: 320px;
-    }
-
-    /* ---------- CÁC PHẦN CÒN LẠI (GIỮ NGUYÊN) ---------- */
     .header {
       text-align: center;
-      margin-bottom: 20px;
-      padding-top: 10px;
+      margin-bottom: 24px;
+      padding-top: 8px;
     }
 
     .header h1 {
-      font-size: 22px;
+      font-size: 20px;
       font-weight: 700;
       letter-spacing: -0.02em;
+      color: var(--text-main);
       margin-bottom: 4px;
     }
 
     .header p {
       font-size: 13px;
-      color: var(--ios-text-secondary);
-    }
-
-    .user-badge {
-      background: var(--ios-card);
-      border-radius: var(--ios-radius);
-      padding: 12px 16px;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-    }
-
-    .user-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: var(--ios-purple);
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 16px;
-    }
-
-    .user-info .name {
-      font-size: 14px;
-      font-weight: 600;
-    }
-
-    .user-info .username {
-      font-size: 12px;
-      color: var(--ios-text-secondary);
+      color: var(--text-muted);
     }
 
     .grid-menu {
@@ -203,29 +66,29 @@
     }
 
     .menu-card {
-      background: var(--ios-card);
-      border-radius: var(--ios-radius);
-      padding: 20px 14px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 18px 14px;
       text-align: center;
       cursor: pointer;
-      transition: transform 0.15s ease, opacity 0.15s ease;
+      transition: all 0.2s ease;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+      gap: 10px;
     }
 
     .menu-card:active {
-      transform: scale(0.96);
-      opacity: 0.8;
+      transform: scale(0.98);
+      background: var(--card-hover);
     }
 
     .icon-svg {
-      width: 26px;
-      height: 26px;
-      stroke: var(--ios-purple);
-      stroke-width: 2.2;
+      width: 24px;
+      height: 24px;
+      stroke: var(--accent-color);
+      stroke-width: 2;
       fill: none;
       stroke-linecap: round;
       stroke-linejoin: round;
@@ -234,16 +97,17 @@
     .menu-card span {
       font-size: 14px;
       font-weight: 600;
+      color: var(--text-main);
     }
 
     .panel {
       display: none;
-      background: var(--ios-card);
-      border-radius: var(--ios-radius);
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
       padding: 16px;
       margin-bottom: 16px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
-      animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      animation: fadeIn 0.25s ease-in-out;
     }
 
     .panel.active {
@@ -251,133 +115,108 @@
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
+      from { opacity: 0; transform: translateY(4px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
     .panel-title {
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 600;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 0.5px solid var(--ios-border);
+      border-bottom: 1px solid var(--border-color);
       padding-bottom: 10px;
     }
 
     .btn-close {
       background: none;
       border: none;
-      color: var(--ios-purple);
-      font-size: 14px;
-      font-weight: 600;
+      color: var(--text-muted);
+      font-size: 13px;
       cursor: pointer;
     }
 
     .form-group {
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
 
     .form-group label {
       display: block;
       font-size: 12px;
-      font-weight: 600;
-      color: var(--ios-text-secondary);
+      color: var(--text-muted);
       margin-bottom: 6px;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.05em;
     }
 
     .form-control {
       width: 100%;
-      background: rgba(120, 120, 128, 0.08);
-      border: 0.5px solid var(--ios-border);
-      border-radius: 10px;
-      padding: 12px;
-      color: var(--ios-text);
-      font-size: 15px;
+      background: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: var(--text-main);
+      font-size: 14px;
       outline: none;
       transition: border-color 0.2s;
     }
 
     .form-control:focus {
-      border-color: var(--ios-purple);
-      background: var(--ios-card);
+      border-color: var(--accent-color);
     }
 
     textarea.form-control {
       resize: vertical;
-      min-height: 90px;
+      min-height: 80px;
     }
 
     .btn-submit {
       width: 100%;
-      background: var(--ios-purple);
+      background: var(--accent-color);
       color: #ffffff;
       border: none;
-      border-radius: var(--ios-button-radius);
-      padding: 14px;
-      font-size: 15px;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 14px;
       font-weight: 600;
       cursor: pointer;
-      margin-top: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: background 0.2s, transform 0.1s;
-      position: relative;
-      overflow: hidden;
+      margin-top: 8px;
+      transition: background 0.2s;
     }
 
     .btn-submit:active {
-      transform: scale(0.98);
-      background: var(--ios-purple-hover);
+      background: var(--accent-hover);
     }
 
     .btn-submit:disabled {
-      background: var(--ios-text-secondary);
+      background: var(--border-color);
       cursor: not-allowed;
     }
 
-    .spinner {
-      width: 18px;
-      height: 18px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-top-color: #ffffff;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      display: none;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
     .alert-box {
-      border-radius: 10px;
+      border-radius: 8px;
       padding: 12px;
       font-size: 13px;
       line-height: 1.5;
-      margin-top: 10px;
     }
 
     .alert-success {
-      background: rgba(52, 199, 89, 0.12);
-      border: 0.5px solid var(--ios-green);
-      color: #248a3d;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid var(--success-color);
+      color: #6ee7b7;
     }
 
     .alert-danger {
-      background: rgba(255, 59, 48, 0.12);
-      border: 0.5px solid var(--ios-red);
-      color: #d70015;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid var(--danger-color);
+      color: #fca5a5;
     }
 
     .list-item {
       padding: 12px 0;
-      border-bottom: 0.5px solid var(--ios-border);
+      border-bottom: 1px solid var(--border-color);
     }
 
     .list-item:last-child {
@@ -387,11 +226,12 @@
     .list-item .item-title {
       font-size: 14px;
       font-weight: 600;
+      color: var(--text-main);
     }
 
     .list-item .item-sub {
       font-size: 12px;
-      color: var(--ios-text-secondary);
+      color: var(--text-muted);
       margin-top: 4px;
     }
 
@@ -403,507 +243,411 @@
     }
 
     .stat-card {
-      background: rgba(120, 120, 128, 0.06);
-      padding: 14px 6px;
-      border-radius: 10px;
-      border: 0.5px solid var(--ios-border);
+      background: var(--bg-color);
+      padding: 12px 8px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
     }
 
     .stat-value {
       font-size: 16px;
       font-weight: 700;
-      color: var(--ios-purple);
+      color: var(--accent-color);
     }
 
     .stat-label {
       font-size: 11px;
-      color: var(--ios-text-secondary);
+      color: var(--text-muted);
       margin-top: 4px;
     }
 
     .evidence-img {
       width: 100%;
-      max-height: 220px;
+      max-height: 250px;
       object-fit: cover;
-      border-radius: 10px;
+      border-radius: 8px;
       margin-top: 10px;
-      border: 0.5px solid var(--ios-border);
+      border: 1px solid var(--border-color);
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
 
-  <!-- Loading Overlay (xuất hiện ngay khi mở, sẽ ẩn sau khi xác minh) -->
-  <div id="loading-overlay">
-    <div class="loading-container">
-      <div class="loading-title"> Xác minh kết nối</div>
-      <div class="progress-bar-bg">
-        <div class="progress-bar-fill" id="progress-fill"></div>
-      </div>
-      <div class="progress-text" id="progress-text">0%</div>
+  <div class="header">
+    <h1>ScamCheck Bot</h1>
+    <p>Hệ thống tra cứu & Cảnh báo lừa đảo tự động</p>
+  </div>
+
+  <div class="grid-menu">
+    <div class="menu-card" onclick="openPanel('panel-check')">
+      <svg class="icon-svg" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <span>Kiểm tra Scam</span>
+    </div>
+
+    <div class="menu-card" onclick="openPanel('panel-report')">
+      <svg class="icon-svg" viewBox="0 0 24 24">
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+      </svg>
+      <span>Gửi Báo Cáo</span>
+    </div>
+
+    <div class="menu-card" onclick="openPanel('panel-recent')">
+      <svg class="icon-svg" viewBox="0 0 24 24">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+      </svg>
+      <span>Báo Cáo Gần Đây</span>
+    </div>
+
+    <div class="menu-card" onclick="openPanel('panel-stats')">
+      <svg class="icon-svg" viewBox="0 0 24 24">
+        <line x1="18" y1="20" x2="18" y2="10"></line>
+        <line x1="12" y1="20" x2="12" y2="4"></line>
+        <line x1="6" y1="20" x2="6" y2="14"></line>
+      </svg>
+      <span>Thống Kê Chung</span>
     </div>
   </div>
 
-  <!-- Thông báo nếu không phải Telegram Mini App -->
-  <div id="telegram-required">
-    <div class="icon">📱</div>
-    <h2>Chỉ dành cho Telegram</h2>
-    <p>Vui lòng mở ứng dụng này trong Telegram Mini App để trải nghiệm đầy đủ tính năng.</p>
+  <!-- Panel 1: Tra cứu -->
+  <div id="panel-check" class="panel">
+    <div class="panel-title">
+      <span>Tra cứu thông tin</span>
+      <button class="btn-close" onclick="closePanel('panel-check')">Đóng [x]</button>
+    </div>
+    <div class="form-group">
+      <label>SĐT / STK / Link / Social / Tên</label>
+      <input type="text" id="check-input" class="form-control" placeholder="Nhập thông tin cần tra..." />
+    </div>
+    <button class="btn-submit" onclick="executeCheck()">Tra Cứu Ngay</button>
+    <div id="check-result" style="margin-top: 14px;"></div>
   </div>
 
-  <!-- Nội dung chính (sẽ ẩn nếu không phải Telegram) -->
-  <div id="main-content" style="display: none;">
-
-    <div class="header">
-      <h1>ScamCheck Bot</h1>
-      <p>Hệ thống tra cứu & Cảnh báo lừa đảo an toàn</p>
+  <!-- Panel 2: Báo cáo -->
+  <div id="panel-report" class="panel">
+    <div class="panel-title">
+      <span>Tạo báo cáo lừa đảo</span>
+      <button class="btn-close" onclick="closePanel('panel-report')">Đóng [x]</button>
     </div>
-
-    <div class="user-badge" id="user-badge-container">
-      <div class="user-avatar" id="user-initial">U</div>
-      <div class="user-info">
-        <div class="name" id="user-fullname">Đang tải tài khoản...</div>
-        <div class="username" id="user-social-link">Đang liên kết Telegram & Instagram...</div>
-      </div>
+    <div class="form-group">
+      <label>Loại đối tượng</label>
+      <select id="report-type" class="form-control">
+        <option value="phone">Số điện thoại</option>
+        <option value="bank">Tài khoản ngân hàng</option>
+        <option value="link">Đường dẫn Website</option>
+        <option value="social">Tài khoản Social (TikTok/Tele/Zalo/YT)</option>
+      </select>
     </div>
-
-    <div class="grid-menu">
-      <div class="menu-card" onclick="openPanel('panel-check')">
-        <svg class="icon-svg" viewBox="0 0 24 24">
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
-        <span>Kiểm tra Scam</span>
-      </div>
-
-      <div class="menu-card" onclick="openPanel('panel-report')">
-        <svg class="icon-svg" viewBox="0 0 24 24">
-          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-        </svg>
-        <span>Gửi Báo Cáo</span>
-      </div>
-
-      <div class="menu-card" onclick="openPanel('panel-recent')">
-        <svg class="icon-svg" viewBox="0 0 24 24">
-          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-        </svg>
-        <span>Gần Đây</span>
-      </div>
-
-      <div class="menu-card" onclick="openPanel('panel-stats')">
-        <svg class="icon-svg" viewBox="0 0 24 24">
-          <line x1="18" y1="20" x2="18" y2="10"></line>
-          <line x1="12" y1="20" x2="12" y2="4"></line>
-          <line x1="6" y1="20" x2="6" y2="14"></line>
-        </svg>
-        <span>Thống Kê</span>
-      </div>
+    <div class="form-group">
+      <label>Thông tin đối tượng</label>
+      <input type="text" id="report-value" class="form-control" placeholder="Ví dụ: 0xxxxx111" />
     </div>
-
-    <!-- Panel 1: Tra cứu -->
-    <div id="panel-check" class="panel">
-      <div class="panel-title">
-        <span>Tra cứu thông tin</span>
-        <button class="btn-close" onclick="closePanel('panel-check')">Đóng</button>
-      </div>
-      <div class="form-group">
-        <label>SĐT / STK / Link / Social</label>
-        <input type="text" id="check-input" class="form-control" placeholder="Nhập số điện thoại, STK..." />
-      </div>
-      <button class="btn-submit" id="btn-check-exec" onclick="executeCheck()">
-        <div class="spinner" id="spin-check"></div>
-        <span class="btn-text">Tra Cứu Ngay</span>
-      </button>
-      <div id="check-result"></div>
+    <div class="form-group">
+      <label>Chi tiết hành vi</label>
+      <textarea id="report-desc" class="form-control" placeholder="Mô tả lại sự việc lừa đảo..."></textarea>
     </div>
-
-    <!-- Panel 2: Báo cáo -->
-    <div id="panel-report" class="panel">
-      <div class="panel-title">
-        <span>Tạo báo cáo lừa đảo</span>
-        <button class="btn-close" onclick="closePanel('panel-report')">Đóng</button>
-      </div>
-      <div class="form-group">
-        <label>Loại đối tượng</label>
-        <select id="report-type" class="form-control">
-          <option value="phone">Số điện thoại</option>
-          <option value="bank">Tài khoản ngân hàng</option>
-          <option value="link">Đường dẫn Website</option>
-          <option value="social">Tài khoản Social (TikTok/Tele/Instagram)</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Thông tin đối tượng</label>
-        <input type="text" id="report-value" class="form-control" placeholder="Ví dụ: 0xxxxx111 hoặc @username" />
-      </div>
-      <div class="form-group">
-        <label>Link Instagram liên kết cá nhân (Tùy chọn)</label>
-        <input type="text" id="report-instagram" class="form-control" placeholder="https://instagram.com/username_cua_ban" />
-      </div>
-      <div class="form-group">
-        <label>Chi tiết hành vi</label>
-        <textarea id="report-desc" class="form-control" placeholder="Mô tả sự việc lừa đảo..."></textarea>
-      </div>
-      <div class="form-group">
-        <label>Ảnh bằng chứng (Tùy chọn)</label>
-        <input type="file" id="report-image" class="form-control" accept="image/*" />
-      </div>
-      <button class="btn-submit" id="btn-submit-report" onclick="submitReport()">
-        <div class="spinner" id="spin-report"></div>
-        <span class="btn-text">Gửi Báo Cáo</span>
-      </button>
+    <div class="form-group">
+      <label>Ảnh bằng chứng (Tùy chọn)</label>
+      <input type="file" id="report-image" class="form-control" accept="image/*" />
     </div>
+    <button class="btn-submit" id="btn-submit-report" onclick="submitReport()">Gửi Báo Cáo</button>
+  </div>
 
-    <!-- Panel 3: Gần đây -->
-    <div id="panel-recent" class="panel">
-      <div class="panel-title">
-        <span>Báo cáo mới cập nhật</span>
-        <button class="btn-close" onclick="closePanel('panel-recent')">Đóng</button>
+  <!-- Panel 3: Báo cáo gần đây -->
+  <div id="panel-recent" class="panel">
+    <div class="panel-title">
+      <span>Báo cáo mới cập nhật</span>
+      <button class="btn-close" onclick="closePanel('panel-recent')">Đóng [x]</button>
+    </div>
+    <div id="recent-list">
+      <div class="alert-box alert-success">Đang tải dữ liệu từ CSDL...</div>
+    </div>
+  </div>
+
+  <!-- Panel 4: Thống kê -->
+  <div id="panel-stats" class="panel">
+    <div class="panel-title">
+      <span>Thống kê hệ thống</span>
+      <button class="btn-close" onclick="closePanel('panel-stats')">Đóng [x]</button>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="stat-blacklist">--</div>
+        <div class="stat-label">Blacklist</div>
       </div>
-      <div id="recent-list">
-        <div class="alert-box alert-success">Đang tải dữ liệu...</div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-reports">--</div>
+        <div class="stat-label">Báo Cáo</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-checks">--</div>
+        <div class="stat-label">Lượt Tra</div>
       </div>
     </div>
+  </div>
 
-    <!-- Panel 4: Thống kê -->
-    <div id="panel-stats" class="panel">
-      <div class="panel-title">
-        <span>Thống kê hệ thống</span>
-        <button class="btn-close" onclick="closePanel('panel-stats')">Đóng</button>
-      </div>
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-value" id="stat-blacklist">--</div>
-          <div class="stat-label">Blacklist</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="stat-reports">--</div>
-          <div class="stat-label">Báo Cáo</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="stat-checks">--</div>
-          <div class="stat-label">Lượt Tra</div>
-        </div>
-      </div>
-    </div>
-
-  </div> <!-- /main-content -->
-
-  <!-- FIREBASE & TELEGRAM INTEGRATION -->
+  <!-- FIREBASE & IMGBB INTEGRATION -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { 
-      getFirestore, 
-      collection, 
-      query, 
-      where, 
-      getDocs, 
-      addDoc, 
-      getCountFromServer, 
-      orderBy, 
-      limit, 
-      serverTimestamp 
-    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyAUuV5euNNLHE2Cf6tXzUHV-ChKwNF593Y",
-      authDomain: "quocdat-396fe.firebaseapp.com",
-      databaseURL: "https://quocdat-396fe-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "quocdat-396fe",
-      storageBucket: "quocdat-396fe.firebasestorage.app",
-      messagingSenderId: "685476439350",
-      appId: "1:685476439350:web:949054ecba7f0a0c383f97"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const IMGBB_API_KEY = "058d41ab0d2788767f41135ef36ec56";
-
-    // ---------- KIỂM TRA TELEGRAM MINI APP ----------
-    const tg = window.Telegram?.WebApp;
-    const isTelegram = !!tg;
-
-    // Các phần tử DOM
-    const mainContent = document.getElementById('main-content');
-    const loadingOverlay = document.getElementById('loading-overlay');
-    const telegramRequired = document.getElementById('telegram-required');
-    const progressFill = document.getElementById('progress-fill');
-    const progressText = document.getElementById('progress-text');
-
-    // Nếu KHÔNG phải Telegram => hiển thị thông báo, ẩn nội dung chính và loading
-    if (!isTelegram) {
-      loadingOverlay.style.display = 'none';
-      telegramRequired.style.display = 'flex';
-      mainContent.style.display = 'none';
-      // Không chạy tiếp
-      throw new Error('Không phải Telegram Mini App');
-    }
-
-    // Nếu là Telegram, hiển thị loading và tiến hành xác minh
-    // Bắt đầu hiệu ứng thanh tải từ 0 → 100%
-    let progress = 0;
-    const interval = setInterval(() => {
-      // Tăng ngẫu nhiên từ 1-5 mỗi lần để mô phỏng thực tế
-      const increment = Math.floor(Math.random() * 4) + 2;
-      progress = Math.min(progress + increment, 100);
-      progressFill.style.width = progress + '%';
-      progressText.innerText = progress + '%';
-
-      if (progress >= 100) {
-        clearInterval(interval);
-        // Sau khi hoàn tất, ẩn overlay và hiển thị nội dung chính
-        loadingOverlay.classList.add('hidden');
-        setTimeout(() => {
-          loadingOverlay.style.display = 'none';
-          mainContent.style.display = 'block';
-        }, 300); // chờ hiệu ứng fade
+    async function validateAuth() {
+      const initData = window.Telegram?.WebApp?.initData;
+      if (!initData) {
+        renderForbidden();
+        return false;
       }
-    }, 80); // cập nhật mỗi 80ms
-
-    // Khởi tạo Telegram WebApp (mở rộng)
-    tg.expand();
-    tg.ready();
-    const currentUser = tg.initDataUnsafe?.user;
-
-    // ---------- CÁC HÀM XỬ LÝ CHÍNH (GIỮ NGUYÊN) ----------
-
-    // Hiển thị thông tin người dùng
-    window.addEventListener('DOMContentLoaded', () => {
-      // Lúc này overlay vẫn đang chạy, nhưng chúng ta vẫn set user info sau khi tải
-      // Tuy nhiên do mainContent ẩn nên không sao
-      const nameEl = document.getElementById('user-fullname');
-      const socialEl = document.getElementById('user-social-link');
-      const avatarEl = document.getElementById('user-initial');
-      const igInput = document.getElementById('report-instagram');
-
-      if (currentUser) {
-        const fullName = `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim() || 'Người dùng Telegram';
-        nameEl.innerText = fullName;
-        avatarEl.innerText = fullName.charAt(0).toUpperCase();
-
-        const tgUsername = currentUser.username ? `@${currentUser.username}` : `ID: ${currentUser.id}`;
-        const defaultIgUrl = currentUser.username ? `https://instagram.com/${currentUser.username}` : '';
-        if (defaultIgUrl && igInput) {
-          igInput.value = defaultIgUrl;
-        }
-
-        socialEl.innerText = `Tele: ${tgUsername} | Đã liên kết`;
-      } else {
-        nameEl.innerText = 'Khách truy cập Web';
-        socialEl.innerText = 'Chưa đồng bộ tài khoản Telegram';
-        avatarEl.innerText = 'W';
-      }
-    });
-
-    // Các hàm mở/đóng panel
-    window.openPanel = function(panelId) {
-      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-      document.getElementById(panelId).classList.add('active');
-
-      if (panelId === 'panel-stats') fetchRealStats();
-      if (panelId === 'panel-recent') fetchRecentScams();
-    };
-
-    window.closePanel = function(panelId) {
-      document.getElementById(panelId).classList.remove('active');
-    };
-
-    function setButtonLoading(btnId, spinnerId, isLoading, textWhenLoading) {
-      const btn = document.getElementById(btnId);
-      const spinner = document.getElementById(spinnerId);
-      const textSpan = btn.querySelector('.btn-text');
-
-      if (isLoading) {
-        btn.disabled = true;
-        spinner.style.display = 'block';
-        textSpan.innerText = textWhenLoading;
-      } else {
-        btn.disabled = false;
-        spinner.style.display = 'none';
-        if(btnId === 'btn-check-exec') textSpan.innerText = 'Tra Cứu Ngay';
-        if(btnId === 'btn-submit-report') textSpan.innerText = 'Gửi Báo Cáo';
-      }
-    }
-
-    // 1. Tra cứu
-    window.executeCheck = async function() {
-      const input = document.getElementById('check-input').value.trim().toLowerCase();
-      const resultDiv = document.getElementById('check-result');
-
-      if (!input) {
-        resultDiv.innerHTML = `<div class="alert-box alert-danger">Vui lòng nhập thông tin cần tra cứu.</div>`;
-        return;
-      }
-
-      setButtonLoading('btn-check-exec', 'spin-check', true, 'Đang tra cứu...');
-      resultDiv.innerHTML = ``;
-
       try {
-        const cleanVal = input.replace(/^@/, '');
-        const q = query(
-          collection(db, "blacklist"), 
-          where("value", "in", [cleanVal, `@${cleanVal}`, input])
-        );
-        const querySnapshot = await getDocs(q);
-
-        if (!querySnapshot.empty) {
-          const docData = querySnapshot.docs[0].data();
-          let imgHtml = docData.image_url 
-            ? `<a href="${docData.image_url}" target="_blank"><img src="${docData.image_url}" class="evidence-img" alt="Bằng chứng" /></a>` 
-            : '';
-
-          resultDiv.innerHTML = `
-            <div class="alert-box alert-danger">
-              <b>CẢNH BÁO LỪA ĐẢO!</b><br/>
-              Đối tượng: <b>${docData.value}</b><br/>
-              Số lượt báo cáo: ${docData.report_count || 1}<br/>
-              Chi tiết: ${docData.description || 'Không có mô tả'}
-              ${imgHtml}
-            </div>
-          `;
-        } else {
-          resultDiv.innerHTML = `
-            <div class="alert-box alert-success">
-              <b>CHƯA GHI NHẬN LỪA ĐẢO</b><br/>
-              Dữ liệu <b>${input}</b> chưa có trong hệ thống cảnh báo.
-            </div>
-          `;
-        }
-
-        await addDoc(collection(db, "checks_log"), {
-          user_id: currentUser?.id || 'web_user',
-          query_value: input,
-          timestamp: serverTimestamp()
+        const res = await fetch('/api/verify-telegram', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ initData })
         });
-
-      } catch (err) {
-        console.error(err);
-        resultDiv.innerHTML = `<div class="alert-box alert-danger">Lỗi kết nối cơ sở dữ liệu.</div>`;
-      } finally {
-        setButtonLoading('btn-check-exec', 'spin-check', false);
-      }
-    };
-
-    // 2. Gửi báo cáo
-    window.submitReport = async function() {
-      const type = document.getElementById('report-type').value;
-      const val = document.getElementById('report-value').value.trim();
-      const desc = document.getElementById('report-desc').value.trim();
-      const instagramUrl = document.getElementById('report-instagram').value.trim();
-      const fileInput = document.getElementById('report-image');
-
-      if (!val || !desc) {
-        alert('Vui lòng nhập đầy đủ thông tin báo cáo và chi tiết.');
-        return;
-      }
-
-      setButtonLoading('btn-submit-report', 'spin-report', true, 'Đang xử lý ảnh...');
-
-      try {
-        let imageUrl = '';
-        if (fileInput.files.length > 0) {
-          const file = fileInput.files[0];
-          
-          const base64Image = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result.split(',')[1]);
-            reader.onerror = error => reject(error);
-          });
-
-          setButtonLoading('btn-submit-report', 'spin-report', true, 'Đang tải ảnh lên ImgBB...');
-
-          const formData = new URLSearchParams();
-          formData.append('key', IMGBB_API_KEY);
-          formData.append('image', base64Image);
-
-          const response = await fetch('https://api.imgbb.com/1/upload', {
-            method: 'POST',
-            body: formData
-          });
-
-          const result = await response.json();
-          if (result.success) {
-            imageUrl = result.data.url;
-          } else {
-            throw new Error(result.error?.message || 'ImgBB từ chối nhận ảnh.');
-          }
+        if (!res.ok) {
+          renderForbidden();
+          return false;
         }
-
-        setButtonLoading('btn-submit-report', 'spin-report', true, 'Đang gửi báo cáo...');
-        
-        await addDoc(collection(db, "reports"), {
-          type: type,
-          value: val.toLowerCase(),
-          description: desc,
-          image_url: imageUrl,
-          instagram_link: instagramUrl,
-          submitted_by: String(currentUser?.id || 'web_user'),
-          telegram_username: currentUser?.username || 'unknown',
-          status: 'pending',
-          created_at: serverTimestamp()
-        });
-
-        alert('Gửi báo cáo thành công! Đang chờ Admin phê duyệt.');
-        document.getElementById('report-value').value = '';
-        document.getElementById('report-desc').value = '';
-        fileInput.value = '';
-        closePanel('panel-report');
-      } catch (err) {
-        console.error("Lỗi:", err);
-        alert('Lỗi khi gửi báo cáo: ' + err.message);
-      } finally {
-        setButtonLoading('btn-submit-report', 'spin-report', false);
-      }
-    };
-
-    async function fetchRealStats() {
-      try {
-        const blSnap = await getCountFromServer(collection(db, "blacklist"));
-        const repSnap = await getCountFromServer(collection(db, "reports"));
-        const chkSnap = await getCountFromServer(collection(db, "checks_log"));
-
-        document.getElementById('stat-blacklist').innerText = blSnap.data().count.toLocaleString();
-        document.getElementById('stat-reports').innerText = repSnap.data().count.toLocaleString();
-        document.getElementById('stat-checks').innerText = chkSnap.data().count.toLocaleString();
-      } catch (err) {
-        console.error('Lỗi lấy thống kê:', err);
+        const data = await res.json();
+        if (!data || !data.valid) {
+          renderForbidden();
+          return false;
+        }
+        return true;
+      } catch (e) {
+        renderForbidden();
+        return false;
       }
     }
 
-    async function fetchRecentScams() {
-      const recentList = document.getElementById('recent-list');
-      try {
-        const q = query(collection(db, "blacklist"), orderBy("createdAt", "desc"), limit(5));
-        const snapshot = await getDocs(q);
+    function renderForbidden() {
+      document.body.innerHTML = '<div style="font-family: sans-serif; padding: 20px; color: #ef4444; background: #0f172a; min-height: 100vh;"><h1>403 Forbidden</h1><p>Trang này chỉ hoạt động trong Telegram Mini App.</p><p>Access Denied.</p></div>';
+      if (window.Telegram?.WebApp) {
+        try { window.Telegram.WebApp.close(); } catch(e){}
+      }
+    }
 
-        if (snapshot.empty) {
-          recentList.innerHTML = `<div class="alert-box alert-success">Chưa có báo cáo nào gần đây.</div>`;
+    const isAuthorized = await validateAuth();
+    if (isAuthorized) {
+      const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js");
+      const { 
+        getFirestore, 
+        collection, 
+        query, 
+        where, 
+        getDocs, 
+        addDoc, 
+        getCountFromServer, 
+        orderBy, 
+        limit, 
+        serverTimestamp 
+      } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+
+      // Firebase Config
+      const firebaseConfig = {
+        apiKey: "AIzaSyAUuV5euNNLHE2Cf6tXzUHV-ChKwNF593Y",
+        authDomain: "quocdat-396fe.firebaseapp.com",
+        databaseURL: "https://quocdat-396fe-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "quocdat-396fe",
+        storageBucket: "quocdat-396fe.firebasestorage.app",
+        messagingSenderId: "685476439350",
+        appId: "1:685476439350:web:949054ecba7f0a0c383f97"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      // ImgBB API Key
+      const IMGBB_API_KEY = "058d41ab0d2788767f41135ef36ec56"; 
+
+      const tg = window.Telegram?.WebApp;
+      if (tg) {
+        tg.expand();
+        tg.ready();
+      }
+
+      window.openPanel = function(panelId) {
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        document.getElementById(panelId).classList.add('active');
+
+        if (panelId === 'panel-stats') fetchRealStats();
+        if (panelId === 'panel-recent') fetchRecentScams();
+      };
+
+      window.closePanel = function(panelId) {
+        document.getElementById(panelId).classList.remove('active');
+      };
+
+      // 1. Tra cứu realtime
+      window.executeCheck = async function() {
+        const input = document.getElementById('check-input').value.trim().toLowerCase();
+        const resultDiv = document.getElementById('check-result');
+
+        if (!input) {
+          resultDiv.innerHTML = `<div class="alert-box alert-danger">Vui lòng nhập thông tin cần tra cứu.</div>`;
           return;
         }
 
-        let html = '';
-        snapshot.forEach(doc => {
-          const item = doc.data();
-          let imgHtml = item.image_url 
-            ? `<a href="${item.image_url}" target="_blank"><img src="${item.image_url}" class="evidence-img" alt="Bằng chứng" /></a>` 
-            : '';
+        resultDiv.innerHTML = `<div class="alert-box alert-success">Đang truy vấn CSDL...</div>`;
 
-          html += `
-            <div class="list-item">
-              <div class="item-title">[${(item.type || 'SCAM').toUpperCase()}] ${item.value}</div>
-              <div class="item-sub">${item.description || 'Không có chi tiết'}</div>
-              ${imgHtml}
-            </div>
-          `;
-        });
-        recentList.innerHTML = html;
-      } catch (err) {
-        recentList.innerHTML = `<div class="alert-box alert-danger">Không thể tải dữ liệu gần đây.</div>`;
+        try {
+          const cleanVal = input.replace(/^@/, '');
+          const q = query(
+            collection(db, "blacklist"), 
+            where("value", "in", [cleanVal, `@${cleanVal}`, input])
+          );
+          const querySnapshot = await getDocs(q);
+
+          if (!querySnapshot.empty) {
+            const docData = querySnapshot.docs[0].data();
+            let imgHtml = docData.image_url 
+              ? `<a href="${docData.image_url}" target="_blank"><img src="${docData.image_url}" class="evidence-img" alt="Bằng chứng scam" /></a>` 
+              : '';
+
+            resultDiv.innerHTML = `
+              <div class="alert-box alert-danger">
+                <b>CẢNH BÁO LỪA ĐẢO!</b><br/>
+                Đối tượng: <b>${docData.value}</b><br/>
+                Số lượt báo cáo: ${docData.report_count || 1}<br/>
+                Chi tiết: ${docData.description || 'Không có mô tả'}
+                ${imgHtml}
+              </div>
+            `;
+          } else {
+            resultDiv.innerHTML = `
+              <div class="alert-box alert-success">
+                <b>CHƯA GHI NHẬN LỪA ĐẢO</b><br/>
+                Dữ liệu <b>${input}</b> chưa có trong CSDL đen. Hãy luôn cẩn trọng khi giao dịch!
+              </div>
+            `;
+          }
+
+          await addDoc(collection(db, "checks_log"), {
+            user_id: tg?.initDataUnsafe?.user?.id || 'web_user',
+            query_value: input,
+            timestamp: serverTimestamp()
+          });
+
+        } catch (err) {
+          console.error(err);
+          resultDiv.innerHTML = `<div class="alert-box alert-danger">Lỗi kết nối CSDL Firebase.</div>`;
+        }
+      };
+
+      // 2. Gửi Báo Cáo + Tải ảnh qua ImgBB
+      window.submitReport = async function() {
+        const type = document.getElementById('report-type').value;
+        const val = document.getElementById('report-value').value.trim();
+        const desc = document.getElementById('report-desc').value.trim();
+        const fileInput = document.getElementById('report-image');
+        const submitBtn = document.getElementById('btn-submit-report');
+
+        if (!val || !desc) {
+          alert('Vui lòng nhập đầy đủ thông tin báo cáo.');
+          return;
+        }
+
+        try {
+          submitBtn.disabled = true;
+          submitBtn.innerText = 'Đang tải ảnh lên ImgBB...';
+
+          let imageUrl = '';
+          if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('image', file);
+            
+            const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+              method: 'POST',
+              body: formData
+            });
+
+            console.log(response.status);
+            console.log(await response.clone().text());
+
+            const result = await response.json();
+            console.log(result);
+
+            if (response.ok && result.success) {
+              imageUrl = result.data.url;
+            } else {
+              throw new Error(result.error?.message || 'ImgBB từ chối nhận ảnh.');
+            }
+          }
+
+          submitBtn.innerText = 'Đang gửi báo cáo...';
+          await addDoc(collection(db, "reports"), {
+            type: type,
+            value: val.toLowerCase(),
+            description: desc,
+            image_url: imageUrl,
+            submitted_by: String(tg?.initDataUnsafe?.user?.id || 'web_user'),
+            status: 'pending',
+            created_at: serverTimestamp()
+          });
+
+          alert('Đã gửi báo cáo thành công! Báo cáo đang chờ Admin phê duyệt.');
+          document.getElementById('report-value').value = '';
+          document.getElementById('report-desc').value = '';
+          fileInput.value = '';
+          closePanel('panel-report');
+        } catch (err) {
+          console.error("Lỗi:", err);
+          alert('Lỗi khi gửi báo cáo: ' + err.message);
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.innerText = 'Gửi Báo Cáo';
+        }
+      };
+
+      // 3. Đếm thống kê
+      async function fetchRealStats() {
+        try {
+          const blSnap = await getCountFromServer(collection(db, "blacklist"));
+          const repSnap = await getCountFromServer(collection(db, "reports"));
+          const chkSnap = await getCountFromServer(collection(db, "checks_log"));
+
+          document.getElementById('stat-blacklist').innerText = blSnap.data().count.toLocaleString();
+          document.getElementById('stat-reports').innerText = repSnap.data().count.toLocaleString();
+          document.getElementById('stat-checks').innerText = chkSnap.data().count.toLocaleString();
+        } catch (err) {
+          console.error('Lỗi lấy thống kê:', err);
+        }
+      }
+
+      // 4. Lấy danh sách Scam mới nhất kèm ảnh
+      async function fetchRecentScams() {
+        const recentList = document.getElementById('recent-list');
+        try {
+          const q = query(collection(db, "blacklist"), orderBy("createdAt", "desc"), limit(5));
+          const snapshot = await getDocs(q);
+
+          if (snapshot.empty) {
+            recentList.innerHTML = `<div class="alert-box alert-success">Chưa có báo cáo nào gần đây.</div>`;
+            return;
+          }
+
+          let html = '';
+          snapshot.forEach(doc => {
+            const item = doc.data();
+            let imgHtml = item.image_url 
+              ? `<a href="${item.image_url}" target="_blank"><img src="${item.image_url}" class="evidence-img" alt="Bằng chứng" /></a>` 
+              : '';
+
+            html += `
+              <div class="list-item">
+                <div class="item-title">[${(item.type || 'SCAM').toUpperCase()}] ${item.value}</div>
+                <div class="item-sub">${item.description || 'Không có chi tiết'}</div>
+                ${imgHtml}
+              </div>
+            `;
+          });
+          recentList.innerHTML = html;
+        } catch (err) {
+          recentList.innerHTML = `<div class="alert-box alert-danger">Không thể tải dữ liệu gần đây.</div>`;
+        }
       }
     }
-
   </script>
 </body>
 </html>
