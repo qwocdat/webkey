@@ -435,8 +435,12 @@
       const app = initializeApp(firebaseConfig);
       const db = getFirestore(app);
 
-      // Đã cập nhật sang API Key thứ 2 từ trang ImgBB của bạn
+      // ImgBB API Key
       const IMGBB_API_KEY = "cafeb77854330599830d8d7ed8fa3bcf"; 
+
+      // CẤU HÌNH THÔNG BÁO BOT VỀ ADMIN
+      const TELEGRAM_BOT_TOKEN = "8958654665:AAGEfprVysaqjAiZ0-RzXYkNre-6NiOfyrM"; 
+      const ADMIN_CHAT_ID = "6756064272"; 
 
       const tg = window.Telegram?.WebApp;
       if (tg) {
@@ -512,7 +516,7 @@
         }
       };
 
-      // 2. Gửi Báo Cáo + Tải ảnh qua ImgBB
+      // 2. Gửi Báo Cáo + Tải ảnh qua ImgBB + Báo Telegram Bot Admin
       window.submitReport = async function() {
         const type = document.getElementById('report-type').value;
         const val = document.getElementById('report-value').value.trim();
@@ -549,18 +553,50 @@
             }
           }
 
-          submitBtn.innerText = 'Đang gửi báo cáo...';
-          await addDoc(collection(db, "reports"), {
+          submitBtn.innerText = 'Đang lưu báo cáo...';
+          const senderId = String(tg?.initDataUnsafe?.user?.id || 'web_user');
+          const senderName = tg?.initDataUnsafe?.user?.first_name || 'N/A';
+
+          const docRef = await addDoc(collection(db, "reports"), {
             type: type,
             value: val.toLowerCase(),
             description: desc,
             image_url: imageUrl,
-            submitted_by: String(tg?.initDataUnsafe?.user?.id || 'web_user'),
+            submitted_by: senderId,
             status: 'pending',
             created_at: serverTimestamp()
           });
 
-          alert('Đã gửi báo cáo thành công! Báo cáo đang chờ Admin phê duyệt.');
+          // Gửi thông báo trực tiếp qua Bot Telegram cho Admin
+          submitBtn.innerText = 'Đang gửi thông báo cho Admin...';
+          const reportText = `🚨 <b>BÁO CÁO SCAM MỚI CẦN PHÊ DUYỆT</b>\n\n` +
+                             `👤 <b>Người báo cáo:</b> ${senderName} (ID: <code>${senderId}</code>)\n` +
+                             `📌 <b>Loại:</b> ${type.toUpperCase()}\n` +
+                             `🎯 <b>Đối tượng:</b> <code>${val}</code>\n` +
+                             `📝 <b>Chi tiết:</b> ${desc}\n` +
+                             (imageUrl ? `🖼 <b>Bằng chứng:</b> <a href="${imageUrl}">Xem ảnh</a>\n` : '') +
+                             `🆔 <b>Report ID:</b> <code>${docRef.id}</code>`;
+
+          await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              chat_id: ADMIN_CHAT_ID,
+              text: reportText,
+              parse_mode: 'HTML',
+              disable_web_page_preview: false,
+              reply_markup: {
+                inline_keyboard: [
+                  [
+                    { text: "✅ Duyệt (Vào Blacklist)", callback_data: `approve_${docRef.id}` },
+                    { text: "❌ Từ chối", callback_data: `reject_${docRef.id}` }
+                  ]
+                ]
+              }
+            })
+          });
+
+          alert('Đã gửi báo cáo thành công! Thông báo đã được chuyển tới Admin.');
           document.getElementById('report-value').value = '';
           document.getElementById('report-desc').value = '';
           fileInput.value = '';
