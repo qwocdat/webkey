@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Apple iOS 26 - Apple Liquid Glass Engine</title>
+    <!-- Tailwind CSS Engine -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        glass: {
+                            light: 'rgba(255, 255, 255, 0.25)',
+                            dark: 'rgba(18, 18, 22, 0.45)',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* ==========================================================================
+           RESET & ABSOLUTE NO FAKE HIGHLIGHT / FOCUS OUTLINE (MỤC TIÊU TỐI THƯỢNG)
+           ========================================================================== */
+        *, *::before, *::after {
+            -webkit-tap-highlight-color: transparent !important;
+            -webkit-touch-callout: none !important;
+            user-select: none !important;
+            outline: none !important;
+        }
+
+        :focus, :focus-visible, :active {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
+            background-color: #f3f4f6;
+            transition: background-color 0.5s ease;
+        }
+
+        body.dark {
+            background-color: #0d0e12;
+        }
+
+        /* ==========================================================================
+           7-LAYER RENDERING PIPELINE & CORE LIQUID GLASS MATERIAL
+           ========================================================================== */
+        
+        .liquid-glass-node {
+            position: relative;
+            isolation: isolate;
+            transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1);
+            border-radius: inherit;
+        }
+
+        /* Layer 3: True Refraction & Volumetric Distortion (SVG Displacement Filter) */
+        .glass-refraction-layer {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            border-radius: inherit;
+            filter: url('#liquid-glass-refraction-filter') blur(12px) contrast(105%) saturate(125%);
+            background: inherit;
+            opacity: 0.98;
+            pointer-events: none;
+        }
+
+        /* Layer 4: Glass Surface Volume & Material Tint */
+        .glass-surface-layer {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            border-radius: inherit;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.05) 100%);
+            mix-blend-mode: overlay;
+            pointer-events: none;
+            transition: background 0.3s ease;
+        }
+
+        .dark .glass-surface-layer {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(0, 0, 0, 0.35) 100%);
+        }
+
+        /* Layer 5: Dynamic Ray-Traced Canvas Overlay */
+        .glass-specular-canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 3;
+            border-radius: inherit;
+            pointer-events: none;
+        }
+
+        /* Layer 6: Multi-Layer Edge Lighting & Edge Chromatic Optics */
+        .glass-edge-layer {
+            position: absolute;
+            inset: 0;
+            z-index: 4;
+            border-radius: inherit;
+            pointer-events: none;
+            /* Triple Layer Border Architecture: Outer Soft Shadow + Bright Cut Edge + Inner Reflective Inset */
+            box-shadow: 
+                0 0 0 1px rgba(255, 255, 255, 0.5) inset,
+                0 1px 2px 0 rgba(255, 255, 255, 0.8) inset,
+                0 -1px 2px 0 rgba(0, 0, 0, 0.1) inset,
+                0 20px 40px -15px rgba(0, 0, 0, 0.07);
+        }
+
+        .dark .glass-edge-layer {
+            box-shadow: 
+                0 0 0 1px rgba(255, 255, 255, 0.15) inset,
+                0 1px 1px 0 rgba(255, 255, 255, 0.3) inset,
+                0 -1px 2px 0 rgba(0, 0, 0, 0.5) inset,
+                0 20px 40px -15px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Layer 7: Interaction & Physical Content Buffer */
+        .glass-content-layer {
+            position: relative;
+            z-index: 5;
+            border-radius: inherit;
+        }
+
+        /* VOLUMETRIC COMPRESSION ON PRESS (Spring Physics Feeling) */
+        .liquid-glass-node:active {
+            transform: scale(0.975) translateY(1px);
+        }
+
+        /* Custom Scrollbar suppression */
+        ::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-between min-h-screen relative antialiased selection:bg-none">
+
+    <!-- ==========================================================================
+         SVG FILTER PIPELINE: TRUE OPTICAL REFRACTION & CHROMATIC ABERRATION
+         ========================================================================== -->
+    <svg class="hidden absolute width-0 height-0" aria-hidden="true">
+        <defs>
+            <filter id="liquid-glass-refraction-filter" x="-20%" y="-20%" width="140%" height="140%">
+                <!-- Dynamic Liquid Ripples Turbulence Generator -->
+                <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="2" result="noise" id="fe-turbulence" />
+                <feGaussianBlur in="noise" stdDeviation="4" result="blurredNoise" />
+                <!-- Physical Lens Bulge Displacement Mapping -->
+                <feDisplacementMap in="SourceGraphic" in2="blurredNoise" scale="22" xChannelSelector="R" yChannelSelector="G" result="displaced" />
+                <!-- Subtle Saturation Amplification through refractive medium -->
+                <feColorMatrix type="saturate" values="1.3" in="displaced" />
+            </filter>
+        </defs>
+    </svg>
+
+    <!-- ==========================================================================
+         LAYER 1 & 2: DYNAMIC BACKGROUND LIGHT BLOBS & AMBIENT BLOOM
+         ========================================================================== -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div id="blob-1" class="absolute top-1/4 left-1/4 w-96 h-96 bg-pink-300/40 dark:bg-pink-900/30 rounded-full blur-3xl transform -translate-x-1/2 -translate-y-1/2 transition-all duration-1000 ease-out"></div>
+        <div id="blob-2" class="absolute top-2/3 right-1/4 w-[28rem] h-[28rem] bg-emerald-200/50 dark:bg-emerald-900/20 rounded-full blur-3xl transform translate-x-1/3 transition-all duration-1000 ease-out"></div>
+        <div id="blob-3" class="absolute bottom-10 left-1/3 w-80 h-80 bg-amber-200/40 dark:bg-amber-900/20 rounded-full blur-3xl transition-all duration-1000 ease-out"></div>
+    </div>
+
+    <!-- ==========================================================================
+         HEADER & SYSTEM CONTROLS
+         ========================================================================== -->
+    <header class="w-full max-w-4xl pt-8 px-6 flex justify-between items-center z-10">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl liquid-glass-node overflow-hidden flex items-center justify-center cursor-pointer" data-thickness="0.9">
+                <div class="glass-refraction-layer"></div>
+                <div class="glass-surface-layer"></div>
+                <canvas class="glass-specular-canvas"></canvas>
+                <div class="glass-edge-layer"></div>
+                <div class="glass-content-layer">
+                    <svg class="w-5 h-5 text-gray-800 dark:text-gray-100" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                </div>
+            </div>
+            <span class="font-semibold text-lg tracking-tight text-gray-800 dark:text-gray-100">Liquid OS <span class="text-xs px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/10 font-normal">v26.0</span></span>
+        </div>
+
+        <!-- Dark / Light Mode Morphing Toggle Button -->
+        <button id="theme-toggle" class="liquid-glass-node w-14 h-8 rounded-full p-1 cursor-pointer flex items-center" data-thickness="0.6">
+            <div class="glass-refraction-layer"></div>
+            <div class="glass-surface-layer"></div>
+            <canvas class="glass-specular-canvas"></canvas>
+            <div class="glass-edge-layer"></div>
+            <div id="toggle-orb" class="glass-content-layer w-6 h-6 rounded-full bg-white dark:bg-gray-200 shadow-md transform transition-transform duration-300 flex items-center justify-center">
+                <svg id="sun-icon" class="w-3.5 h-3.5 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 100 2h1z"/></svg>
+                <svg id="moon-icon" class="w-3.5 h-3.5 text-indigo-900 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
+            </div>
+        </button>
+    </header>
+
+    <!-- ==========================================================================
+         MAIN DASHBOARD WORKSPACE
+         ========================================================================== -->
+    <main class="w-full max-w-4xl my-auto px-6 py-8 grid grid-cols-1 md:grid-cols-12 gap-6 z-10">
+
+        <!-- 1. MUSIC PLAYER CARD (VOLUMETRIC LIQUID GLASS) -->
+        <section id="music-card" class="md:col-span-7 liquid-glass-node rounded-[36px] p-6 flex flex-col justify-between overflow-hidden min-h-[300px]" data-thickness="1.0">
+            <div class="glass-refraction-layer"></div>
+            <div class="glass-surface-layer"></div>
+            <canvas class="glass-specular-canvas"></canvas>
+            <div class="glass-edge-layer"></div>
+            
+            <div class="glass-content-layer flex flex-col h-full justify-between gap-6">
+                <!-- Album Header -->
+                <div class="flex items-center gap-4">
+                    <div class="relative w-16 h-16 rounded-2xl overflow-hidden shadow-lg flex-shrink-0">
+                        <img id="album-art" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=300&auto=format&fit=crop" class="w-full h-full object-cover" alt="Album Artwork">
+                        <div class="absolute inset-0 bg-black/10"></div>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-xs font-semibold tracking-wider text-pink-600 dark:text-pink-400 uppercase">Now Playing</span>
+                        <h2 class="text-xl font-bold text-gray-900 dark:text-white tracking-tight">Ethereal Glass Waves</h2>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">iOS 26 Ambient Synthetic</span>
+                    </div>
+                </div>
+
+                <!-- Embedded Dynamic Glass Track Scrubbing Groove -->
+                <div class="flex flex-col gap-2">
+                    <div id="track-groove" class="liquid-glass-node w-full h-3 rounded-full cursor-pointer relative overflow-hidden" data-thickness="0.4">
+                        <div class="glass-refraction-layer"></div>
+                        <div class="glass-surface-layer"></div>
+                        <canvas class="glass-specular-canvas"></canvas>
+                        <div class="glass-edge-layer"></div>
+                        <div id="track-progress" class="glass-content-layer h-full w-1/3 bg-gradient-to-r from-pink-500 to-rose-400 rounded-full relative">
+                            <!-- Glowing Orb Tip -->
+                            <div class="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-md"></div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between text-xs font-medium text-gray-500 dark:text-gray-400 px-1">
+                        <span>1:24</span>
+                        <span>3:45</span>
+                    </div>
+                </div>
+
+                <!-- Glass Playback Controls & 3D Glass Orb -->
+                <div class="flex items-center justify-center gap-8">
+                    <button class="text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+                    </button>
+
+                    <!-- 3D Glass Orb Play Button -->
+                    <button id="play-orb" class="liquid-glass-node w-16 h-16 rounded-full flex items-center justify-center cursor-pointer transform active:scale-90 transition-transform" data-thickness="1.2">
+                        <div class="glass-refraction-layer"></div>
+                        <div class="glass-surface-layer"></div>
+                        <canvas class="glass-specular-canvas"></canvas>
+                        <div class="glass-edge-layer"></div>
+                        <div class="glass-content-layer">
+                            <svg id="play-icon" class="w-7 h-7 text-gray-900 dark:text-white translate-x-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        </div>
+                    </button>
+
+                    <button class="text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. SYSTEM CONTROLS & INTERACTIVE GLASS SLIDERS -->
+        <section class="md:col-span-5 flex flex-col gap-6">
+
+            <!-- Interactive Volume/Brightness Glass Slider -->
+            <div class="liquid-glass-node rounded-[28px] p-5 flex flex-col gap-4" data-thickness="0.7">
+                <div class="glass-refraction-layer"></div>
+                <div class="glass-surface-layer"></div>
+                <canvas class="glass-specular-canvas"></canvas>
+                <div class="glass-edge-layer"></div>
+
+                <div class="glass-content-layer flex flex-col gap-3">
+                    <div class="flex justify-between items-center text-sm font-semibold text-gray-800 dark:text-gray-200">
+                        <span class="flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
+                            Volume Intensity
+                        </span>
+                        <span id="slider-val" class="text-xs font-mono opacity-60">72%</span>
+                    </div>
+
+                    <!-- Custom Liquid Glass Slider Rail -->
+                    <div id="slider-rail" class="liquid-glass-node w-full h-10 rounded-2xl cursor-pointer relative flex items-center px-1" data-thickness="0.5">
+                        <div class="glass-refraction-layer"></div>
+                        <div class="glass-surface-layer"></div>
+                        <canvas class="glass-specular-canvas"></canvas>
+                        <div class="glass-edge-layer"></div>
+                        
+                        <div id="slider-fill" class="glass-content-layer h-8 bg-white/40 dark:bg-white/20 rounded-xl w-[72%] relative transition-all duration-75 flex items-center justify-end pr-1">
+                            <!-- Glass Thumb Orb -->
+                            <div class="liquid-glass-node w-7 h-7 rounded-lg shadow-sm flex items-center justify-center" data-thickness="1.1">
+                                <div class="glass-refraction-layer"></div>
+                                <div class="glass-surface-layer"></div>
+                                <canvas class="glass-specular-canvas"></canvas>
+                                <div class="glass-edge-layer"></div>
+                                <div class="glass-content-layer">
+                                    <div class="w-1.5 h-3 bg-gray-600 dark:bg-gray-300 rounded-full"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Glass Quick Action Grid -->
+            <div class="grid grid-cols-2 gap-4">
+                <button class="liquid-glass-node rounded-[24px] p-4 flex items-center gap-3 cursor-pointer" data-thickness="0.8">
+                    <div class="glass-refraction-layer"></div>
+                    <div class="glass-surface-layer"></div>
+                    <canvas class="glass-specular-canvas"></canvas>
+                    <div class="glass-edge-layer"></div>
+                    <div class="glass-content-layer flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071a9.5 9.5 0 0114.142 0M1.757 8.929a16.5 16.5 0 0120.486 0"/></svg>
+                        </div>
+                        <div class="flex flex-col text-left">
+                            <span class="text-xs font-bold text-gray-900 dark:text-white">Wi-Fi</span>
+                            <span class="text-[10px] text-gray-500">Apple Glass</span>
+                        </div>
+                    </div>
+                </button>
+
+                <button class="liquid-glass-node rounded-[24px] p-4 flex items-center gap-3 cursor-pointer" data-thickness="0.8">
+                    <div class="glass-refraction-layer"></div>
+                    <div class="glass-surface-layer"></div>
+                    <canvas class="glass-specular-canvas"></canvas>
+                    <div class="glass-edge-layer"></div>
+                    <div class="glass-content-layer flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                        </div>
+                        <div class="flex flex-col text-left">
+                            <span class="text-xs font-bold text-gray-900 dark:text-white">AirDrop</span>
+                            <span class="text-[10px] text-gray-500">Contacts Only</span>
+                        </div>
+                    </div>
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- ==========================================================================
+         3. FLOATING LIQUID GLASS NAVIGATION TAB BAR WITH SPRING CAPSULE
+         ========================================================================== -->
+    <nav class="w-full max-w-md mb-8 px-6 z-20">
+        <div id="tab-bar" class="liquid-glass-node rounded-full p-2 flex items-center justify-between relative" data-thickness="0.9">
+            <div class="glass-refraction-layer"></div>
+            <div class="glass-surface-layer"></div>
+            <canvas class="glass-specular-canvas"></canvas>
+            <div class="glass-edge-layer"></div>
+
+            <!-- Floating Spring Active Glass Capsule Indicator -->
+            <div id="tab-indicator" class="liquid-glass-node absolute top-2 left-2 h-10 w-24 rounded-full transition-all duration-300 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] pointer-events-none" data-thickness="1.0">
+                <div class="glass-refraction-layer"></div>
+                <div class="glass-surface-layer !bg-white/40 dark:!bg-white/20"></div>
+                <canvas class="glass-specular-canvas"></canvas>
+                <div class="glass-edge-layer"></div>
+            </div>
+
+            <!-- Tab Items -->
+            <button class="tab-item relative z-10 flex-1 py-2 text-center font-medium text-xs text-gray-900 dark:text-white transition-colors" data-index="0">
+                Home
+            </button>
+            <button class="tab-item relative z-10 flex-1 py-2 text-center font-medium text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors" data-index="1">
+                Widgets
+            </button>
+            <button class="tab-item relative z-10 flex-1 py-2 text-center font-medium text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors" data-index="2">
+                Control
+            </button>
+            <button class="tab-item relative z-10 flex-1 py-2 text-center font-medium text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors" data-index="3">
+                Profile
+            </button>
+        </div>
+    </nav>
+
+    <!-- ==========================================================================
+         GLOBAL LIQUID GLASS ENGINE & DYNAMIC LIGHTING SCRIPT
+         ========================================================================== -->
+    <script>
+        /**
+         * Global Liquid Glass Engine
+         * Ray-traces real-time light vectors and computes dynamic specular highlights,
+         * multi-layer edge light concentration, and fluid interaction physics.
+         */
+        class LiquidGlassEngine {
+            constructor() {
+                this.nodes = [];
+                this.pointer = { x: window.innerWidth / 2, y: window.innerHeight / 2, targetX: window.innerWidth / 2, targetY: window.innerHeight / 2 };
+                this.config = {
+                    refractionIOR: 1.45,
+                    specularIntensity: 0.9,
+                    lightFollowSpeed: 0.12
+                };
+
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.registerNodes();
+                this.renderLoop();
+            }
+
+            registerNodes() {
+                const elements = document.querySelectorAll('.liquid-glass-node');
+                elements.forEach(el => {
+                    const canvas = el.querySelector('.glass-specular-canvas');
+                    if (canvas) {
+                        const ctx = canvas.getContext('2d');
+                        const thickness = parseFloat(el.getAttribute('data-thickness') || '0.8');
+                        this.nodes.push({ el, canvas, ctx, thickness });
+                    }
+                });
+            }
+
+            bindEvents() {
+                const updatePointer = (x, y) => {
+                    this.pointer.targetX = x;
+                    this.pointer.targetY = y;
+                };
+
+                window.addEventListener('pointermove', (e) => updatePointer(e.clientX, e.clientY));
+                window.addEventListener('touchmove', (e) => {
+                    if (e.touches.length > 0) {
+                        updatePointer(e.touches[0].clientX, e.touches[0].clientY);
+                    }
+                }, { passive: true });
+
+                window.addEventListener('resize', () => {
+                    this.nodes.forEach(node => this.resizeCanvas(node));
+                });
+            }
+
+            resizeCanvas(node) {
+                const rect = node.el.getBoundingClientRect();
+                const dpr = window.devicePixelRatio || 1;
+                node.canvas.width = rect.width * dpr;
+                node.canvas.height = rect.height * dpr;
+                node.ctx.scale(dpr, dpr);
+            }
+
+            renderLoop() {
+                // Spring physics lag algorithm for smooth volumetric light motion
+                this.pointer.x += (this.pointer.targetX - this.pointer.x) * this.config.lightFollowSpeed;
+                this.pointer.y += (this.pointer.targetY - this.pointer.y) * this.config.lightFollowSpeed;
+
+                // Animate background light blobs based on pointer offset
+                const blob1 = document.getElementById('blob-1');
+                const blob2 = document.getElementById('blob-2');
+                if(blob1 && blob2) {
+                    const offsetX = (this.pointer.x - window.innerWidth / 2) * 0.05;
+                    const offsetY = (this.pointer.y - window.innerHeight / 2) * 0.05;
+                    blob1.style.transform = `translate(${offsetX - 50}%, ${offsetY - 50}%)`;
+                    blob2.style.transform = `translate(${-offsetX}px, ${-offsetY}px)`;
+                }
+
+                // Render dynamic specular raytracing on each registered glass node
+                this.nodes.forEach(node => {
+                    const rect = node.el.getBoundingClientRect();
+                    
+                    // Auto-sync canvas size if bounding box shifts
+                    if (node.canvas.width !== Math.floor(rect.width * (window.devicePixelRatio || 1))) {
+                        this.resizeCanvas(node);
+                    }
+
+                    const ctx = node.ctx;
+                    const w = rect.width;
+                    const h = rect.height;
+
+                    ctx.clearRect(0, 0, w, h);
+
+                    // Compute relative light vector to node center
+                    const relX = this.pointer.x - rect.left;
+                    const relY = this.pointer.y - rect.top;
+
+                    // 1. Dynamic Specular Reflection Point
+                    const specGradient = ctx.createRadialGradient(
+                        relX, relY, 0,
+                        relX, relY, Math.max(w, h) * 0.8
+                    );
+                    
+                    const isDark = document.documentElement.classList.contains('dark');
+                    const specularAlpha = node.thickness * (isDark ? 0.35 : 0.6);
+
+                    specGradient.addColorStop(0, `rgba(255, 255, 255, ${specularAlpha})`);
+                    specGradient.addColorStop(0.2, `rgba(255, 255, 255, ${specularAlpha * 0.4})`);
+                    specGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+                    ctx.fillStyle = specGradient;
+                    ctx.fillRect(0, 0, w, h);
+
+                    // 2. Directional Edge Lighting (Light-Facing Rim Highlight)
+                    const angle = Math.atan2(relY - h / 2, relX - w / 2);
+                    const edgeX = w / 2 + (Math.cos(angle) * w) / 2;
+                    const edgeY = h / 2 + (Math.sin(angle) * h) / 2;
+
+                    const edgeGradient = ctx.createRadialGradient(
+                        edgeX, edgeY, 0,
+                        edgeX, edgeY, Math.min(w, h) * 0.5
+                    );
+
+                    edgeGradient.addColorStop(0, `rgba(255, 255, 255, ${node.thickness * 0.5})`);
+                    edgeGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+                    ctx.fillStyle = edgeGradient;
+                    ctx.fillRect(0, 0, w, h);
+                });
+
+                requestAnimationFrame(() => this.renderLoop());
+            }
+        }
+
+        // Initialize Engine & Application Controllers when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            const engine = new LiquidGlassEngine();
+
+            // 1. Theme Switcher (Dark/Light Mode)
+            const themeToggle = document.getElementById('theme-toggle');
+            const toggleOrb = document.getElementById('toggle-orb');
+            const sunIcon = document.getElementById('sun-icon');
+            const moonIcon = document.getElementById('moon-icon');
+
+            themeToggle.addEventListener('click', () => {
+                const isDark = document.documentElement.classList.toggle('dark');
+                if (isDark) {
+                    toggleOrb.style.transform = 'translateX(24px)';
+                    sunIcon.classList.add('hidden');
+                    moonIcon.classList.remove('hidden');
+                } else {
+                    toggleOrb.style.transform = 'translateX(0px)';
+                    sunIcon.classList.remove('hidden');
+                    moonIcon.classList.add('hidden');
+                }
+            });
+
+            // 2. Tab Bar Spring Physics Capsule
+            const tabItems = document.querySelectorAll('.tab-item');
+            const tabIndicator = document.getElementById('tab-indicator');
+
+            tabItems.forEach((tab, index) => {
+                tab.addEventListener('click', () => {
+                    tabItems.forEach(t => t.classList.replace('text-gray-900', 'text-gray-500'));
+                    tabItems.forEach(t => t.classList.replace('dark:text-white', 'dark:text-gray-400'));
+                    
+                    tab.classList.replace('text-gray-500', 'text-gray-900');
+                    tab.classList.replace('dark:text-gray-400', 'dark:text-white');
+
+                    const width = tab.offsetWidth;
+                    const left = tab.offsetLeft;
+
+                    tabIndicator.style.width = `${width}px`;
+                    tabIndicator.style.transform = `translateX(${left - 8}px)`;
+                });
+            });
+
+            // 3. Interactive Glass Volume Slider
+            const sliderRail = document.getElementById('slider-rail');
+            const sliderFill = document.getElementById('slider-fill');
+            const sliderVal = document.getElementById('slider-val');
+            let isDragging = false;
+
+            const updateSlider = (clientX) => {
+                const rect = sliderRail.getBoundingClientRect();
+                let percentage = ((clientX - rect.left) / rect.width) * 100;
+                percentage = Math.max(5, Math.min(100, percentage));
+                sliderFill.style.width = `${percentage}%`;
+                sliderVal.textContent = `${Math.round(percentage)}%`;
+            };
+
+            sliderRail.addEventListener('pointerdown', (e) => {
+                isDragging = true;
+                updateSlider(e.clientX);
+            });
+
+            window.addEventListener('pointermove', (e) => {
+                if (isDragging) updateSlider(e.clientX);
+            });
+
+            window.addEventListener('pointerup', () => isDragging = false);
+
+            // 4. Music Play/Pause Orb Interaction
+            const playOrb = document.getElementById('play-orb');
+            const playIcon = document.getElementById('play-icon');
+            let isPlaying = false;
+
+            playOrb.addEventListener('click', () => {
+                isPlaying = !isPlaying;
+                if (isPlaying) {
+                    playIcon.innerHTML = `<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>`;
+                    playOrb.classList.add('ring-4', 'ring-pink-500/30');
+                } else {
+                    playIcon.innerHTML = `<path d="M8 5v14l11-7z"/>`;
+                    playOrb.classList.remove('ring-4', 'ring-pink-500/30');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
